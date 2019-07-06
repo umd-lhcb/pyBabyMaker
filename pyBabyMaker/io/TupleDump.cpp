@@ -1,3 +1,7 @@
+// Author: Yipeng Sun <syp at umd dot edu>
+// License: BSD 2-clause
+// Last Change: Sat Jul 06, 2019 at 12:31 AM -0400
+
 #include <TDirectoryFile.h>
 #include <TFile.h>
 #include <TKey.h>
@@ -11,11 +15,11 @@
 #include "TupleDump.h"
 
 namespace pyBabyMaker {
-TupleDump::TupleDump(std::string filename) {
+TupleDump::~TupleDump() { delete this->ntuple; }
+
+void TupleDump::read(std::string filename) {
   this->ntuple = new TFile(filename.c_str(), "read");
 }
-
-TupleDump::~TupleDump() { delete this->ntuple; }
 
 std::vector<std::string> TupleDump::dump() {
   auto keys = (this->ntuple)->GetListOfKeys();

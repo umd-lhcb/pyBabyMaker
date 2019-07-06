@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Jul 06, 2019 at 12:05 PM -0400
+# Last Change: Sat Jul 06, 2019 at 12:57 PM -0400
 
 # cython: language_level=3
 
@@ -15,3 +15,5 @@ cdef extern from "TupleDump.h" namespace "pyBabyMaker":
         TupleDump() except +
         void read(string filename)
         vector[string] trees()
+        vector[string] branches(string tree)
+        string datatype(string tree, string branch)

@@ -1,6 +1,6 @@
 // Author: Yipeng Sun <syp at umd dot edu>
 // License: BSD 2-clause
-// Last Change: Sat Jul 06, 2019 at 11:56 AM -0400
+// Last Change: Sat Jul 06, 2019 at 12:56 PM -0400
 
 #ifndef BMAKER_TUPLEDUMP_H_
 #define BMAKER_TUPLEDUMP_H_
@@ -18,6 +18,8 @@ class TupleDump {
 
   void read(std::string filename);
   std::vector<std::string> trees();
+  std::vector<std::string> branches(std::string tree);
+  std::string datatype(std::string tree, std::string branch);
 
  private:
   TFile *ntuple;

@@ -1,6 +1,6 @@
 // Author: Yipeng Sun <syp at umd dot edu>
 // License: BSD 2-clause
-// Last Change: Sat Jul 06, 2019 at 11:59 AM -0400
+// Last Change: Sat Jul 06, 2019 at 12:56 PM -0400
 
 #include <TDirectoryFile.h>
 #include <TFile.h>
@@ -25,6 +25,33 @@ void TupleDump::read(std::string filename) {
 std::vector<std::string> TupleDump::trees() {
   auto keys = (this->ntuple)->GetListOfKeys();
   return TupleDump::traverse(keys);
+}
+
+std::vector<std::string> TupleDump::branches(std::string tree) {
+  std::vector<std::string> result;
+  auto t = dynamic_cast<TTree *>(this->ntuple->Get(tree.c_str()));
+  auto b_objs = t->GetListOfBranches();
+
+  for (const auto &&b : *b_objs) {
+    const std::string branch = b->GetName();
+    result.insert(result.end(), branch);
+  }
+
+  return result;
+}
+
+std::string TupleDump::datatype(std::string tree, std::string branch) {
+  std::string result;
+  auto t = dynamic_cast<TTree *>(this->ntuple->Get(tree.c_str()));
+  auto b = t->GetBranch(branch.c_str());
+  auto l_objs = b->GetListOfLeaves();
+
+  for (const auto &&l : *l_objs) {
+    result = (dynamic_cast<TLeaf *>(l))->GetTypeName();
+    break;  // Assume the branch is filled with the objects of the same type.
+  }
+
+  return result;
 }
 
 std::vector<std::string> TupleDump::traverse(TList *keys) {

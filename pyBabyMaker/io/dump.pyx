@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD-clause
-# Last Change: Sat Jul 06, 2019 at 12:08 PM -0400
+# Last Change: Sat Jul 06, 2019 at 01:02 PM -0400
 
 # cython: language_level=3
 
@@ -18,3 +18,13 @@ cdef class PyTupleDump:
     def trees(self):
         raw_trees = self.c_dump.trees()
         return [t.decode('ascii') for t in raw_trees]
+
+    def branches(self, tree):
+        raw_branches = self.c_dump.branches(
+            tree.encode('ascii'))
+        return [t.decode('ascii') for t in raw_branches]
+
+    def datatype(self, tree, branch):
+        raw_datatype = self.c_dump.datatype(
+            tree.encode('ascii'), branch.encode('ascii'))
+        return raw_datatype.decode('ascii')

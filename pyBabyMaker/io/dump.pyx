@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD-clause
-# Last Change: Sat Jul 06, 2019 at 01:02 PM -0400
+# Last Change: Sat Jul 06, 2019 at 04:24 PM -0400
 
 # cython: language_level=3
 
@@ -14,6 +14,16 @@ cdef class PyTupleDump:
 
     def __cinit__(self, filename):
         self.c_dump.read(filename.encode('ascii'))
+
+    def dump(self):
+        result = {}
+
+        for t in self.trees():
+            result[t] = {}
+            for b in self.branches(t):
+                result[t][b] = self.datatype(t, b)
+
+        return result
 
     def trees(self):
         raw_trees = self.c_dump.trees()

@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Jul 06, 2019 at 01:07 PM -0400
+# Last Change: Sat Jul 06, 2019 at 05:18 PM -0400
 
 from distutils.core import setup, Extension
 from Cython.Build import cythonize
@@ -31,8 +31,8 @@ cxx_flags = get_pipe_output('root-config --cflags').split()
 extra_flags = cxx_flags
 
 TupleDumpExtension = Extension(
-    name="TupleDump",
-    sources=["pyBabyMaker/io/dump.pyx"],
+    name="pyBabyMaker.io.TupleDump",
+    sources=["pyBabyMaker/io/TupleDump.pyx"],
     libraries=["RIO", "Tree"],
     library_dirs=[root_libdir],
     include_dirs=[root_incdir],

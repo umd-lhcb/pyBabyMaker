@@ -1,6 +1,6 @@
 // Author: Yipeng Sun <syp at umd dot edu>
 // License: BSD 2-clause
-// Last Change: Sat Jul 06, 2019 at 04:08 AM -0400
+// Last Change: Sat Jul 06, 2019 at 11:59 AM -0400
 
 #include <TDirectoryFile.h>
 #include <TFile.h>
@@ -22,7 +22,7 @@ void TupleDump::read(std::string filename) {
   this->ntuple = new TFile(filename.c_str(), "read");
 }
 
-std::vector<std::string> TupleDump::dump() {
+std::vector<std::string> TupleDump::trees() {
   auto keys = (this->ntuple)->GetListOfKeys();
   return TupleDump::traverse(keys);
 }

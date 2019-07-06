@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Jul 06, 2019 at 06:31 PM -0400
+# Last Change: Sat Jul 06, 2019 at 06:33 PM -0400
 
 from distutils.core import setup, Extension
 
@@ -35,7 +35,7 @@ extra_flags = cxx_flags
 
 TupleDumpExtension = Extension(
     name="pyBabyMaker.io.TupleDump",
-    sources=["pyBabyMaker/io/dump.cpp"],
+    sources=["pyBabyMaker/io/TupleDump.cpp"],
     libraries=["RIO", "Tree"],
     library_dirs=[root_libdir],
     include_dirs=[root_incdir],

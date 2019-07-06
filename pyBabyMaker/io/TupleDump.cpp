@@ -1,6 +1,6 @@
 // Author: Yipeng Sun <syp at umd dot edu>
 // License: BSD 2-clause
-// Last Change: Sat Jul 06, 2019 at 02:55 AM -0400
+// Last Change: Sat Jul 06, 2019 at 04:08 AM -0400
 
 #include <TDirectoryFile.h>
 #include <TFile.h>
@@ -15,6 +15,7 @@
 #include "TupleDump.h"
 
 namespace pyBabyMaker {
+TupleDump::TupleDump() {}
 TupleDump::~TupleDump() { delete this->ntuple; }
 
 void TupleDump::read(std::string filename) {

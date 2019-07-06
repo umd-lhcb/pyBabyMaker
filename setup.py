@@ -1,15 +1,20 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Jul 06, 2019 at 05:22 PM -0400
+# Last Change: Sat Jul 06, 2019 at 06:31 PM -0400
 
 from distutils.core import setup, Extension
 
+import setuptools
 import subprocess
 
 
 ###########
 # Helpers #
 ###########
+
+with open('README.md', 'r') as ld:
+    long_description = ld.read()
+
 
 def get_pipe_output(cmd):
     cmd_splitted = cmd.split(' ')
@@ -38,4 +43,25 @@ TupleDumpExtension = Extension(
     language='c++',
 )
 
-setup(ext_modules=[TupleDumpExtension])
+
+#########
+# Setup #
+#########
+
+setup(
+    name='pyBabyMaker',
+    version='0.1.0',
+    author='Yipeng Sun',
+    author_email='syp@umd.edu',
+    description='Python babymaker (flat ntuple generation tool) library',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
+    url='https://github.com/yipengsun/pyBabyMaker',
+    packages=setuptools.find_packages(),
+    classifiers=[
+        'Programming Language :: Python :: 3',
+        'License :: OSI Approved :: BSD License'
+        'Operating System :: OS Independent'
+    ],
+    ext_modules=[TupleDumpExtension]
+)

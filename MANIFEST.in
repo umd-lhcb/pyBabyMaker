@@ -1,0 +1,2 @@
+# Include helper scripts
+recursive-include bin *

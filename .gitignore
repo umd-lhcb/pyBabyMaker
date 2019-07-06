@@ -5,6 +5,4 @@
 build
 
 *.pyc
-*.c
-*.cpp
 *.so

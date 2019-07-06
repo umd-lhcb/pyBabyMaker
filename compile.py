@@ -1,11 +1,11 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Jul 06, 2019 at 05:18 PM -0400
+# Last Change: Sat Jul 06, 2019 at 07:12 PM -0400
+
+import subprocess
 
 from distutils.core import setup, Extension
 from Cython.Build import cythonize
-
-import subprocess
 
 
 ###########

@@ -1,11 +1,12 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Jul 06, 2019 at 06:57 PM -0400
-
-from distutils.core import setup, Extension
+# Last Change: Sat Jul 06, 2019 at 07:12 PM -0400
 
 import setuptools
 import subprocess
+
+from distutils.core import setup, Extension
+from pyBabyMaker import version
 
 
 ###########
@@ -50,7 +51,7 @@ TupleDumpExtension = Extension(
 
 setup(
     name='pyBabyMaker',
-    version='0.1.0',
+    version=version,
     author='Yipeng Sun',
     author_email='syp@umd.edu',
     description='Python babymaker (flat ntuple generation tool) library',

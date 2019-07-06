@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Jul 06, 2019 at 06:51 PM -0400
+# Last Change: Sat Jul 06, 2019 at 06:57 PM -0400
 
 from distutils.core import setup, Extension
 
@@ -59,6 +59,9 @@ setup(
     url='https://github.com/yipengsun/pyBabyMaker',
     packages=setuptools.find_packages(),
     scripts=['bin/ntpdump'],
+    install_requires=[
+        'pyyaml'
+    ],
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: BSD License'

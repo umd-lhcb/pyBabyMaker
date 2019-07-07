@@ -30,11 +30,10 @@ pip install git+https://github.com/yipengsun/pyBabyMaker
 ## `babymaker`
 `babymaker` generates `C++` source code that can do the following things to
 ntuple:
-* renaming,
+* renaming
 * making selections
 * dropping
-* doing additional calculations
-  on selected branches of the input `.root` file.
+* doing additional calculations on selected branches of the input `.root` file
 
 Below we list the usage of `babymaker`:
 ```

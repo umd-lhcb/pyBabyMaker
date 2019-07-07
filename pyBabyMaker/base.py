@@ -2,13 +2,15 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Jul 06, 2019 at 09:26 PM -0400
+# Last Change: Sat Jul 06, 2019 at 09:42 PM -0400
 
 import abc
 import yaml
 import re
+import subprocess
 
 from datetime import datetime
+from shutil import which
 from .io.TupleDump import pyTupleDump
 
 
@@ -47,6 +49,13 @@ class CppGenerator(metaclass=abc.ABCMeta):
             if bool(re.search(p, string)):
                 return return_value
         return not return_value
+
+    @staticmethod
+    def reformat(filename, formatter='clang-format', exec='clang-format -i'):
+        if which(formatter):
+            cmd_splitted = exec.split(' ')
+            cmd_splitted.append(filename)
+            subprocess.Popen(cmd_splitted)
 
     @staticmethod
     def cpp_gen_date(time_format='%Y-%m-%d %H:%M:%S.%f'):

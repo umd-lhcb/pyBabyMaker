@@ -113,8 +113,9 @@ YetYetAnotherTuple:
         SUM: "SUM(Y_PE, Y_P)"
 ```
 
-> The `drop` section will always execute before `keep`. Also, they both fully
-> utilize regular expressions so the expressions.
+> The `drop` section will always execute before `keep`.
+>
+> Also, `drop` and `keep` fully utilize regular expressions so the expressions
 > `Y_P*` should not be used in most cases.
 
 

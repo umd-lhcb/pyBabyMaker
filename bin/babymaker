@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun
 # License: BSD 2-clause
-# Last Change: Sat Jul 06, 2019 at 09:43 PM -0400
+# Last Change: Sat Jul 06, 2019 at 09:51 PM -0400
 
 import re
 
@@ -47,7 +47,7 @@ additional headers to be included in generated C++.''')
 # C++ generator implementations #
 #################################
 
-class PostProcess(CppGenerator):
+class BabyMaker(CppGenerator):
     input_file = 'input_file'
     output_file = 'output_file'
     headers = ['TFile.h', 'TTree.h', 'TTreeReader.h', 'TBranch.h']
@@ -310,6 +310,6 @@ delete {1};
 
 if __name__ == '__main__':
     args = parse_input()
-    generator = PostProcess(args.data, args.headers)
+    generator = BabyMaker(args.data, args.headers)
     generator.parse_conf(args.input)
     generator.write(args.output)

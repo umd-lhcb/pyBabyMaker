@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Jul 06, 2019 at 09:42 PM -0400
+# Last Change: Sat Jul 06, 2019 at 09:49 PM -0400
 
 import abc
 import yaml
@@ -11,7 +11,7 @@ import subprocess
 
 from datetime import datetime
 from shutil import which
-from .io.TupleDump import pyTupleDump
+from .io.TupleDump import PyTupleDump
 
 
 ###############################
@@ -20,7 +20,7 @@ from .io.TupleDump import pyTupleDump
 
 class CppGenerator(metaclass=abc.ABCMeta):
     def __init__(self, data_filename):
-        dumper = pyTupleDump(data_filename)
+        dumper = PyTupleDump(data_filename)
         self.raw_datatype = dumper.dump()
 
     @abc.abstractmethod

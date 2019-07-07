@@ -56,9 +56,6 @@ optional arguments:
 ```
 
 We also provide a sample `YAML` configuration:
-```
-```
-
 ```yaml
 ATuple:
     force_lowercase: false

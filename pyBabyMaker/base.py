@@ -2,13 +2,14 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Jul 06, 2019 at 06:30 PM -0400
+# Last Change: Sat Jul 06, 2019 at 09:26 PM -0400
 
 import abc
 import yaml
 import re
 
 from datetime import datetime
+from .io.TupleDump import pyTupleDump
 
 
 ###############################
@@ -16,6 +17,10 @@ from datetime import datetime
 ###############################
 
 class CppGenerator(metaclass=abc.ABCMeta):
+    def __init__(self, data_filename):
+        dumper = pyTupleDump(data_filename)
+        self.raw_datatype = dumper.dump()
+
     @abc.abstractmethod
     def parse_conf(self, yaml_conf):
         '''

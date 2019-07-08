@@ -50,7 +50,7 @@ optional arguments:
   -o [OUTPUT], --output [OUTPUT]
                         path to output C++ file.
   -d [DATA], --data [DATA]
-                        path to ntuple datatype YAML file.
+                        path to data ntuple file.
   -H HEADERS [HEADERS ...], --headers HEADERS [HEADERS ...]
                         additional headers to be included in generated C++.
 ```

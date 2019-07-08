@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Jul 06, 2019 at 06:02 PM -0400
+# Last Change: Sun Jul 07, 2019 at 11:34 PM -0400
 
 import yaml
 
@@ -32,7 +32,7 @@ specify path to output YAML file.''')
                         choices=['yaml', 'plain'],
                         default='yaml',
                         help='''
-path to output C++ file.''')
+select output format.''')
 
     return parser.parse_args()
 

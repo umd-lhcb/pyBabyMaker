@@ -136,5 +136,5 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -f [{yaml,plain}], --output-format [{yaml,plain}]
-                        path to output C++ file.
+                        select output format.
 ```

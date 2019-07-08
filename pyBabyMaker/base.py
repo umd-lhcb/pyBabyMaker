@@ -2,16 +2,36 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jul 07, 2019 at 12:10 PM -0400
+# Last Change: Mon Jul 08, 2019 at 01:08 PM -0400
 
 import abc
 import yaml
 import re
+import os
 import subprocess
 
 from datetime import datetime
 from shutil import which
 from .io.TupleDump import PyTupleDump
+
+
+#########################
+# Configuration helpers #
+#########################
+
+class NestedYAMLLoader(yaml.SafeLoader):
+    def __init__(self, stream):
+        self._root = os.path.split(stream.name)[0]
+        super().__init__(stream)
+
+    def include(self, node):
+        filename = os.path.join(self._root, self.construct_scalar(node))
+
+        with open(filename, 'r') as f:
+            return yaml.load(f, NestedYAMLLoader)
+
+
+NestedYAMLLoader.add_constructor('!include', NestedYAMLLoader.include)
 
 
 ###############################
@@ -37,7 +57,7 @@ class CppGenerator(metaclass=abc.ABCMeta):
         Read ntuple data structure.
         '''
         with open(yaml_file) as f:
-            return yaml.safe_load(f)
+            return yaml.load(f, NestedYAMLLoader)
 
     @staticmethod
     def dump_ntuple(data_filename):

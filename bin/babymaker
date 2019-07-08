@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jul 08, 2019 at 03:43 AM -0400
+# Last Change: Mon Jul 08, 2019 at 03:48 AM -0400
 
 import re
 
@@ -20,6 +20,7 @@ generate compilable C++ source file for ntuple processing.''')
 
     parser.add_argument('-i', '--input',
                         nargs='?',
+                        required=True,
                         help='''
 path to input YAML file.''')
 
@@ -31,6 +32,7 @@ path to output C++ file.''')
 
     parser.add_argument('-d', '--data',
                         nargs='?',
+                        required=True,
                         help='''
 path to data ntuple file.''')
 

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jul 08, 2019 at 01:08 PM -0400
+# Last Change: Tue Jul 09, 2019 at 05:34 AM -0400
 
 import abc
 import yaml
@@ -78,6 +78,10 @@ class CppGenerator(metaclass=abc.ABCMeta):
             cmd_splitted.append(filename)
             subprocess.Popen(cmd_splitted)
 
+    ################
+    # C++ Snippets #
+    ################
+
     @staticmethod
     def cpp_gen_date(time_format='%Y-%m-%d %H:%M:%S.%f'):
         return '// Generated on: {}\n'.format(
@@ -86,6 +90,11 @@ class CppGenerator(metaclass=abc.ABCMeta):
     @staticmethod
     def cpp_header(header):
         return '#include <{}>'.format(header)
+
+    @staticmethod
+    def cpp_make_var(name, prefix='', suffix='', separator='_'):
+        return prefix + separator + re.sub('/', separator, name) + separator + \
+            suffix
 
     @staticmethod
     def cpp_main(definitions, main):
@@ -97,3 +106,15 @@ int main(int, char** argv) {{
   return 0;
 }}
     '''.format(definitions, main)
+
+    @staticmethod
+    def cpp_TTree(var, name):
+        return 'TTree {0}("{1}", "{1}");\n'.format(var, name)
+
+    @staticmethod
+    def cpp_TTreeReader(var, name, TFile):
+        return 'TTreeReader {0}("{1}", {2});\n'.format(var, name, TFile)
+
+    @staticmethod
+    def cpp_TTreeReaderValue(datatype, var, TTree, TBranch):
+        return 'TTreeReaderValue<{0}> {1}({2}, "{3}");\n'

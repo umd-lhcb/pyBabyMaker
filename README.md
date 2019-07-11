@@ -23,7 +23,7 @@ code, if `clang-format` is available in your `$PATH`.
 
 Currently, `pyBabyMaker` is not on `PyPI`. To install:
 ```
-pip install git+https://github.com/yipengsun/pyBabyMaker
+pip install git+https://github.com/umd-lhcb/pyBabyMaker
 ```
 
 

@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Jul 06, 2019 at 07:22 PM -0400
+# Last Change: Tue Aug 27, 2019 at 03:54 PM -0400
 
 .PHONY: build sdist clean
 
@@ -9,6 +9,9 @@ build:
 
 sdist:
 	@python ./setup.py sdist
+
+install:
+	@python ./setup.py install
 
 clean:
 	@rm -rf ./build

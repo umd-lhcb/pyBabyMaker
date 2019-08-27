@@ -1,6 +1,6 @@
 // Author: Yipeng Sun <syp at umd dot edu>
 // License: BSD 2-clause
-// Last Change: Sat Jul 06, 2019 at 12:56 PM -0400
+// Last Change: Tue Aug 27, 2019 at 03:46 PM -0400
 
 #include <TDirectoryFile.h>
 #include <TFile.h>
@@ -10,16 +10,17 @@
 #include <TObjArray.h>
 #include <TTree.h>
 #include <iostream>
+#include <memory>
 #include <string>
 
 #include "TupleDump.h"
 
 namespace pyBabyMaker {
 TupleDump::TupleDump() {}
-TupleDump::~TupleDump() { delete this->ntuple; }
+TupleDump::~TupleDump() {}
 
 void TupleDump::read(std::string filename) {
-  this->ntuple = new TFile(filename.c_str(), "read");
+  this->ntuple = std::make_unique<TFile>(filename.c_str(), "read");
 }
 
 std::vector<std::string> TupleDump::trees() {

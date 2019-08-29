@@ -1,4 +1,4 @@
-# pyBabyMaker
+# pyBabyMaker [![Build status](https://travis-ci.com/umd-lhcb/pyBabyMaker.svg?build)](https://travis-ci.com/umd-lhcb/pyBabyMaker)
 Python babymaker (flat ntuple generation tool) library. [`babymaker`](https://github.com/manuelfs/babymaker)
 was originally conceived by Manuel Franco Sevilla and his colleagues
 at UCSB. It was later rewritten by Yipeng Sun to make it simpler, and more

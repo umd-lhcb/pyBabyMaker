@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Aug 28, 2019 at 11:44 PM -0400
+# Last Change: Wed Aug 28, 2019 at 11:47 PM -0400
 
 import abc
 import yaml
@@ -76,6 +76,18 @@ class CppGenerator(metaclass=abc.ABCMeta):
         user_headers = ''.join([
             self.cpp_header(i, system=False) for i in self.user_headers])
         return system_headers + '\n' + user_headers
+
+    @abc.abstractmethod
+    def gen_preamble(self):
+        '''
+        Generate C++ definitions and functions before the 'main'.
+        '''
+
+    @abc.abstractmethod
+    def gen_body(self):
+        '''
+        Generate C++ code inside 'main'.
+        '''
 
     ################
     # C++ snippets #

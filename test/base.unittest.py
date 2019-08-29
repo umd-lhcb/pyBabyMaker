@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Aug 28, 2019 at 11:44 PM -0400
+# Last Change: Wed Aug 28, 2019 at 11:48 PM -0400
 
 import sys
 sys.path.insert(0, '..')
@@ -13,7 +13,11 @@ from pyBabyMaker.base import CppGenerator
 
 
 class BaseCppGenerator(CppGenerator):
-    pass
+    def gen_preamble(self):
+        pass
+
+    def gen_body(self):
+        pass
 
 
 class CppGeneratorTester(unittest.TestCase):

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Aug 28, 2019 at 11:26 PM -0400
+# Last Change: Wed Aug 28, 2019 at 11:44 PM -0400
 
 import abc
 import yaml
@@ -66,6 +66,10 @@ class CppGenerator(metaclass=abc.ABCMeta):
         if additional_user_headers is not None:
             self.user_headers += additional_user_headers
 
+    #########################
+    # Chuck code generation #
+    #########################
+
     def gen_headers(self):
         system_headers = ''.join([
             self.cpp_header(i) for i in self.system_headers])
@@ -74,7 +78,7 @@ class CppGenerator(metaclass=abc.ABCMeta):
         return system_headers + '\n' + user_headers
 
     ################
-    # C++ Snippets #
+    # C++ snippets #
     ################
 
     @staticmethod
@@ -100,8 +104,7 @@ class CppGenerator(metaclass=abc.ABCMeta):
 int main(int, char** argv) {{
   {0}
   return 0;
-}}
-    '''.format(body)
+}}'''.format(body)
 
     @staticmethod
     def cpp_TTree(var, name):
@@ -112,8 +115,10 @@ int main(int, char** argv) {{
         return 'TTreeReader {0}("{1}", {2});\n'.format(var, name, TFile)
 
     @staticmethod
-    def cpp_TTreeReaderValue(datatype, var, TTree, TBranch):
-        return 'TTreeReaderValue<{0}> {1}({2}, "{3}");\n'
+    def cpp_TTreeReaderValue(datatype, var, TTreeReader, branch_name):
+        return 'TTreeReaderValue<{0}> {1}({2}, "{3}");\n'.format(
+            datatype, var, TTreeReader, branch_name
+        )
 
 
 ##################

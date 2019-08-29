@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Aug 28, 2019 at 10:45 PM -0400
+# Last Change: Wed Aug 28, 2019 at 11:26 PM -0400
 
 import abc
 import yaml
@@ -46,19 +46,32 @@ class ConfigParser(object):
 # C++ code generator template #
 ###############################
 
-class CppGenerator(object):
-    headers = ['TFile.h', 'TTree.h', 'TTreeReader.h', 'TBranch.h']
+class CppGenerator(metaclass=abc.ABCMeta):
     cpp_input_filename = 'input_file'
     cpp_output_filename = 'output_file'
 
     def __init__(self,
                  io_directive=None, calc_directive=None,
-                 additional_headers=None):
+                 additional_system_headers=None, additional_user_headers=None):
         self.io_directive = io_directive
         self.calc_directive = calc_directive
 
-        if additional_headers is not None:
-            self.headers += additional_headers
+        self.system_headers = ['TFile.h', 'TTree.h', 'TTreeReader.h',
+                               'TBranch.h']
+        self.user_headers = []
+
+        if additional_system_headers is not None:
+            self.system_headers += additional_system_headers
+
+        if additional_user_headers is not None:
+            self.user_headers += additional_user_headers
+
+    def gen_headers(self):
+        system_headers = ''.join([
+            self.cpp_header(i) for i in self.system_headers])
+        user_headers = ''.join([
+            self.cpp_header(i, system=False) for i in self.user_headers])
+        return system_headers + '\n' + user_headers
 
     ################
     # C++ Snippets #
@@ -70,8 +83,11 @@ class CppGenerator(object):
             datetime.now().strftime(time_format))
 
     @staticmethod
-    def cpp_header(header):
-        return '#include <{}>'.format(header)
+    def cpp_header(header, system=True):
+        if system:
+            return '#include <{}>\n'.format(header)
+        else:
+            return '#include "{}"\n'.format(header)
 
     @staticmethod
     def cpp_make_var(name, prefix='', suffix='', separator='_'):
@@ -79,15 +95,13 @@ class CppGenerator(object):
             suffix
 
     @staticmethod
-    def cpp_main(definitions, main):
+    def cpp_main(body):
         return '''
-{definitions}
-
 int main(int, char** argv) {{
-  {main}
+  {0}
   return 0;
 }}
-    '''.format(definitions=definitions, main=main)
+    '''.format(body)
 
     @staticmethod
     def cpp_TTree(var, name):

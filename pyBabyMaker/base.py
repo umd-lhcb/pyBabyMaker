@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jul 09, 2019 at 05:34 AM -0400
+# Last Change: Wed Aug 28, 2019 at 10:45 PM -0400
 
 import abc
 import yaml
@@ -12,11 +12,10 @@ import subprocess
 
 from datetime import datetime
 from shutil import which
-from .io.TupleDump import PyTupleDump
 
 
 #########################
-# Configuration helpers #
+# Configuration-related #
 #########################
 
 class NestedYAMLLoader(yaml.SafeLoader):
@@ -34,36 +33,7 @@ class NestedYAMLLoader(yaml.SafeLoader):
 NestedYAMLLoader.add_constructor('!include', NestedYAMLLoader.include)
 
 
-###############################
-# C++ code generator template #
-###############################
-
-class CppGenerator(metaclass=abc.ABCMeta):
-    @abc.abstractmethod
-    def parse_conf(self, yaml_conf):
-        '''
-        Parse configuration file for the writer.
-        '''
-
-    @abc.abstractmethod
-    def write(self, cpp_file):
-        '''
-        Write generated C++ file to 'cpp_file'.
-        '''
-
-    @staticmethod
-    def read_yaml(yaml_file):
-        '''
-        Read ntuple data structure.
-        '''
-        with open(yaml_file) as f:
-            return yaml.load(f, NestedYAMLLoader)
-
-    @staticmethod
-    def dump_ntuple(data_filename):
-        dumper = PyTupleDump(data_filename)
-        return dumper.dump()
-
+class ConfigParser(object):
     @staticmethod
     def match(patterns, string, return_value=True):
         for p in patterns:
@@ -71,12 +41,24 @@ class CppGenerator(metaclass=abc.ABCMeta):
                 return return_value
         return not return_value
 
-    @staticmethod
-    def reformat(filename, formatter='clang-format', exec='clang-format -i'):
-        if which(formatter):
-            cmd_splitted = exec.split(' ')
-            cmd_splitted.append(filename)
-            subprocess.Popen(cmd_splitted)
+
+###############################
+# C++ code generator template #
+###############################
+
+class CppGenerator(object):
+    headers = ['TFile.h', 'TTree.h', 'TTreeReader.h', 'TBranch.h']
+    cpp_input_filename = 'input_file'
+    cpp_output_filename = 'output_file'
+
+    def __init__(self,
+                 io_directive=None, calc_directive=None,
+                 additional_headers=None):
+        self.io_directive = io_directive
+        self.calc_directive = calc_directive
+
+        if additional_headers is not None:
+            self.headers += additional_headers
 
     ################
     # C++ Snippets #
@@ -99,13 +81,13 @@ class CppGenerator(metaclass=abc.ABCMeta):
     @staticmethod
     def cpp_main(definitions, main):
         return '''
-{0}
+{definitions}
 
 int main(int, char** argv) {{
-  {1}
+  {main}
   return 0;
 }}
-    '''.format(definitions, main)
+    '''.format(definitions=definitions, main=main)
 
     @staticmethod
     def cpp_TTree(var, name):
@@ -118,3 +100,42 @@ int main(int, char** argv) {{
     @staticmethod
     def cpp_TTreeReaderValue(datatype, var, TTree, TBranch):
         return 'TTreeReaderValue<{0}> {1}({2}, "{3}");\n'
+
+
+##################
+# Skeleton maker #
+##################
+
+class SkeletonMaker(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def parse_conf(self, filename):
+        '''
+        Parse configuration file for the writer.
+        '''
+
+    @abc.abstractmethod
+    def write(self, filename):
+        '''
+        Write generated C++ file.
+        '''
+
+    @staticmethod
+    def read(yaml_filename):
+        '''
+        Read ntuple data structure.
+        '''
+        with open(yaml_filename) as f:
+            return yaml.load(f, NestedYAMLLoader)
+
+    @staticmethod
+    def reformat(cpp_filename, formatter='clang-format', exec='clang-format -i'):
+        if which(formatter):
+            cmd_splitted = exec.split(' ')
+            cmd_splitted.append(cpp_filename)
+            subprocess.Popen(cmd_splitted)
+
+    @staticmethod
+    def dump(data_filename):
+        from pyBabyMaker.io.TupleDump import PyTupleDump
+        dumper = PyTupleDump(data_filename)
+        return dumper.dump()

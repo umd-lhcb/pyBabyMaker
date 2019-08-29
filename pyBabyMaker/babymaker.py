@@ -2,26 +2,30 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 27, 2019 at 05:00 PM -0400
+# Last Change: Wed Aug 28, 2019 at 10:22 PM -0400
 
 import re
 
-from .base import CppGenerator
+from .base import CppGenerator, SkeletonMaker, ConfigParser
 
 
-class BabyMaker(CppGenerator):
-    input_file = 'input_file'
-    output_file = 'output_file'
+class BabyCppGenerator(CppGenerator):
+    pass
+
+
+class BabyMaker(CppGenerator, SkeletonMaker, ConfigParser):
     headers = ['TFile.h', 'TTree.h', 'TTreeReader.h', 'TBranch.h']
+    cpp_input_file = 'input_file'
+    cpp_output_file = 'output_file'
 
     def __init__(self, data_filename, headers):
         self.headers += headers
         self.io_directive = {}
         self.calc_directive = {}
-        self.raw_datatype = self.dump_ntuple(data_filename)
+        self.raw_datatype = self.dump(data_filename)
 
     def parse_conf(self, yaml_conf):
-        conf = self.read_yaml(yaml_conf)
+        conf = self.read(yaml_conf)
 
         for output_tree, opts in conf.items():
             self.io_directive[output_tree] = {}
@@ -123,7 +127,7 @@ TFile *{1} = new TFile(argv[2], "recreate");
 
 delete {0};
 delete {1};
-'''.format(self.input_file, self.output_file, calls)
+'''.format(self.cpp_input_file, self.cpp_output_file, calls)
 
     def cpp_calls(self):
         calls = ''
@@ -133,8 +137,8 @@ delete {1};
                 calls += '{0}_{1}({2}, {3});\n'.format(
                     self.cpp_make_variable(output_tree, prefix='generator_'),
                     self.cpp_make_variable(input_tree),
-                    self.input_file,
-                    self.output_file
+                    self.cpp_input_file,
+                    self.cpp_output_file
                 )
 
         return calls
@@ -149,12 +153,12 @@ delete {1};
                         self.cpp_make_variable(output_tree,
                                                prefix='generator_'),
                         self.cpp_make_variable(input_tree),
-                        self.input_file,
-                        self.output_file
+                        self.cpp_input_file,
+                        self.cpp_output_file
                     )
                 tuple_generators += self.cpp_variables(output_tree, input_tree)
                 tuple_generators += self.cpp_loops(output_tree, input_tree)
-                tuple_generators += '{}->Write();'.format(self.output_file)
+                tuple_generators += '{}->Write();'.format(self.cpp_output_file)
                 tuple_generators += '}\n\n'
 
         return tuple_generators
@@ -165,7 +169,7 @@ delete {1};
         variables += 'TTreeReader {0}("{1}", {2});\n'.format(
             self.cpp_make_variable(input_tree),
             input_tree,
-            self.input_file
+            self.cpp_input_file
         ) + '\n'
 
         for s in self.io_directive[output_tree][input_tree]:
@@ -216,7 +220,7 @@ delete {1};
         loops = 'while ({0}.Next()) {{\n'.format(
             self.cpp_make_variable(input_tree),
             input_tree,
-            self.input_file
+            self.cpp_input_file
         )
         loops += 'if ({}) {{\n'.format(self.cpp_selections(output_tree,
                                                            input_tree))

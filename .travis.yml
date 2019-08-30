@@ -9,3 +9,6 @@ install:
 script:
     - cd ./test
     - python ./base.unittest.py
+
+after_success:
+    - bash <(curl -s https://codecov.io/bash)

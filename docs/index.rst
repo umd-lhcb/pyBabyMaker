@@ -5,8 +5,6 @@ Welcome to pyBabyMaker's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-.. automodule:: pyBabyMaker.base
-
 
 Indices and tables
 ==================

@@ -2,17 +2,8 @@
 pyBabyMaker
 ###########
 
-.. image:: https://travis-ci.com/umd-lhcb/pyBabyMaker.svg?build
-:target: https://travis-ci.com/umd-lhcb/pyBabyMaker
-:alt: Travis CI build status
+|build-status| |coverage| |docs|
 
-.. image:: https://codecov.io/gh/umd-lhcb/pyBabyMaker/branch/master/graph/badge.svg
-:target: https://codecov.io/gh/umd-lhcb/pyBabyMaker
-:alt: Codecov status
-
-.. image:: https://readthedocs.org/projects/pybabymaker/badge/?version=latest
-:target: https://pybabymaker.readthedocs.io/en/latest/?badge=latest
-:alt: Documentation Status
 
 Python babymaker (flat ntuple generation tool) library. `babymaker`_ was
 originally conceived by Manuel Franco Sevilla and his colleagues at UCSB. It
@@ -24,6 +15,21 @@ processing:
 
 - ``ntpdump``: Dump ntuple tree structure.
 - ``babymaker``: Generate ``C++`` code to process ntuples.
+
+.. |build-status| image:: https://travis-ci.com/umd-lhcb/pyBabyMaker.svg?build
+    :alt: build status
+    :scale: 100%
+    :target: https://travis-ci.com/umd-lhcb/pyBabyMaker
+
+.. |docs| image:: https://readthedocs.org/projects/pybabymaker/badge/?version=latest
+    :alt: Documentation Status
+    :scale: 100%
+    :target: https://pybabymaker.readthedocs.io/en/latest
+
+.. |coverage| image:: https://codecov.io/gh/umd-lhcb/pyBabyMaker/branch/master/graph/badge.svg
+    :alt: Test coverage
+    :scale: 100%
+    :target: https://codecov.io/gh/umd-lhcb/pyBabyMaker
 
 .. _babymaker: https://github.com/manuelfs/babymaker
 
@@ -41,6 +47,5 @@ if it is available in your ``$PATH``.
 
 Currently, ``pyBabyMaker`` is not on ``PyPI``. To install:
 
-.. code: console
-
+.. code:: console
    pip install git+https://github.com/umd-lhcb/pyBabyMaker

@@ -1,10 +1,11 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Aug 30, 2019 at 02:58 PM -0400
+# Last Change: Fri Aug 30, 2019 at 03:19 PM -0400
 
 import setuptools
 import subprocess
 import sys
+import re
 
 from setuptools.command.test import test as TestCommand
 from distutils.core import setup, Extension
@@ -53,7 +54,10 @@ root_libdir = get_pipe_output('root-config --libdir')
 root_incdir = get_pipe_output('root-config --incdir')
 
 cxx_flags = get_pipe_output('root-config --cflags').split()
-extra_flags = cxx_flags
+
+# Make sure to enable C++ 14 support
+# extra_flags = cxx_flags
+extra_flags = [re.sub(r'std=c\+\+11', 'std=c++14', f) for f in cxx_flags]
 
 TupleDumpExtension = Extension(
     name="pyBabyMaker.io.TupleDump",

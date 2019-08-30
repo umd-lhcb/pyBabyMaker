@@ -40,5 +40,7 @@ supports ``-std=c++14``.
 if it is available in your ``$PATH``.
 
 Currently, ``pyBabyMaker`` is not on ``PyPI``. To install:
-..
+
+.. code: console
+
    pip install git+https://github.com/umd-lhcb/pyBabyMaker

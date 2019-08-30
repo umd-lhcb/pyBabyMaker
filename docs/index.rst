@@ -8,4 +8,4 @@ Welcome to pyBabyMaker's documentation!
    intro
    install
 
-   scripts/ntpdump
+   scripts/index

@@ -1,13 +1,20 @@
 language: python
+dist: bionic
 python: 3.7
 
 install:
+    # Install CERN ROOT
+    - curl -o root.tar.gz https://root.cern/download/root_v6.18.02.Linux-ubuntu18-x86_64-gcc7.4.tar.gz
+    - tar xvf root.tar.gz
+    - . ./root/bin/thisroot.sh
+    # Install package dependency
     - pip install -r ./requirements.txt
+    # For code coverage
+    - pip install coverage
     - pip install codecov
 
 script:
-    - cd ./test
-    - python ./base.unittest.py
+    - coverage run --source pyBabyMaker setup.py test
 
 after_success:
     - codecov

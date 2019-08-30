@@ -1,10 +1,12 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Jul 06, 2019 at 09:34 PM -0400
+# Last Change: Fri Aug 30, 2019 at 02:58 PM -0400
 
 import setuptools
 import subprocess
+import sys
 
+from setuptools.command.test import test as TestCommand
 from distutils.core import setup, Extension
 from pyBabyMaker import version
 
@@ -22,6 +24,25 @@ def get_pipe_output(cmd):
     proc = subprocess.Popen(cmd_splitted, stdout=subprocess.PIPE)
     result = proc.stdout.read().decode('utf-8')
     return result.strip('\n')
+
+
+class PyTest(TestCommand):
+    user_options = [('pytest-args=', 'a', "Arguments to pass into py.test")]
+
+    def initialize_options(self):
+        TestCommand.initialize_options(self)
+        self.pytest_args = []
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        import pytest
+
+        errno = pytest.main(self.pytest_args)
+        sys.exit(errno)
 
 
 ########################
@@ -68,5 +89,8 @@ setup(
         'License :: OSI Approved :: BSD License'
         'Operating System :: OS Independent'
     ],
-    ext_modules=[TupleDumpExtension]
+    ext_modules=[TupleDumpExtension],
+    tests_require=['pytest'],
+    test_suite="test",
+    cmdclass={'test': PyTest}
 )

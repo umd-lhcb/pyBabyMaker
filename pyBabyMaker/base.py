@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Aug 30, 2019 at 01:28 PM -0400
+# Last Change: Fri Aug 30, 2019 at 02:00 PM -0400
 
 import abc
 import yaml
@@ -165,11 +165,11 @@ int main(int, char** argv) {{
         )
 
 
-##################
-# Skeleton maker #
-##################
+##############
+# Base maker #
+##############
 
-class SkeletonMaker(metaclass=abc.ABCMeta):
+class BaseMaker(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def parse_conf(self, filename):
         '''

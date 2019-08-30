@@ -2,18 +2,32 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Aug 28, 2019 at 10:22 PM -0400
+# Last Change: Fri Aug 30, 2019 at 02:00 PM -0400
 
 import re
 
-from .base import CppGenerator, SkeletonMaker, ConfigParser
+from pyBabyMaker.base import BaseCppGenerator, BaseConfigParser, BaseMaker
 
 
-class BabyCppGenerator(CppGenerator):
+#################################
+# n-tuple generation directives #
+#################################
+
+class NtupleGenDirectives(object):
+    def __init__(self, input_file, output_file):
+        self.input_file = input_file
+        self.output_file = output_file
+
+        self._input_branches = []
+        self._output_branches = []
+        self._dependencies = []
+
+
+class BabyCppGenerator(BaseCppGenerator):
     pass
 
 
-class BabyMaker(CppGenerator, SkeletonMaker, ConfigParser):
+class BabyMaker(BaseCppGenerator, BaseMaker, BaseConfigParser):
     headers = ['TFile.h', 'TTree.h', 'TTreeReader.h', 'TBranch.h']
     cpp_input_file = 'input_file'
     cpp_output_file = 'output_file'

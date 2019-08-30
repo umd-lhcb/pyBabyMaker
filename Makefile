@@ -1,8 +1,8 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 27, 2019 at 03:54 PM -0400
+# Last Change: Fri Aug 30, 2019 at 06:30 PM -0400
 
-.PHONY: build sdist clean
+.PHONY: build sdist clean doc
 
 build:
 	@python ./compile.py build_ext --inplace
@@ -18,3 +18,6 @@ clean:
 	@rm -rf ./dist
 	@rm -rf ./pyBabyMaker.egg-info
 	@find . -name '*.so' -delete
+
+doc:
+	@sphinx-build -b html docs build

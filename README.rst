@@ -47,7 +47,7 @@ if it is available in your ``$PATH``.
 
 Currently, ``pyBabyMaker`` is not on ``PyPI``. To install:
 
-.. code-block:: bash
+.. code-block:: console
 
    # pip install git+https://github.com/umd-lhcb/pyBabyMaker
    $ pip install --user git+https://github.com/umd-lhcb/pyBabyMaker

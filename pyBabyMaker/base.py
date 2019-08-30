@@ -2,7 +2,11 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Aug 30, 2019 at 02:00 PM -0400
+# Last Change: Fri Aug 30, 2019 at 05:08 PM -0400
+"""
+This module provides basic infrastructure for n-tuple related C++ code
+generation.
+"""
 
 import abc
 import yaml
@@ -19,7 +23,14 @@ from shutil import which
 ##################
 
 class UniqueList(list):
+    """
+    An extension to the standard 'list' class such that every element stored
+    inside is unique.
+    """
     def __init__(self, iterable=None):
+        """
+        Initializer.
+        """
         try:
             uniq = []
             [uniq.append(i) for i in iterable if not uniq.count(i)]

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Aug 28, 2019 at 11:47 PM -0400
+# Last Change: Fri Aug 30, 2019 at 01:28 PM -0400
 
 import abc
 import yaml
@@ -14,9 +14,37 @@ from datetime import datetime
 from shutil import which
 
 
-#########################
-# Configuration-related #
-#########################
+##################
+# Data structure #
+##################
+
+class UniqueList(list):
+    def __init__(self, iterable=None):
+        try:
+            uniq = []
+            [uniq.append(i) for i in iterable if not uniq.count(i)]
+            super().__init__(uniq)
+        except TypeError:
+            super().__init__()
+
+    def append(self, object):
+        if not super().__contains__(object):
+            super().append(object)
+
+    def insert(self, index, object):
+        if not super().__contains__(object):
+            super().insert(index, object)
+
+    def __add__(self, rhs):
+        return UniqueList(super().__add__(rhs))
+
+    def __iadd__(self, rhs):
+        return UniqueList(super().__iadd__(rhs))
+
+
+###############
+# YAML reader #
+###############
 
 class NestedYAMLLoader(yaml.SafeLoader):
     def __init__(self, stream):
@@ -33,7 +61,11 @@ class NestedYAMLLoader(yaml.SafeLoader):
 NestedYAMLLoader.add_constructor('!include', NestedYAMLLoader.include)
 
 
-class ConfigParser(object):
+###########
+# Parsers #
+###########
+
+class BaseConfigParser(object):
     @staticmethod
     def match(patterns, string, return_value=True):
         for p in patterns:
@@ -42,11 +74,11 @@ class ConfigParser(object):
         return not return_value
 
 
-###############################
-# C++ code generator template #
-###############################
+#######################
+# C++ code generators #
+#######################
 
-class CppGenerator(metaclass=abc.ABCMeta):
+class BaseCppGenerator(metaclass=abc.ABCMeta):
     cpp_input_filename = 'input_file'
     cpp_output_filename = 'output_file'
 

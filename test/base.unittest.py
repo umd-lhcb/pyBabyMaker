@@ -2,17 +2,38 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Aug 28, 2019 at 11:48 PM -0400
+# Last Change: Fri Aug 30, 2019 at 01:32 PM -0400
 
 import sys
 sys.path.insert(0, '..')
 
 import unittest
 
-from pyBabyMaker.base import CppGenerator
+from pyBabyMaker.base import UniqueList
+from pyBabyMaker.base import BaseCppGenerator
 
 
-class BaseCppGenerator(CppGenerator):
+##################
+# Data structure #
+##################
+
+class UniqueListTester(unittest.TestCase):
+    def test___init__(self):
+        self.assertTrue(
+            [1, 2, 3, 4],
+            UniqueList([1, 2, 3, 4]),
+        )
+        self.assertTrue(
+            [1, 2, 3],
+            UniqueList([1, 2, 3, 1]),
+        )
+
+
+#######################
+# C++ code generators #
+#######################
+
+class SimpleCppGenerator(BaseCppGenerator):
     def gen_preamble(self):
         pass
 
@@ -20,10 +41,10 @@ class BaseCppGenerator(CppGenerator):
         pass
 
 
-class CppGeneratorTester(unittest.TestCase):
+class SimpleCppGeneratorTester(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.cpp_generator = BaseCppGenerator(
+        cls.cpp_generator = SimpleCppGenerator(
             additional_system_headers=['iostream'],
             additional_user_headers=['include/dummy.h']
         )
@@ -62,7 +83,7 @@ class CppGeneratorTester(unittest.TestCase):
         )
 
     def test_gen_headers_no_user(self):
-        cpp_generator = BaseCppGenerator()
+        cpp_generator = SimpleCppGenerator()
         self.assertEqual(
             '''#include <TFile.h>
 #include <TTree.h>

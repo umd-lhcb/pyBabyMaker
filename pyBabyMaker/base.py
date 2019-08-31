@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Aug 31, 2019 at 01:25 PM -0400
+# Last Change: Sat Aug 31, 2019 at 01:44 PM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -64,8 +64,8 @@ class BaseConfigParser(object):
     @staticmethod
     def match(patterns, string, return_value=True):
         """
-        Test if ``string`` (a regexp) matches at least one in the ``patterns``.
-        If there's a match, return ``return_value``.
+        Test if ``string`` (a regular expression) matches at least one element
+        in the ``patterns``. If there's a match, return ``return_value``.
         """
         for p in patterns:
             if bool(re.search(p, string)):
@@ -106,7 +106,7 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
 
     def gen_headers(self):
         """
-        Generate C++ #include macros.
+        Generate C++ ``#include`` macros.
         """
         system_headers = ''.join([
             self.cpp_header(i) for i in self.system_headers])
@@ -117,13 +117,13 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def gen_preamble(self):
         """
-        Generate C++ definitions and functions before the 'main'.
+        Generate C++ definitions and functions before ``main``.
         """
 
     @abc.abstractmethod
     def gen_body(self):
         '''
-        Generate C++ code inside 'main'.
+        Generate C++ code inside ``main`` function.
         '''
 
     ################
@@ -141,7 +141,7 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
     @staticmethod
     def cpp_header(header, system=True):
         """
-        C++ #include snippets.
+        C++ ``#include`` snippets.
         """
         if system:
             return '#include <{}>\n'.format(header)
@@ -152,7 +152,7 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
     def cpp_make_var(name, prefix='', suffix='', separator='_'):
         """
         Make a legal C++ variable name. This is typically used to convert a
-        TTree name to a C++ variable name.
+        ``TTree`` name to a C++ variable name.
         """
         return prefix + separator + re.sub('/', separator, name) + separator + \
             suffix
@@ -171,21 +171,21 @@ int main(int, char** argv) {{
     @staticmethod
     def cpp_TTree(var, name):
         """
-        C++ TTree initializer snippet.
+        C++ ``TTree`` initializer snippet.
         """
         return 'TTree {0}("{1}", "{1}");\n'.format(var, name)
 
     @staticmethod
     def cpp_TTreeReader(var, name, TFile):
         """
-        C++ TTreeReader initializer snippet.
+        C++ ``TTreeReader`` initializer snippet.
         """
         return 'TTreeReader {0}("{1}", {2});\n'.format(var, name, TFile)
 
     @staticmethod
     def cpp_TTreeReaderValue(datatype, var, TTreeReader, branch_name):
         """
-        C++ TTreeReaderValue initializer snippet.
+        C++ ``TTreeReaderValue`` initializer snippet.
         """
         return 'TTreeReaderValue<{0}> {1}({2}, "{3}");\n'.format(
             datatype, var, TTreeReader, branch_name
@@ -221,7 +221,7 @@ class BaseMaker(metaclass=abc.ABCMeta):
     @staticmethod
     def dump(data_filename):
         """
-        Dump TTree structures inside a n-tuple
+        Dump ``TTree`` structures inside a n-tuple
         """
         from pyBabyMaker.io.TupleDump import PyTupleDump
         dumper = PyTupleDump(data_filename)

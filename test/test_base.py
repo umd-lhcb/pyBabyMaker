@@ -2,10 +2,13 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Aug 31, 2019 at 02:51 AM -0400
+# Last Change: Sat Aug 31, 2019 at 03:51 AM -0400
 
 import pytest
 import os
+
+from unittest.mock import patch
+from datetime import datetime
 
 from pyBabyMaker.base import UniqueList
 from pyBabyMaker.base import BaseConfigParser
@@ -154,6 +157,13 @@ def test_SimpleCppGenerator_gen_headers_no_user():
 
 # C++ snippets #################################################################
 
+def test_SimpleCppGenerator_cpp_gen_date(default_SimpleCppGenerator):
+    with patch('pyBabyMaker.base.datetime') as m:
+        m.now.return_value = datetime(2019, 8, 31, 3, 46, 15, 98809)
+        assert default_SimpleCppGenerator.cpp_gen_date() == \
+            '// Generated on: 2019-08-31 03:46:15.098809\n'
+
+
 def test_SimpleCppGenerator_cpp_header_system(default_SimpleCppGenerator):
     assert default_SimpleCppGenerator.cpp_header('iostream') == \
         '#include <iostream>\n'
@@ -198,7 +208,7 @@ def test_SimpleCppGenerator_cpp_TTreeReaderValue(default_SimpleCppGenerator):
 
 
 ##############
-# base maker #
+# Base maker #
 ##############
 
 class SimpleMaker(BaseMaker):
@@ -229,7 +239,14 @@ def test_SimpleMaker_dump_scalar(default_SimpleMaker):
     assert result['TupleB0/DecayTree']['CaloBremChi2'] == 'Float_t'
 
 
-@pytest.mark.xfail
+@pytest.mark.xfail(reason="Don't know how to detect vector with ROOT C++ glue.")
 def test_SimpleMaker_dump_vector(default_SimpleMaker):
     result = default_SimpleMaker.dump(SAMPLE_ROOT)
     assert result['TupleB0/DecayTree']['Y_OWNPV_COV_'] == 'vector<Float_t>'
+
+
+def test_SimpleMaker_reformat(default_SimpleMaker):
+    with patch('pyBabyMaker.base.which', return_value=True), \
+            patch('subprocess.Popen') as m:
+        default_SimpleMaker.reformat('cpp_filename')
+        m.assert_called_once_with(['clang-format', '-i', 'cpp_filename'])

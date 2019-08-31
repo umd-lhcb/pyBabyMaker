@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Aug 30, 2019 at 09:13 PM -0400
+# Last Change: Sat Aug 31, 2019 at 03:43 AM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -183,14 +183,13 @@ class BaseMaker(metaclass=abc.ABCMeta):
             return yaml.load(f, NestedYAMLLoader)
 
     @staticmethod
-    def reformat(cpp_filename, formatter='clang-format', exec='clang-format -i'):
-        if which(formatter):
-            cmd_splitted = exec.split(' ')
-            cmd_splitted.append(cpp_filename)
-            subprocess.Popen(cmd_splitted)
-
-    @staticmethod
     def dump(data_filename):
         from pyBabyMaker.io.TupleDump import PyTupleDump
         dumper = PyTupleDump(data_filename)
         return dumper.dump()
+
+    @staticmethod
+    def reformat(cpp_filename, formatter='clang-format', flags=['-i']):
+        if which(formatter):
+            cmd = [formatter] + flags + [cpp_filename]
+            subprocess.Popen(cmd)

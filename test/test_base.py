@@ -2,13 +2,15 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Aug 30, 2019 at 09:09 PM -0400
+# Last Change: Sat Aug 31, 2019 at 02:51 AM -0400
 
 import pytest
+import os
 
 from pyBabyMaker.base import UniqueList
 from pyBabyMaker.base import BaseConfigParser
 from pyBabyMaker.base import BaseCppGenerator
+from pyBabyMaker.base import BaseMaker
 
 
 ##################
@@ -193,3 +195,41 @@ def test_SimpleCppGenerator_cpp_TTreeReaderValue(default_SimpleCppGenerator):
     assert default_SimpleCppGenerator.cpp_TTreeReaderValue(
         'float', 'value', 'reader', 'some_branch') == \
         'TTreeReaderValue<float> value(reader, "some_branch");\n'
+
+
+##############
+# base maker #
+##############
+
+class SimpleMaker(BaseMaker):
+    def parse_conf(self, filename):
+        pass
+
+    def write(self, filename):
+        pass
+
+
+PWD = os.path.dirname(os.path.realpath(__file__))
+SAMPLE_YAML = os.path.join(PWD, 'sample-ntuple_process.yml')
+SAMPLE_ROOT = os.path.join(PWD, 'sample.root')
+
+
+@pytest.fixture
+def default_SimpleMaker():
+    return SimpleMaker()
+
+
+def test_SimpleMaker_read(default_SimpleMaker):
+    result = default_SimpleMaker.read(SAMPLE_YAML)
+    assert result['YetAnotherTuple']['drop'] == ['Y_OWNPV_COV_', 'Y_OWNPV_P.*']
+
+
+def test_SimpleMaker_dump_scalar(default_SimpleMaker):
+    result = default_SimpleMaker.dump(SAMPLE_ROOT)
+    assert result['TupleB0/DecayTree']['CaloBremChi2'] == 'Float_t'
+
+
+@pytest.mark.xfail
+def test_SimpleMaker_dump_vector(default_SimpleMaker):
+    result = default_SimpleMaker.dump(SAMPLE_ROOT)
+    assert result['TupleB0/DecayTree']['Y_OWNPV_COV_'] == 'vector<Float_t>'

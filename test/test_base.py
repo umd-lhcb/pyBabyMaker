@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Aug 30, 2019 at 02:30 PM -0400
+# Last Change: Fri Aug 30, 2019 at 08:15 PM -0400
 
 import unittest
 
@@ -13,6 +13,11 @@ from pyBabyMaker.base import BaseCppGenerator
 ##################
 # Data structure #
 ##################
+
+def test_UniqueList__init__():
+    test_list = UniqueList([1, 2, 3, 4])
+    assert test_list == [1, 2, 3, 4]
+
 
 class UniqueListTester(unittest.TestCase):
     def test___init__(self):

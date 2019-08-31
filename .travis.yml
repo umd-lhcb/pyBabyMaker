@@ -10,7 +10,6 @@ install:
     # Install package dependency
     - pip install -r ./requirements.txt
     # For code coverage
-    - pip install coverage
     - pip install codecov
 
 script:

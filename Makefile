@@ -1,8 +1,8 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Aug 30, 2019 at 06:30 PM -0400
+# Last Change: Fri Aug 30, 2019 at 08:18 PM -0400
 
-.PHONY: build sdist clean doc
+.PHONY: build sdist clean doc test
 
 build:
 	@python ./compile.py build_ext --inplace
@@ -21,3 +21,6 @@ clean:
 
 doc:
 	@sphinx-build -b html docs build
+
+test:
+	@coverage run --source pyBabyMaker setup.py test

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Aug 30, 2019 at 08:49 PM -0400
+# Last Change: Fri Aug 30, 2019 at 09:00 PM -0400
 
 import pytest
 
@@ -20,12 +20,37 @@ def default_UniqueList():
 
 
 def test_UniqueList__init__normal():
-    test_list = UniqueList([1, 2, 3, 4])
-    assert test_list == [1, 2, 3, 4]
+    test_list = UniqueList()
+    assert test_list == []
 
 
 def test_UniqueList__init__duplicate(default_UniqueList):
     assert default_UniqueList == [1, 2, 3]
+
+
+def test_UniqueList__init__exception():
+    test_list = UniqueList([1, 2, 3, 4])
+    assert test_list == [1, 2, 3, 4]
+
+
+def test_UniqueList__add__normal(default_UniqueList):
+    test_list = default_UniqueList + [7]
+    assert test_list == [1, 2, 3, 7]
+
+
+def test_UniqueList__add__duplicate(default_UniqueList):
+    test_list = default_UniqueList + [7, 1, 2]
+    assert test_list == [1, 2, 3, 7]
+
+
+def test_UniqueList__iadd__normal(default_UniqueList):
+    default_UniqueList += [7]
+    assert default_UniqueList == [1, 2, 3, 7]
+
+
+def test_UniqueList__iadd__duplicate(default_UniqueList):
+    default_UniqueList += [7, 1, 2]
+    assert default_UniqueList == [1, 2, 3, 7]
 
 
 def test_UniqueList_append_normal(default_UniqueList):
@@ -35,6 +60,16 @@ def test_UniqueList_append_normal(default_UniqueList):
 
 def test_UniqueList_append_duplicate(default_UniqueList):
     default_UniqueList.append(1)
+    assert default_UniqueList == [1, 2, 3]
+
+
+def test_UniqueList_insert_normal(default_UniqueList):
+    default_UniqueList.insert(0, 0)
+    assert default_UniqueList == [0, 1, 2, 3]
+
+
+def test_UniqueList_insert_duplicate(default_UniqueList):
+    default_UniqueList.insert(0, 1)
     assert default_UniqueList == [1, 2, 3]
 
 

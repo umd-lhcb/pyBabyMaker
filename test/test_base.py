@@ -2,11 +2,12 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Aug 30, 2019 at 09:00 PM -0400
+# Last Change: Fri Aug 30, 2019 at 09:09 PM -0400
 
 import pytest
 
 from pyBabyMaker.base import UniqueList
+from pyBabyMaker.base import BaseConfigParser
 from pyBabyMaker.base import BaseCppGenerator
 
 
@@ -71,6 +72,28 @@ def test_UniqueList_insert_normal(default_UniqueList):
 def test_UniqueList_insert_duplicate(default_UniqueList):
     default_UniqueList.insert(0, 1)
     assert default_UniqueList == [1, 2, 3]
+
+
+###########
+# Parsers #
+###########
+
+@pytest.fixture
+def default_BaseConfigParser():
+    return BaseConfigParser()
+
+
+def test_BaseConfigParser_match_True(default_BaseConfigParser):
+    assert default_BaseConfigParser.match(['quick', 'brown', 'fox'], r'fox')
+
+
+def test_BaseConfigParser_match_False(default_BaseConfigParser):
+    assert not default_BaseConfigParser.match(['quick', 'brown', 'fox'], r'Fox')
+
+
+def test_BaseConfigParser_match_True_inverse(default_BaseConfigParser):
+    assert not default_BaseConfigParser.match(['quick', 'brown', 'fox'], r'fox',
+                                              False)
 
 
 #######################

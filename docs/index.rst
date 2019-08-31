@@ -8,15 +8,6 @@ result is this project: ``pyBabyMaker``.
 
 .. _babymaker: https://github.com/manuelfs/babymaker
 
-The ``pyBabyMaker`` library provides the following tools to aid ntuple
-processing:
-
-- ``ntpdump``: Dump ntuple tree structure.
-- ``babymaker``: Generate ``C++`` code to process ntuples.
-
-It also provides several libraries to ease the creation of a ``C++`` code
-generator.
-
 .. toctree::
    :maxdepth: 2
    :caption: Contents:

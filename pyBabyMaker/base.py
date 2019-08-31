@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Aug 30, 2019 at 05:08 PM -0400
+# Last Change: Fri Aug 30, 2019 at 09:13 PM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -11,7 +11,6 @@ generation.
 import abc
 import yaml
 import re
-import os
 import subprocess
 
 from datetime import datetime
@@ -51,25 +50,6 @@ class UniqueList(list):
 
     def __iadd__(self, rhs):
         return UniqueList(super().__iadd__(rhs))
-
-
-###############
-# YAML reader #
-###############
-
-class NestedYAMLLoader(yaml.SafeLoader):
-    def __init__(self, stream):
-        self._root = os.path.split(stream.name)[0]
-        super().__init__(stream)
-
-    def include(self, node):
-        filename = os.path.join(self._root, self.construct_scalar(node))
-
-        with open(filename, 'r') as f:
-            return yaml.load(f, NestedYAMLLoader)
-
-
-NestedYAMLLoader.add_constructor('!include', NestedYAMLLoader.include)
 
 
 ###########
@@ -198,6 +178,7 @@ class BaseMaker(metaclass=abc.ABCMeta):
         '''
         Read ntuple data structure.
         '''
+        from pyBabyMaker.io.NestedYAMLLoader import NestedYAMLLoader
         with open(yaml_filename) as f:
             return yaml.load(f, NestedYAMLLoader)
 

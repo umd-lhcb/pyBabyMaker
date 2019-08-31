@@ -7,3 +7,4 @@ API
 .. toctree::
 
    pyBabyMaker.base
+   pyBabyMaker.io.NestedYAMLLoader

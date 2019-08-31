@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Aug 31, 2019 at 03:51 AM -0400
+# Last Change: Sat Aug 31, 2019 at 01:15 PM -0400
 
 import pytest
 import os
@@ -239,7 +239,7 @@ def test_SimpleMaker_dump_scalar(default_SimpleMaker):
     assert result['TupleB0/DecayTree']['CaloBremChi2'] == 'Float_t'
 
 
-@pytest.mark.xfail(reason="Don't know how to detect vector with ROOT C++ glue.")
+@pytest.mark.xfail(reason="Don't know how to detect vector with ROOT C++ code.")
 def test_SimpleMaker_dump_vector(default_SimpleMaker):
     result = default_SimpleMaker.dump(SAMPLE_ROOT)
     assert result['TupleB0/DecayTree']['Y_OWNPV_COV_'] == 'vector<Float_t>'

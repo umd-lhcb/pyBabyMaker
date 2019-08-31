@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Aug 31, 2019 at 01:32 PM -0400
+# Last Change: Sat Aug 31, 2019 at 03:52 PM -0400
 """
 This module provides a YAML loader with ``!include`` directive so that other
 YAML files can be included in the input YAML file.
@@ -23,7 +23,7 @@ class NestedYAMLLoader(yaml.SafeLoader):
 
     def include(self, node):
         """
-        Load YAML from another file, the additional YAML file path must be
+        Load from another YAML file, the additional YAML file path must be
         relative to the original YAML file.
 
         .. warning::

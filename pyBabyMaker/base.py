@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Aug 31, 2019 at 01:44 PM -0400
+# Last Change: Sat Aug 31, 2019 at 03:54 PM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -46,11 +46,11 @@ class UniqueList(list):
         if not super().__contains__(object):
             super().insert(index, object)
 
-    def __add__(self, rhs):
-        return UniqueList(super().__add__(rhs))
+    def __add__(self, value):
+        return UniqueList(super().__add__(value))
 
-    def __iadd__(self, rhs):
-        return UniqueList(super().__iadd__(rhs))
+    def __iadd__(self, value):
+        return UniqueList(super().__iadd__(value))
 
 
 ###########

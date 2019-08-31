@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Aug 31, 2019 at 01:00 AM -0400
+# Last Change: Sat Aug 31, 2019 at 01:11 AM -0400
 
 import os
 import pytest
@@ -12,8 +12,6 @@ from pyBabyMaker.io.NestedYAMLLoader import NestedYAMLLoader
 
 PWD = os.path.dirname(os.path.realpath(__file__))
 SAMPLE_YAML = os.path.join(PWD, 'sample-ntuple_process.yml')
-SAMPLE_YAML_SUBSECTION = os.path.join(PWD,
-                                      'sample-ntuple_process-subsection.yml')
 
 
 @pytest.fixture
@@ -25,3 +23,11 @@ def default_Loader():
 def test_NestedYAMLLoader_values(default_Loader):
     result = default_Loader
     assert result['YetYetAnotherTuple']['force_lowercase']
+    assert result['ATuple']['rename'] == {k: k.lower()
+                                          for k in ['Y_PT', 'Y_PX', 'Y_PY',
+                                                    'Y_PZ']}
+
+
+def test_NestedYAMLLoader_subfile_values(default_Loader):
+    result = default_Loader
+    assert result['YetAnotherTuple']['drop'] == ['Y_OWNPV_COV_', 'Y_OWNPV_P.*']

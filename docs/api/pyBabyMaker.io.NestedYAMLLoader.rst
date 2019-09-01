@@ -1,5 +1,5 @@
 ``pyBabyMaker.io.NestedYAMLLoader``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------------
 
 .. automodule:: pyBabyMaker.io.NestedYAMLLoader
    :members:

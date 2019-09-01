@@ -1,5 +1,5 @@
 ``pyBabyMaker.base``
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 
 .. automodule:: pyBabyMaker.base
    :members:

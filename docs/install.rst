@@ -1,5 +1,5 @@
 Installation
-------------
+============
 
 This package requires ``Python 3.7+``. Also, please make sure ``ROOT``,
 ``gcc``, and ``pip`` are installed.  Make sure that ``root-config`` is

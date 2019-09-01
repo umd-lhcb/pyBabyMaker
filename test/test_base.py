@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Aug 31, 2019 at 01:15 PM -0400
+# Last Change: Sat Aug 31, 2019 at 11:37 PM -0400
 
 import pytest
 import os
@@ -11,6 +11,7 @@ from unittest.mock import patch
 from datetime import datetime
 
 from pyBabyMaker.base import UniqueList
+from pyBabyMaker.base import Variable, CppCodeDataStore
 from pyBabyMaker.base import BaseConfigParser
 from pyBabyMaker.base import BaseCppGenerator
 from pyBabyMaker.base import BaseMaker
@@ -19,6 +20,8 @@ from pyBabyMaker.base import BaseMaker
 ##################
 # Data structure #
 ##################
+
+# UniqueList ###################################################################
 
 @pytest.fixture
 def default_UniqueList():
@@ -77,6 +80,49 @@ def test_UniqueList_insert_normal(default_UniqueList):
 def test_UniqueList_insert_duplicate(default_UniqueList):
     default_UniqueList.insert(0, 1)
     assert default_UniqueList == [1, 2, 3]
+
+
+# CppCodeDataStore #############################################################
+
+@pytest.fixture
+def default_CppCodeDataStore():
+    return CppCodeDataStore()
+
+
+def test_CppCodeDataStore_append_correct(default_CppCodeDataStore):
+    variable = Variable('float', 'a', '1')
+    default_CppCodeDataStore.append(variable, 'input')
+    assert default_CppCodeDataStore.input == [variable]
+
+
+def test_CppCodeDataStore_append_wrong_type(default_CppCodeDataStore):
+    variable = 'variable'
+    with pytest.raises(TypeError):
+        default_CppCodeDataStore.append(variable, 'input')
+
+
+def test_CppCodeDataStore_append_wrong_list(default_CppCodeDataStore):
+    variable = Variable('float', 'a', '1')
+    with pytest.raises(AttributeError):
+        default_CppCodeDataStore.append(variable, 'test')
+
+
+def test_CppCodeDataStore_append_input(default_CppCodeDataStore):
+    variable = Variable('float', 'a', '1')
+    default_CppCodeDataStore.append_input(variable)
+    assert default_CppCodeDataStore.input == [variable]
+
+
+def test_CppCodeDataStore_append_output(default_CppCodeDataStore):
+    variable = Variable('float', 'a', '1')
+    default_CppCodeDataStore.append_output(variable)
+    assert default_CppCodeDataStore.output == [variable]
+
+
+def test_CppCodeDataStore_append_transient(default_CppCodeDataStore):
+    variable = Variable('float', 'a', '1')
+    default_CppCodeDataStore.append_transient(variable)
+    assert default_CppCodeDataStore.transient == [variable]
 
 
 ###########

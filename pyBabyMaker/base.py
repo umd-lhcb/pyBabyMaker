@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Aug 31, 2019 at 03:54 PM -0400
+# Last Change: Sat Aug 31, 2019 at 11:37 PM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -13,6 +13,7 @@ import yaml
 import re
 import subprocess
 
+from collections import namedtuple
 from datetime import datetime
 from shutil import which
 
@@ -51,6 +52,44 @@ class UniqueList(list):
 
     def __iadd__(self, value):
         return UniqueList(super().__iadd__(value))
+
+
+Variable = namedtuple('Variable', 'type name rvalue, dependency',
+                      defaults=(None,))
+
+
+class CppCodeDataStore(object):
+    """
+    Store the data structure for C++ code to be generated.
+    """
+    def __init__(self, input=None, output=None, transient=None):
+        """
+        Initialize code data store.
+        """
+        self.input = UniqueList(input)
+        self.output = UniqueList(output)
+        self.transient = UniqueList(transient)
+
+    def append(self, variable, target):
+        """
+        Append ``variable`` to ``target``, with the constraint that ``variable``
+        must be of ``Variable`` type.
+        """
+        if type(variable) is not Variable:
+            raise TypeError('Type {} is not a valid Variable!'.format(
+                type(variable)
+            ))
+        else:
+            self.__getattribute__(target).append(variable)
+
+    def append_input(self, variable):
+        self.append(variable, 'input')
+
+    def append_output(self, variable):
+        self.append(variable, 'output')
+
+    def append_transient(self, variable):
+        self.append(variable, 'transient')
 
 
 ###########

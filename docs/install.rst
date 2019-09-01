@@ -1,9 +1,9 @@
 Installation
 ------------
 
-Please make sure ``ROOT``, ``gcc``, ``python3``, and ``pip`` are installed.
-Make sure that ``root-config`` is available in your ``$PATH``, and ``gcc``
-supports ``-std=c++14``.
+This package requires ``Python 3.7+``. Also, Please make sure ``ROOT``,
+``gcc``, and ``pip`` are installed.  Make sure that ``root-config`` is
+available in your ``$PATH``, and ``gcc`` supports ``-std=c++14``.
 
 ``clang-format`` will automatically be used to format generated ``C++`` code,
 if it is available in your ``$PATH``.

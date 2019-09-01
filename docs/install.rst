@@ -1,7 +1,7 @@
 Installation
 ------------
 
-This package requires ``Python 3.7+``. Also, Please make sure ``ROOT``,
+This package requires ``Python 3.7+``. Also, please make sure ``ROOT``,
 ``gcc``, and ``pip`` are installed.  Make sure that ``root-config`` is
 available in your ``$PATH``, and ``gcc`` supports ``-std=c++14``.
 

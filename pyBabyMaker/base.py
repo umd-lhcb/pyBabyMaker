@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 03, 2019 at 12:06 PM -0400
+# Last Change: Tue Sep 03, 2019 at 02:50 PM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -65,7 +65,7 @@ class CppCodeDataStore(object):
     Store the data structure for C++ code to be generated.
     """
     def __init__(self, input_file=None, output_file=None,
-                 input_tree=None, output_tree=None,
+                 input_tree=None, output_tree=None, selection=None,
                  input_br=None, output_br=None, transient=None):
         """
         Initialize code data store.
@@ -74,6 +74,7 @@ class CppCodeDataStore(object):
         self.output_file = output_file
         self.input_tree = input_tree
         self.output_tree = output_tree
+        self.selection = selection
 
         self.input_br = UniqueList(input_br)
         self.output_br = UniqueList(output_br)
@@ -114,42 +115,58 @@ class BaseConfigParser(object):
         Initialize the config parser with parsed YAML file and dumped n-tuple
         structure.
         """
-        self.parse_config = parsed_config
-        self.parsed_ntp = dumped_ntp
+        self.parsed_config = parsed_config
+        self.dumped_ntp = dumped_ntp
 
         self.system_headers = UniqueList()
         self.user_headers = UniqueList()
         self.instructions = dict()
 
-    def parse_headers(self, config_section):
+    def parse_headers(self, config):
         try:
-            self.system_headers += config_section['headers']['system']
+            self.system_headers += config['headers']['system']
         except KeyError:
             pass
 
         try:
-            self.user_headers += config_section['headers']['user']
+            self.user_headers += config['headers']['user']
         except KeyError:
             pass
 
-    def parse_drop_keep_rename(self, config_section, dumped_tree, data_store):
+    def parse_drop_keep_rename(self, config, dumped_tree, data_store):
         for br_in, datatype in dumped_tree.items():
-            if 'drop' in config_section.keys() and self.match(
-                    config_section['drop'], br_in):
+            if 'drop' in config.keys() and self.match(
+                    config['drop'], br_in):
                 print('Dropping branch: {}'.format(br_in))
 
-            elif self.match(config_section['keep'], br_in):
+            elif self.match(config['keep'], br_in):
                 data_store.append_input_br(Variable(datatype, br_in, None))
-                data_store.append_output_br(Variable(datatype, br_in, None))
+                data_store.append_output_br(Variable(datatype, br_in, br_in))
 
-            elif 'rename' in config_section.keys():
+            elif 'rename' in config.keys():
                 try:
-                    br_out = config_section['rename'][br_in]
+                    br_out = config['rename'][br_in]
                     data_store.append_input_br(Variable(datatype, br_in, None))
-                    data_store.append_output_br(Variable(datatype, br_out,
-                                                         None))
+                    data_store.append_output_br(
+                        Variable(datatype, br_out, br_in))
                 except KeyError:
                     pass
+
+    def parse_calculation(self, config, dumped_tree, data_store):
+        if 'calculation' in config.keys():
+            for name, code in config['calculation'].items():
+                datatype, rvalue = code.split(';')
+                if datatype == '^':
+                    self.__getattribute__(rvalue)(name, dumped_tree, data_store)
+                elif '^' in datatype:
+                    datatype = datatype.strip('^')
+                    data_store.append_transient(
+                        Variable(datatype, name, rvalue)
+                    )
+                else:
+                    data_store.append_output_br(
+                        Variable(datatype, name, rvalue)
+                    )
 
     @staticmethod
     def match(patterns, string, return_value=True):
@@ -161,6 +178,15 @@ class BaseConfigParser(object):
             if bool(re.search(p, string)):
                 return return_value
         return not return_value
+
+    @staticmethod
+    def LOAD(name, dumped_tree, data_store):
+        try:
+            datatype = dumped_tree[name]
+            data_store.append_input_br(
+                Variable(datatype, name))
+        except KeyError:
+            raise KeyError('Branch {} not found.'.format(name))
 
 
 #######################
@@ -289,7 +315,7 @@ int main(int, char** argv) {{
 
 class BaseMaker(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def parse_conf(self, filename):
+    def parse_config(self, filename):
         """
         Parse configuration file for the writer.
         """

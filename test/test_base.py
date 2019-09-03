@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 03, 2019 at 12:07 PM -0400
+# Last Change: Tue Sep 03, 2019 at 02:59 PM -0400
 
 import pytest
 import os
@@ -151,6 +151,16 @@ def test_BaseConfigParser_parse_headers_system_only(default_BaseConfigParser):
 
 
 def test_BaseConfigParser_parse_headers_user_only(default_BaseConfigParser):
+    default_BaseConfigParser.parse_headers({
+        'headers': {
+            'user': ['include/dummy.h']
+        }
+    })
+    assert default_BaseConfigParser.system_headers == []
+    assert default_BaseConfigParser.user_headers == ['include/dummy.h']
+
+
+def test_BaseConfigParser_parse_drop_keep_rename(default_BaseConfigParser):
     config_section = {
         'drop': ['Y_P.*'],
         'keep': ['Y_P.*', 'Z_PX', 'X_P.*'],
@@ -179,22 +189,34 @@ def test_BaseConfigParser_parse_headers_user_only(default_BaseConfigParser):
         Variable('float', 'Z_PY'),
     ]
     assert data_store.output_br == [
-        Variable('float', 'X_PX'),
-        Variable('float', 'X_PY'),
-        Variable('float', 'X_PZ'),
-        Variable('float', 'Z_PX'),
-        Variable('float', 'z_py'),
+        Variable('float', 'X_PX', 'X_PX'),
+        Variable('float', 'X_PY', 'X_PY'),
+        Variable('float', 'X_PZ', 'X_PZ'),
+        Variable('float', 'Z_PX', 'Z_PX'),
+        Variable('float', 'z_py', 'Z_PY'),
     ]
 
 
-def test_BaseConfigParser_parse_drop_keep_rename(default_BaseConfigParser):
-    default_BaseConfigParser.parse_headers({
-        'headers': {
-            'user': ['include/dummy.h']
+def test_BaseConfigParser_parse_calculation(default_BaseConfigParser):
+    config_section = {
+        'calculation': {
+            'Y_PX': '^;LOAD',
+            'Y_P_TEMP': '^double;Y_PX+1',
+            'Y_P_shift': 'double;Y_P_TEMP',
         }
-    })
-    assert default_BaseConfigParser.system_headers == []
-    assert default_BaseConfigParser.user_headers == ['include/dummy.h']
+    }
+    dumped_tree = {
+        'Y_PX': 'float',
+        'Y_PY': 'float',
+        'Y_PZ': 'float',
+    }
+    data_store = CppCodeDataStore()
+
+    default_BaseConfigParser.parse_calculation(
+        config_section, dumped_tree, data_store)
+    assert data_store.input_br == [Variable('float', 'Y_PX')]
+    assert data_store.output_br == [Variable('double', 'Y_P_shift', 'Y_P_TEMP')]
+    assert data_store.transient == [Variable('double', 'Y_P_TEMP', 'Y_PX+1')]
 
 
 def test_BaseConfigParser_match_True(default_BaseConfigParser):
@@ -208,6 +230,30 @@ def test_BaseConfigParser_match_False(default_BaseConfigParser):
 def test_BaseConfigParser_match_True_inverse(default_BaseConfigParser):
     assert not default_BaseConfigParser.match(['quick', 'brown', 'fox'], r'fox',
                                               False)
+
+
+def test_BaseConfigParser_LOAD_exist(default_BaseConfigParser):
+    dumped_tree = {
+        'X_PX': 'float',
+        'X_PY': 'float',
+        'X_PZ': 'float',
+        'Y_PX': 'float',
+    }
+    data_store = CppCodeDataStore()
+    default_BaseConfigParser.LOAD('X_PX', dumped_tree, data_store)
+    assert data_store.input_br == [Variable('float', 'X_PX')]
+
+
+def test_BaseConfigParser_LOAD_not_exist(default_BaseConfigParser):
+    dumped_tree = {
+        'X_PX': 'float',
+        'X_PY': 'float',
+        'X_PZ': 'float',
+        'Y_PX': 'float',
+    }
+    data_store = CppCodeDataStore()
+    with pytest.raises(KeyError):
+        default_BaseConfigParser.LOAD('Z_PX', dumped_tree, data_store)
 
 
 #######################
@@ -322,7 +368,7 @@ def test_SimpleCppGenerator_cpp_TTreeReaderValue(default_SimpleCppGenerator):
 ##############
 
 class SimpleMaker(BaseMaker):
-    def parse_conf(self, filename):
+    def parse_config(self, filename):
         pass
 
     def write(self, filename):

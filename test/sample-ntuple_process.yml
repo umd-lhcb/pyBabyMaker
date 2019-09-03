@@ -7,6 +7,10 @@ ATuple:
         Y_PX: y_px
         Y_PY: y_py
         Y_PZ: y_pz
+    calculation:
+        D0_P: '^;LOAD'
+        TempStuff: '^Double_t;D0_P+Y_PT'
+        RandStuff: 'Double_t;TempStuff'
     selection:
         - "Y_PT > 10000"
 

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 03, 2019 at 03:06 PM -0400
+# Last Change: Tue Sep 03, 2019 at 05:18 PM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -110,17 +110,29 @@ class BaseConfigParser(object):
     """
     Basic parser for YAML C++ code instruction.
     """
-    def __init__(self, parsed_config, dumped_ntp):
+    def __init__(self, parsed_config, dumped_ntuple):
         """
         Initialize the config parser with parsed YAML file and dumped n-tuple
         structure.
         """
         self.parsed_config = parsed_config
-        self.dumped_ntp = dumped_ntp
+        self.dumped_ntuple = dumped_ntuple
 
         self.system_headers = UniqueList()
         self.user_headers = UniqueList()
-        self.instructions = dict()
+        self.instructions = []
+
+    def parse(self):
+        for output_tree, config in self.parsed_config.items():
+            input_tree = config['input_tree']
+            dumped_tree = self.dumped_ntuple[input_tree]
+            data_store = CppCodeDataStore(input_tree=input_tree,
+                                          output_tree=output_tree)
+            self.parse_headers(config)
+            self.parse_drop_keep_rename(config, dumped_tree, data_store)
+            self.parse_calculation(config, dumped_tree, data_store)
+            self.parse_selection(config, data_store)
+            self.instructions.append(data_store)
 
     def parse_headers(self, config):
         try:
@@ -134,23 +146,25 @@ class BaseConfigParser(object):
             pass
 
     def parse_drop_keep_rename(self, config, dumped_tree, data_store):
+        branches_to_keep = []
         for br_in, datatype in dumped_tree.items():
             if 'drop' in config.keys() and self.match(
                     config['drop'], br_in):
                 print('Dropping branch: {}'.format(br_in))
-
             elif self.match(config['keep'], br_in):
-                data_store.append_input_br(Variable(datatype, br_in, None))
-                data_store.append_output_br(Variable(datatype, br_in, br_in))
+                branches_to_keep.append((datatype, br_in))
+            elif 'rename' in config.keys() and self.match(
+                    config['rename'].keys(), br_in):
+                branches_to_keep.append((datatype, br_in))
 
-            elif 'rename' in config.keys():
-                try:
-                    br_out = config['rename'][br_in]
-                    data_store.append_input_br(Variable(datatype, br_in, None))
-                    data_store.append_output_br(
-                        Variable(datatype, br_out, br_in))
-                except KeyError:
-                    pass
+        for datatype, br_in in branches_to_keep:
+            data_store.append_input_br(Variable(datatype, br_in))
+            # Handle branch rename here
+            try:
+                br_out = config['rename'][br_in]
+                data_store.append_output_br(Variable(datatype, br_out, br_in))
+            except KeyError:
+                data_store.append_output_br(Variable(datatype, br_in, br_in))
 
     def parse_calculation(self, config, dumped_tree, data_store):
         try:

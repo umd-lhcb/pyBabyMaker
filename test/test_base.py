@@ -2,10 +2,11 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 03, 2019 at 03:07 PM -0400
+# Last Change: Tue Sep 03, 2019 at 05:14 PM -0400
 
 import pytest
 import os
+import yaml
 
 from unittest.mock import patch
 from datetime import datetime
@@ -15,6 +16,9 @@ from pyBabyMaker.base import Variable, CppCodeDataStore
 from pyBabyMaker.base import BaseConfigParser
 from pyBabyMaker.base import BaseCppGenerator
 from pyBabyMaker.base import BaseMaker
+
+from pyBabyMaker.io.NestedYAMLLoader import NestedYAMLLoader
+from pyBabyMaker.io.TupleDump import PyTupleDump
 
 
 ##################
@@ -132,6 +136,41 @@ def test_CppCodeDataStore_append_transient(default_CppCodeDataStore):
 @pytest.fixture
 def default_BaseConfigParser():
     return BaseConfigParser(None, None)
+
+
+@pytest.fixture
+def realistic_BaseConfigParser():
+    with open(SAMPLE_YAML) as f:
+        parsed_config = yaml.load(f, NestedYAMLLoader)
+    dumped_ntuple = PyTupleDump(SAMPLE_ROOT).dump()
+    return BaseConfigParser(parsed_config, dumped_ntuple)
+
+
+def test_BaseConfigParser_parse_ATuple(realistic_BaseConfigParser):
+    realistic_BaseConfigParser.parse()
+    assert realistic_BaseConfigParser.instructions[0].input_tree == \
+        'TupleB0/DecayTree'
+    assert realistic_BaseConfigParser.instructions[0].output_tree == \
+        'ATuple'
+    assert realistic_BaseConfigParser.instructions[0].input_br == [
+        Variable('Double_t', 'Y_PT'),
+        Variable('Double_t', 'Y_PE'),
+        Variable('Double_t', 'Y_PX'),
+        Variable('Double_t', 'Y_PY'),
+        Variable('Double_t', 'Y_PZ'),
+        Variable('Double_t', 'D0_P'),
+    ]
+    assert realistic_BaseConfigParser.instructions[0].output_br == [
+        Variable('Double_t', 'y_pt', 'Y_PT'),
+        Variable('Double_t', 'Y_PE', 'Y_PE'),
+        Variable('Double_t', 'y_px', 'Y_PX'),
+        Variable('Double_t', 'y_py', 'Y_PY'),
+        Variable('Double_t', 'y_pz', 'Y_PZ'),
+        Variable('Double_t', 'RandStuff', 'TempStuff'),
+    ]
+    assert realistic_BaseConfigParser.instructions[0].transient == [
+        Variable('Double_t', 'TempStuff', 'D0_P+Y_PT'),
+    ]
 
 
 def test_BaseConfigParser_parse_headers_none(default_BaseConfigParser):

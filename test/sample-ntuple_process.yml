@@ -1,6 +1,5 @@
 ATuple:
-    input:
-        - TupleY/DecayTree
+    input_tree: TupleY/DecayTree
     keep:
         - ^Y_P\w$
     rename:
@@ -15,8 +14,7 @@ AnotherTuple:
     headers:
         system:
             - cmath
-    input:
-        - TupleY/DecayTree
+    input_tree: TupleY/DecayTree
     keep:
         - Y_P.*
     selection:
@@ -28,9 +26,7 @@ YetAnotherTuple:
     headers:
         system:
             - cmath
-    input:
-        - TupleY/DecayTree
-        - TupleYWSPi/DecayTree
+    input_tree: TupleYWSPi/DecayTree
     # Drop arrays. We don't support them (yet).
     drop:
         !include ./sample-ntuple_process-subsection.yml

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 03, 2019 at 11:52 AM -0400
+# Last Change: Tue Sep 03, 2019 at 12:07 PM -0400
 
 import pytest
 import os
@@ -91,14 +91,14 @@ def default_CppCodeDataStore():
 
 def test_CppCodeDataStore_append_correct(default_CppCodeDataStore):
     variable = Variable('float', 'a', '1')
-    default_CppCodeDataStore.append(variable, 'input')
-    assert default_CppCodeDataStore.input == [variable]
+    default_CppCodeDataStore.append(variable, 'input_br')
+    assert default_CppCodeDataStore.input_br == [variable]
 
 
 def test_CppCodeDataStore_append_wrong_type(default_CppCodeDataStore):
     variable = 'variable'
     with pytest.raises(TypeError):
-        default_CppCodeDataStore.append(variable, 'input')
+        default_CppCodeDataStore.append(variable, 'input_br')
 
 
 def test_CppCodeDataStore_append_wrong_list(default_CppCodeDataStore):
@@ -109,14 +109,14 @@ def test_CppCodeDataStore_append_wrong_list(default_CppCodeDataStore):
 
 def test_CppCodeDataStore_append_input(default_CppCodeDataStore):
     variable = Variable('float', 'a', '1')
-    default_CppCodeDataStore.append_input(variable)
-    assert default_CppCodeDataStore.input == [variable]
+    default_CppCodeDataStore.append_input_br(variable)
+    assert default_CppCodeDataStore.input_br == [variable]
 
 
 def test_CppCodeDataStore_append_output(default_CppCodeDataStore):
     variable = Variable('float', 'a', '1')
-    default_CppCodeDataStore.append_output(variable)
-    assert default_CppCodeDataStore.output == [variable]
+    default_CppCodeDataStore.append_output_br(variable)
+    assert default_CppCodeDataStore.output_br == [variable]
 
 
 def test_CppCodeDataStore_append_transient(default_CppCodeDataStore):
@@ -171,14 +171,14 @@ def test_BaseConfigParser_parse_headers_user_only(default_BaseConfigParser):
 
     default_BaseConfigParser.parse_drop_keep_rename(
         config_section, dumped_tree, data_store)
-    assert data_store.input == [
+    assert data_store.input_br == [
         Variable('float', 'X_PX'),
         Variable('float', 'X_PY'),
         Variable('float', 'X_PZ'),
         Variable('float', 'Z_PX'),
         Variable('float', 'Z_PY'),
     ]
-    assert data_store.output == [
+    assert data_store.output_br == [
         Variable('float', 'X_PX'),
         Variable('float', 'X_PY'),
         Variable('float', 'X_PZ'),

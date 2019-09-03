@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 03, 2019 at 11:40 AM -0400
+# Last Change: Tue Sep 03, 2019 at 12:06 PM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -64,12 +64,19 @@ class CppCodeDataStore(object):
     """
     Store the data structure for C++ code to be generated.
     """
-    def __init__(self, input=None, output=None, transient=None):
+    def __init__(self, input_file=None, output_file=None,
+                 input_tree=None, output_tree=None,
+                 input_br=None, output_br=None, transient=None):
         """
         Initialize code data store.
         """
-        self.input = UniqueList(input)
-        self.output = UniqueList(output)
+        self.input_file = input_file
+        self.output_file = output_file
+        self.input_tree = input_tree
+        self.output_tree = output_tree
+
+        self.input_br = UniqueList(input_br)
+        self.output_br = UniqueList(output_br)
         self.transient = UniqueList(transient)
 
     def append(self, variable, target):
@@ -84,11 +91,11 @@ class CppCodeDataStore(object):
         else:
             self.__getattribute__(target).append(variable)
 
-    def append_input(self, variable):
-        self.append(variable, 'input')
+    def append_input_br(self, variable):
+        self.append(variable, 'input_br')
 
-    def append_output(self, variable):
-        self.append(variable, 'output')
+    def append_output_br(self, variable):
+        self.append(variable, 'output_br')
 
     def append_transient(self, variable):
         self.append(variable, 'transient')
@@ -132,14 +139,15 @@ class BaseConfigParser(object):
                 print('Dropping branch: {}'.format(br_in))
 
             elif self.match(config_section['keep'], br_in):
-                data_store.input.append(Variable(datatype, br_in, None))
-                data_store.output.append(Variable(datatype, br_in, None))
+                data_store.append_input_br(Variable(datatype, br_in, None))
+                data_store.append_output_br(Variable(datatype, br_in, None))
 
             elif 'rename' in config_section.keys():
                 try:
                     br_out = config_section['rename'][br_in]
-                    data_store.input.append(Variable(datatype, br_in, None))
-                    data_store.output.append(Variable(datatype, br_out, None))
+                    data_store.append_input_br(Variable(datatype, br_in, None))
+                    data_store.append_output_br(Variable(datatype, br_out,
+                                                         None))
                 except KeyError:
                     pass
 

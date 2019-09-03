@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 03, 2019 at 02:50 PM -0400
+# Last Change: Tue Sep 03, 2019 at 03:06 PM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -153,7 +153,7 @@ class BaseConfigParser(object):
                     pass
 
     def parse_calculation(self, config, dumped_tree, data_store):
-        if 'calculation' in config.keys():
+        try:
             for name, code in config['calculation'].items():
                 datatype, rvalue = code.split(';')
                 if datatype == '^':
@@ -167,6 +167,14 @@ class BaseConfigParser(object):
                     data_store.append_output_br(
                         Variable(datatype, name, rvalue)
                     )
+        except KeyError:
+            pass
+
+    def parse_selection(self, config, data_store):
+        try:
+            data_store.selection = ' '.join(config['selection'])
+        except KeyError:
+            pass
 
     @staticmethod
     def match(patterns, string, return_value=True):

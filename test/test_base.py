@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 03, 2019 at 02:59 PM -0400
+# Last Change: Tue Sep 03, 2019 at 03:07 PM -0400
 
 import pytest
 import os
@@ -161,7 +161,7 @@ def test_BaseConfigParser_parse_headers_user_only(default_BaseConfigParser):
 
 
 def test_BaseConfigParser_parse_drop_keep_rename(default_BaseConfigParser):
-    config_section = {
+    config = {
         'drop': ['Y_P.*'],
         'keep': ['Y_P.*', 'Z_PX', 'X_P.*'],
         'rename': {'Z_PY': 'z_py'}
@@ -180,7 +180,7 @@ def test_BaseConfigParser_parse_drop_keep_rename(default_BaseConfigParser):
     data_store = CppCodeDataStore()
 
     default_BaseConfigParser.parse_drop_keep_rename(
-        config_section, dumped_tree, data_store)
+        config, dumped_tree, data_store)
     assert data_store.input_br == [
         Variable('float', 'X_PX'),
         Variable('float', 'X_PY'),
@@ -198,7 +198,7 @@ def test_BaseConfigParser_parse_drop_keep_rename(default_BaseConfigParser):
 
 
 def test_BaseConfigParser_parse_calculation(default_BaseConfigParser):
-    config_section = {
+    config = {
         'calculation': {
             'Y_PX': '^;LOAD',
             'Y_P_TEMP': '^double;Y_PX+1',
@@ -213,10 +213,21 @@ def test_BaseConfigParser_parse_calculation(default_BaseConfigParser):
     data_store = CppCodeDataStore()
 
     default_BaseConfigParser.parse_calculation(
-        config_section, dumped_tree, data_store)
+        config, dumped_tree, data_store)
     assert data_store.input_br == [Variable('float', 'Y_PX')]
     assert data_store.output_br == [Variable('double', 'Y_P_shift', 'Y_P_TEMP')]
     assert data_store.transient == [Variable('double', 'Y_P_TEMP', 'Y_PX+1')]
+
+
+def test_BaseConfigParser_parse_selection(default_BaseConfigParser):
+    config = {
+        'selection': ['Y_PT > 100000', '&&', 'Y_PE > (100 * pow(10, 3))']
+    }
+    data_store = CppCodeDataStore()
+
+    default_BaseConfigParser.parse_selection(
+        config, data_store)
+    assert data_store.selection == ' '.join(config['selection'])
 
 
 def test_BaseConfigParser_match_True(default_BaseConfigParser):

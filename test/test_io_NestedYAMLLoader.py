@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Aug 31, 2019 at 01:11 AM -0400
+# Last Change: Tue Sep 03, 2019 at 02:58 AM -0400
 
 import os
 import pytest
@@ -22,7 +22,6 @@ def default_Loader():
 
 def test_NestedYAMLLoader_values(default_Loader):
     result = default_Loader
-    assert result['YetYetAnotherTuple']['force_lowercase']
     assert result['ATuple']['rename'] == {k: k.lower()
                                           for k in ['Y_PT', 'Y_PX', 'Y_PY',
                                                     'Y_PZ']}

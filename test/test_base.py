@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Aug 31, 2019 at 11:37 PM -0400
+# Last Change: Tue Sep 03, 2019 at 11:52 AM -0400
 
 import pytest
 import os
@@ -131,7 +131,70 @@ def test_CppCodeDataStore_append_transient(default_CppCodeDataStore):
 
 @pytest.fixture
 def default_BaseConfigParser():
-    return BaseConfigParser()
+    return BaseConfigParser(None, None)
+
+
+def test_BaseConfigParser_parse_headers_none(default_BaseConfigParser):
+    default_BaseConfigParser.parse_headers({})
+    assert default_BaseConfigParser.system_headers == []
+    assert default_BaseConfigParser.user_headers == []
+
+
+def test_BaseConfigParser_parse_headers_system_only(default_BaseConfigParser):
+    default_BaseConfigParser.parse_headers({
+        'headers': {
+            'system': ['iostream', 'iostream']
+        }
+    })
+    assert default_BaseConfigParser.system_headers == ['iostream']
+    assert default_BaseConfigParser.user_headers == []
+
+
+def test_BaseConfigParser_parse_headers_user_only(default_BaseConfigParser):
+    config_section = {
+        'drop': ['Y_P.*'],
+        'keep': ['Y_P.*', 'Z_PX', 'X_P.*'],
+        'rename': {'Z_PY': 'z_py'}
+    }
+    dumped_tree = {
+        'X_PX': 'float',
+        'X_PY': 'float',
+        'X_PZ': 'float',
+        'Y_PX': 'float',
+        'Y_PY': 'float',
+        'Y_PZ': 'float',
+        'Z_PX': 'float',
+        'Z_PY': 'float',
+        'Z_PZ': 'float',
+    }
+    data_store = CppCodeDataStore()
+
+    default_BaseConfigParser.parse_drop_keep_rename(
+        config_section, dumped_tree, data_store)
+    assert data_store.input == [
+        Variable('float', 'X_PX'),
+        Variable('float', 'X_PY'),
+        Variable('float', 'X_PZ'),
+        Variable('float', 'Z_PX'),
+        Variable('float', 'Z_PY'),
+    ]
+    assert data_store.output == [
+        Variable('float', 'X_PX'),
+        Variable('float', 'X_PY'),
+        Variable('float', 'X_PZ'),
+        Variable('float', 'Z_PX'),
+        Variable('float', 'z_py'),
+    ]
+
+
+def test_BaseConfigParser_parse_drop_keep_rename(default_BaseConfigParser):
+    default_BaseConfigParser.parse_headers({
+        'headers': {
+            'user': ['include/dummy.h']
+        }
+    })
+    assert default_BaseConfigParser.system_headers == []
+    assert default_BaseConfigParser.user_headers == ['include/dummy.h']
 
 
 def test_BaseConfigParser_match_True(default_BaseConfigParser):
@@ -162,6 +225,7 @@ class SimpleCppGenerator(BaseCppGenerator):
 @pytest.fixture
 def default_SimpleCppGenerator():
     return SimpleCppGenerator(
+        None,
         additional_system_headers=['iostream'],
         additional_user_headers=['include/dummy.h']
     )
@@ -191,7 +255,7 @@ def test_SimpleCppGenerator_gen_headers(default_SimpleCppGenerator):
 
 
 def test_SimpleCppGenerator_gen_headers_no_user():
-    cpp_generator = SimpleCppGenerator()
+    cpp_generator = SimpleCppGenerator(None)
     assert cpp_generator.gen_headers() == \
         '''#include <TFile.h>
 #include <TTree.h>

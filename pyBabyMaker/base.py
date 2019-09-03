@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Aug 31, 2019 at 11:37 PM -0400
+# Last Change: Tue Sep 03, 2019 at 11:40 AM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -55,7 +55,9 @@ class UniqueList(list):
 
 
 Variable = namedtuple('Variable', 'type name rvalue, dependency',
-                      defaults=(None,))
+                      defaults=(None, None))
+
+IO = namedtuple('IO', 'input output')
 
 
 class CppCodeDataStore(object):
@@ -100,6 +102,47 @@ class BaseConfigParser(object):
     """
     Basic parser for YAML C++ code instruction.
     """
+    def __init__(self, parsed_config, dumped_ntp):
+        """
+        Initialize the config parser with parsed YAML file and dumped n-tuple
+        structure.
+        """
+        self.parse_config = parsed_config
+        self.parsed_ntp = dumped_ntp
+
+        self.system_headers = UniqueList()
+        self.user_headers = UniqueList()
+        self.instructions = dict()
+
+    def parse_headers(self, config_section):
+        try:
+            self.system_headers += config_section['headers']['system']
+        except KeyError:
+            pass
+
+        try:
+            self.user_headers += config_section['headers']['user']
+        except KeyError:
+            pass
+
+    def parse_drop_keep_rename(self, config_section, dumped_tree, data_store):
+        for br_in, datatype in dumped_tree.items():
+            if 'drop' in config_section.keys() and self.match(
+                    config_section['drop'], br_in):
+                print('Dropping branch: {}'.format(br_in))
+
+            elif self.match(config_section['keep'], br_in):
+                data_store.input.append(Variable(datatype, br_in, None))
+                data_store.output.append(Variable(datatype, br_in, None))
+
+            elif 'rename' in config_section.keys():
+                try:
+                    br_out = config_section['rename'][br_in]
+                    data_store.input.append(Variable(datatype, br_in, None))
+                    data_store.output.append(Variable(datatype, br_out, None))
+                except KeyError:
+                    pass
+
     @staticmethod
     def match(patterns, string, return_value=True):
         """
@@ -116,6 +159,7 @@ class BaseConfigParser(object):
 # C++ code generators #
 #######################
 
+
 class BaseCppGenerator(metaclass=abc.ABCMeta):
     """
     Basic C++ code snippets for n-tuple processing.
@@ -123,11 +167,11 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
     cpp_input_filename = 'input_file'
     cpp_output_filename = 'output_file'
 
-    def __init__(self,
-                 io_directive=None, calc_directive=None,
+    def __init__(self, instructions,
                  additional_system_headers=None, additional_user_headers=None):
-        self.io_directive = io_directive
-        self.calc_directive = calc_directive
+        self.instructions = instructions
+        self.preamble = []
+        self.main = []
 
         self.system_headers = ['TFile.h', 'TTree.h', 'TTreeReader.h',
                                'TBranch.h']
@@ -139,9 +183,9 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
         if additional_user_headers is not None:
             self.user_headers += additional_user_headers
 
-    #########################
-    # Chuck code generation #
-    #########################
+    ###################
+    # Code generation #
+    ###################
 
     def gen_headers(self):
         """

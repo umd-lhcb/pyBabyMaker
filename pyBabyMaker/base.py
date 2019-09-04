@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 01:50 PM -0400
+# Last Change: Wed Sep 04, 2019 at 02:11 PM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -319,6 +319,20 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
 
     @staticmethod
     def deference_variables(expr, vars_to_deref):
+        """
+        Dereference variables loaded from n-tuple directly. For example:
+
+        .. code-block:: c++
+
+            TTreeReader reader("tree", input_file)
+            TTreeReaderValue<double> Y_PT(reader, "Y_PT");
+
+            while (reader.Next()) {
+                cout << (*Y_PT)
+            }
+
+        The ``Y_PT`` inside the ``while`` loop needs to be dereferenced.
+        """
         variables = find_all_vars(expr)
         ref_var_dict = {v.name: v for v in vars_to_deref}
 

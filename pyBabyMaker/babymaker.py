@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 01:54 PM -0400
+# Last Change: Wed Sep 04, 2019 at 02:12 PM -0400
 
 from pyBabyMaker.base import BaseCppGenerator, BaseConfigParser, BaseMaker
 
@@ -104,7 +104,13 @@ void generator_{name}(TFile *input_file, TFile *output_file) {{
 
 
 class BabyMaker(BaseMaker):
+    """
+    ``babymaker`` class to glue parser and code generator together.
+    """
     def __init__(self, config_filename, ntuple_filename):
+        """
+        Initialize with path to YAML file and n-tuple file.
+        """
         self.config_filename = config_filename
         self.ntuple_filename = ntuple_filename
 

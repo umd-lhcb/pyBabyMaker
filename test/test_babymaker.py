@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 01:51 PM -0400
+# Last Change: Wed Sep 04, 2019 at 02:22 PM -0400
 
 import pytest
 import os
@@ -16,13 +16,13 @@ from pyBabyMaker.base import BaseConfigParser
 from pyBabyMaker.base import CppCodeDataStore, Variable
 
 
-PWD = os.path.dirname(os.path.realpath(__file__))
-SAMPLE_YAML = os.path.join(PWD, 'sample-ntuple_process.yml')
-SAMPLE_ROOT = os.path.join(PWD, 'sample.root')
+SAMPLE_YAML = os.path.join('samples', 'sample-ntuple_process.yml')
+SAMPLE_ROOT = os.path.join('samples', 'sample.root')
 
 
 @pytest.fixture
 def load_files():
+    print(SAMPLE_YAML)
     with open(SAMPLE_YAML) as f:
         parsed_config = yaml.load(f, NestedYAMLLoader)
     dumped_ntuple = PyTupleDump(SAMPLE_ROOT).dump()

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 03, 2019 at 02:58 AM -0400
+# Last Change: Wed Sep 04, 2019 at 02:32 PM -0400
 
 import os
 import pytest
@@ -11,7 +11,8 @@ import yaml
 from pyBabyMaker.io.NestedYAMLLoader import NestedYAMLLoader
 
 PWD = os.path.dirname(os.path.realpath(__file__))
-SAMPLE_YAML = os.path.join(PWD, 'sample-ntuple_process.yml')
+PARDIR = os.path.join(PWD, os.pardir)
+SAMPLE_YAML = os.path.join(PARDIR, 'samples', 'sample-ntuple_process.yml')
 
 
 @pytest.fixture

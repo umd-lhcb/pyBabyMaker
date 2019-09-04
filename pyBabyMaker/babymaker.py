@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 02:12 PM -0400
+# Last Change: Wed Sep 04, 2019 at 02:16 PM -0400
 
 from pyBabyMaker.base import BaseCppGenerator, BaseConfigParser, BaseMaker
 
@@ -107,12 +107,13 @@ class BabyMaker(BaseMaker):
     """
     ``babymaker`` class to glue parser and code generator together.
     """
-    def __init__(self, config_filename, ntuple_filename):
+    def __init__(self, config_filename, ntuple_filename, use_reformater=True):
         """
         Initialize with path to YAML file and n-tuple file.
         """
         self.config_filename = config_filename
         self.ntuple_filename = ntuple_filename
+        self.use_reformater = use_reformater
 
     def gen(self):
         parsed_config = self.read(self.config_filename)
@@ -132,4 +133,5 @@ class BabyMaker(BaseMaker):
         content = self.gen()
         with open(filename, 'w') as f:
             f.write(content)
-        self.reformat(filename)
+        if self.use_reformater:
+            self.reformat(filename)

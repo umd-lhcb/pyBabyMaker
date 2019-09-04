@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 12:34 AM -0400
+# Last Change: Wed Sep 04, 2019 at 12:39 AM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -98,13 +98,29 @@ class CppCodeDataStore(object):
             self.__getattribute__(target).append(variable)
 
     def append_input_br(self, variable):
+        """
+        Append ``variable`` to ``self.input_br``, validating that ``variable``
+        has the correct type.
+
+        This will also mark ``variable.name`` as loaded.
+        """
         self.append(variable, 'input_br')
         self.loaded_variables.append(variable.name)
 
     def append_output_br(self, variable):
+        """
+        Append ``variable`` to ``self.output_br``, validating that ``variable``
+        has the correct type.
+        """
         self.append(variable, 'output_br')
 
     def append_transient(self, variable):
+        """
+        Append ``variable`` to ``self.transient``, validating that ``variable``
+        has the correct type.
+
+        This will also mark ``variable.name`` as loaded.
+        """
         self.append(variable, 'transient')
         self.loaded_variables.append(variable.name)
 

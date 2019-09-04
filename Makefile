@@ -1,10 +1,10 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 05:51 PM -0400
+# Last Change: Wed Sep 04, 2019 at 06:26 PM -0400
 
 include ./samples/sample.mk
 
-.PHONY: build sdist clean doc test
+.PHONY: build sdist clean doc test unittest integratedtest
 
 build:
 	@python ./compile.py build_ext --inplace
@@ -25,6 +25,24 @@ clean:
 doc:
 	@sphinx-build -b html docs build
 
-test:
+test: unittest integratedtest
+
+##############
+# Unit tests #
+##############
+
+unittest:
 	@coverage run --source pyBabyMaker setup.py test
+
+####################
+# Integrated tests #
+####################
+
+integratedtest: gen/sample-babymaker.root
 	@mkdir -p gen
+
+gen/sample-babymaker.root: samples/sample.root gen/postprocess
+	gen/postprocess $< $@
+
+gen/postprocess.cpp: samples/sample-babymaker.yml samples/sample.root
+	babymaker -i $< -o $@ -d ./samples/sample.root

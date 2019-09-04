@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 06:21 AM -0400
+# Last Change: Wed Sep 04, 2019 at 06:34 AM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -319,8 +319,15 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
 
     @staticmethod
     def deference_variables(expr, vars_to_deref):
-        for var in vars_to_deref:
-            expr = re.sub(var.name, '*{}'.format(var.name), expr)
+        variables = find_all_vars(expr)
+        ref_var_dict = {v.name: v for v in vars_to_deref}
+
+        for var in variables:
+            try:
+                expr = re.sub(var, '*{}'.format(ref_var_dict[var].name), expr)
+            except KeyError:
+                pass
+
         return expr
 
     # C++ snippets #############################################################

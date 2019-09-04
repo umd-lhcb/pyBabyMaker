@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 06:04 AM -0400
+# Last Change: Wed Sep 04, 2019 at 06:21 AM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -314,7 +314,6 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
         '''
         Generate C++ code inside ``main`` function.
         '''
-        pass
 
     # Helpers ##################################################################
 

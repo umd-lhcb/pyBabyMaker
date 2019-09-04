@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 06:03 AM -0400
+# Last Change: Wed Sep 04, 2019 at 01:54 PM -0400
 
 from pyBabyMaker.base import BaseCppGenerator, BaseConfigParser, BaseMaker
 
@@ -41,6 +41,10 @@ delete output_file;
         return self.cpp_main(body)
 
     def gen_preamble_single_output_tree(self, data_store):
+        """
+        Generate the body of function call for each ``input_tree`` and
+        ``output_tree``.
+        """
         input_tree = self.cpp_TTreeReader(
             'reader', data_store.input_tree, 'input_file')
         output_tree = self.cpp_TTree('output', data_store.output_tree)

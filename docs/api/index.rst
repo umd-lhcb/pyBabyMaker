@@ -8,4 +8,5 @@ API
 
    pyBabyMaker.base
    pyBabyMaker.parse
+   pyBabyMaker.babymaker
    pyBabyMaker.io.NestedYAMLLoader

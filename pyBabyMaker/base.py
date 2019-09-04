@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 06:34 AM -0400
+# Last Change: Wed Sep 04, 2019 at 01:50 PM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -324,7 +324,7 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
 
         for var in variables:
             try:
-                expr = re.sub(var, '*{}'.format(ref_var_dict[var].name), expr)
+                expr = re.sub(var, '(*{})'.format(ref_var_dict[var].name), expr)
             except KeyError:
                 pass
 

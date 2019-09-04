@@ -1,0 +1,2 @@
+include pyBabyMaker/io/TupleDump_unwrapped/*.cpp
+include pyBabyMaker/io/TupleDump_unwrapped/*.h

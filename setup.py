@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 03:10 PM -0400
+# Last Change: Wed Sep 04, 2019 at 03:13 PM -0400
 
 import setuptools
 import subprocess
@@ -90,7 +90,7 @@ setup(
     ],
     classifiers=[
         'Programming Language :: Python :: 3',
-        'License :: OSI Approved :: BSD 2-Clause "Simplified" License (BSD-2-Clause)'
+        'License :: OSI Approved :: BSD 2-Clause "Simplified" License (BSD-2-Clause)',
         'Operating System :: OS Independent'
     ],
     ext_modules=[TupleDumpExtension],

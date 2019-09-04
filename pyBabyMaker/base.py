@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 03, 2019 at 05:26 PM -0400
+# Last Change: Wed Sep 04, 2019 at 12:20 AM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -16,6 +16,8 @@ import subprocess
 from collections import namedtuple
 from datetime import datetime
 from shutil import which
+
+from pyBabyMaker.parse import find_all_vars
 
 
 ##################
@@ -80,6 +82,9 @@ class CppCodeDataStore(object):
         self.output_br = UniqueList(output_br)
         self.transient = UniqueList(transient)
 
+        # Record all loaded variables
+        self.loaded_variables = UniqueList()
+
     def append(self, variable, target):
         """
         Append ``variable`` to ``target``, with the constraint that ``variable``
@@ -94,12 +99,14 @@ class CppCodeDataStore(object):
 
     def append_input_br(self, variable):
         self.append(variable, 'input_br')
+        self.loaded_variables.append(variable.name)
 
     def append_output_br(self, variable):
         self.append(variable, 'output_br')
 
     def append_transient(self, variable):
         self.append(variable, 'transient')
+        self.loaded_variables.append(variable.name)
 
 
 ###########
@@ -123,15 +130,21 @@ class BaseConfigParser(object):
         self.instructions = []
 
     def parse(self):
+        """
+        Parse the loaded YAML dict (in ``self.parsed_config`) and dumped n-tuple
+        tree structure (in ``self.dumped_ntuple``).
+        """
         for output_tree, config in self.parsed_config.items():
             input_tree = config['input_tree']
             dumped_tree = self.dumped_ntuple[input_tree]
             data_store = CppCodeDataStore(input_tree=input_tree,
                                           output_tree=output_tree)
+
             self.parse_headers(config)
             self.parse_drop_keep_rename(config, dumped_tree, data_store)
             self.parse_calculation(config, dumped_tree, data_store)
-            self.parse_selection(config, data_store)
+            self.parse_selection(config, dumped_tree, data_store)
+
             self.instructions.append(data_store)
 
     def parse_headers(self, config):
@@ -177,14 +190,24 @@ class BaseConfigParser(object):
                     data_store.append_transient(
                         Variable(datatype, name, rvalue)
                     )
+                    self.load_missing_variables(rvalue, dumped_tree, data_store)
                 else:
                     data_store.append_output_br(
                         Variable(datatype, name, rvalue)
                     )
+                    self.load_missing_variables(rvalue, dumped_tree, data_store)
 
-    def parse_selection(self, config, data_store):
+    def parse_selection(self, config, dumped_tree, data_store):
         if 'selection' in config.keys():
             data_store.selection = ' '.join(config['selection'])
+            self.load_missing_variables(data_store.selection, dumped_tree,
+                                        data_store)
+
+    def load_missing_variables(self, expr, dumped_tree, data_store):
+        variables = find_all_vars(expr)
+        for v in variables:
+            if v not in data_store.loaded_variables:
+                self.LOAD(v, dumped_tree, data_store)
 
     @staticmethod
     def match(patterns, string, return_value=True):

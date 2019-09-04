@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 03, 2019 at 05:14 PM -0400
+# Last Change: Wed Sep 04, 2019 at 12:23 AM -0400
 
 import pytest
 import os
@@ -258,14 +258,39 @@ def test_BaseConfigParser_parse_calculation(default_BaseConfigParser):
     assert data_store.transient == [Variable('double', 'Y_P_TEMP', 'Y_PX+1')]
 
 
+def test_BaseConfigParser_parse_load_missing_variables(
+        default_BaseConfigParser):
+    expr = '!(Y_PX > 10) && FUNCTOR(Y_PY, Y_PZ) != 10'
+    dumped_tree = {
+        'Y_PX': 'float',
+        'Y_PY': 'float',
+        'Y_PZ': 'float',
+    }
+    data_store = CppCodeDataStore()
+    default_BaseConfigParser.load_missing_variables(expr, dumped_tree,
+                                                    data_store)
+    assert data_store.input_br == [
+        Variable('float', 'Y_PX'),
+        Variable('float', 'Y_PY'),
+        Variable('float', 'Y_PZ'),
+    ]
+
+
 def test_BaseConfigParser_parse_selection(default_BaseConfigParser):
     config = {
         'selection': ['Y_PT > 100000', '&&', 'Y_PE > (100 * pow(10, 3))']
     }
+    dumped_tree = {
+        'Y_PX': 'float',
+        'Y_PY': 'float',
+        'Y_PZ': 'float',
+        'Y_PT': 'float',
+        'Y_PE': 'float',
+    }
     data_store = CppCodeDataStore()
 
     default_BaseConfigParser.parse_selection(
-        config, data_store)
+        config, dumped_tree, data_store)
     assert data_store.selection == ' '.join(config['selection'])
 
 

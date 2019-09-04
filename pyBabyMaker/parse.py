@@ -2,12 +2,15 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 03, 2019 at 11:55 PM -0400
+# Last Change: Wed Sep 04, 2019 at 12:07 AM -0400
 
 import re
 
 
 def is_numeral(n):
+    """
+    Test if ``string n`` can be converted to a numeral.
+    """
     try:
         float(n)
         return True
@@ -21,11 +24,17 @@ def find_all_args(s, tokens=[
     r'&&', r'\|\|',
     r'!', r'>', r'<', r'='
 ]):
+    """
+    Find all arguments inside a C++ expression ``s``.
+    """
     for t in tokens:
         s = re.sub(t, ' ', s)
     return s.split()
 
 
 def find_all_vars(s, **kwargs):
+    """
+    Find all arguments, minus numerals, inside a C++ expression ``s``.
+    """
     args = find_all_args(s, **kwargs)
     return [v for v in args if not is_numeral(v)]

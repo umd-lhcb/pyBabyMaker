@@ -17,3 +17,12 @@ script:
 
 after_success:
     - codecov
+
+deploy:
+    provider: pypi
+    user: yipengsun
+    skip_cleanup: true
+    on:
+        tags: true
+    password:
+        secure: YiY+blCuUjOagNw15KdBDrXc7NE1nXaTJZQSMSuCVEElACNZN3lT/RK8MBiDBRNIiaX+cccybXIhvMyJuCDFx/xwisKN2nbe4WK+x3t8jVlc5LruSeofDPAiTHklJO94rGvq7zYD8pQtgRajfgdhy5Rqk85CL1xx3v/l2x7x1Hg+t0ocRsKMfx4MLp2cpKiGPJkybILOjVDG1UakLwKRmb27C6FyWYpMFW/cRYKC1uMP78of2W+j6pKtW5nSuXKIex15swjJaU5ijBxYzU6t2WLFxSdPEpjqFf96+xB6xGaw+NBEnnC1Klf+c2KdseA1bcb68BJpdGaGg5/DOVOKGnrH29Zem0dOztA8X+AAL+Mt9YWZHqpFeGkAhj8WklPlr6p3TExSyRwsZOz6vHCI2h2YgzumCkRSza5LxIHt8JYRjHyT/B9tIhBY1hGvf8DLmXwR6jC/XRYmZdojuu41/OoyK0qpm0YFt9HsvMTDmdjb4Wn61r2iCFlPh5kypL6RfrhSKndGsmqZgWAcAqG35oklHsAkraawyW5V+LopzJioSrcTdAv4Jnp5hSxq2cNAsiO5YkXnxUAYJYP/QfKqHQ1mgGvtVZbT4x6OmTRgfhmax03AkdAxTPLxsr4ITIFEH2oocFYP6eoYfj1sfijHjTfA0sEJ1suG6NzhTFScjAE=

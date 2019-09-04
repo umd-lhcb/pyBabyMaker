@@ -59,8 +59,6 @@ class UniqueList(list):
 Variable = namedtuple('Variable', 'type name rvalue, dependency',
                       defaults=(None, None))
 
-IO = namedtuple('IO', 'input output')
-
 
 class CppCodeDataStore(object):
     """

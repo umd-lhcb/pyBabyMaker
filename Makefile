@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Aug 31, 2019 at 01:00 AM -0400
+# Last Change: Wed Sep 04, 2019 at 04:18 PM -0400
 
 .PHONY: build sdist clean doc test
 
@@ -16,6 +16,7 @@ install:
 clean:
 	@rm -rf ./build
 	@rm -rf ./dist
+	@rm -rf ./gen
 	@rm -rf ./pyBabyMaker.egg-info
 	@find . -name '*.so' -delete
 

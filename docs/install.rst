@@ -8,9 +8,13 @@ available in your ``$PATH``, and ``gcc`` supports ``-std=c++14``.
 ``clang-format`` will automatically be used to format generated ``C++`` code,
 if it is available in your ``$PATH``.
 
-Currently, ``pyBabyMaker`` is not on ``PyPI``. To install:
+``pyBabyMaker`` is available on ``PyPI``:
+.. code-block:: console
+
+   pip install pyBabyMaker
+
+If you want to install the latest develop version:
 
 .. code-block:: console
 
-   # pip install git+https://github.com/umd-lhcb/pyBabyMaker
-   $ pip install --user git+https://github.com/umd-lhcb/pyBabyMaker
+   pip install git+https://github.com/umd-lhcb/pyBabyMaker

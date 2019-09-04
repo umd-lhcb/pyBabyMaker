@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 06:30 PM -0400
+# Last Change: Wed Sep 04, 2019 at 06:33 PM -0400
 
 include ./samples/sample.mk
 
@@ -38,7 +38,7 @@ unittest:
 # Integration tests #
 #####################
 
-integrationtest: gen/sample-babymaker.root
+integrationtest: gen/sample-babymaker.root install
 
 gen/sample-babymaker.root: samples/sample.root gen/postprocess
 	gen/postprocess $< $@

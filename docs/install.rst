@@ -9,6 +9,7 @@ available in your ``$PATH``, and ``gcc`` supports ``-std=c++14``.
 if it is available in your ``$PATH``.
 
 ``pyBabyMaker`` is available on ``PyPI``:
+
 .. code-block:: console
 
    pip install pyBabyMaker

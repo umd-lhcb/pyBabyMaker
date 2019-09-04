@@ -7,3 +7,4 @@
 
 Python babymaker (flat ntuple generation tool) library.
 Please refer to [`readthedocs`](https://pybabymaker.readthedocs.io/en/latest) for detailed documentation.
+To integrate this project, please refer to [`samples/sample.mk`](https://github.com/umd-lhcb/pyBabyMaker/blob/master/samples/sample.mk).

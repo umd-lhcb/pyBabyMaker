@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 04:35 PM -0400
+# Last Change: Wed Sep 04, 2019 at 06:30 PM -0400
 
 name = 'pyBabyMaker'
-version = '0.2.1'
+version = '0.2.2'

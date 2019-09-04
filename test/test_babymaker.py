@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 05:40 AM -0400
+# Last Change: Wed Sep 04, 2019 at 06:13 AM -0400
 
 import pytest
 import os
@@ -77,9 +77,9 @@ output.Branch("y_pt", &y_pt_out);
     float temp = 1;
 
     if (*Y_PT > 1) {
-  float y_pt = *Y_PT+temp;
+  y_pt_out = *Y_PT+temp;
 
-  output->Fill();
+  output.Fill();
 }
   }
 

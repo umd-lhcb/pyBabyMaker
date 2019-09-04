@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 04:04 PM -0400
+# Last Change: Wed Sep 04, 2019 at 04:13 PM -0400
 
 import setuptools
 import subprocess
@@ -16,7 +16,7 @@ from pyBabyMaker import version
 # Helpers #
 ###########
 
-with open('README.rst', 'r') as ld:
+with open('README.md', 'r') as ld:
     long_description = ld.read()
 
 

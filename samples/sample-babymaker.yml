@@ -33,7 +33,7 @@ YetAnotherTuple:
     input_tree: TupleB0WSPi/DecayTree
     # Drop arrays. We don't support them (yet).
     drop:
-        !include ./sample-ntuple_process-subsection.yml
+        !include ./sample-babymaker_subsection.yml
     keep:
         - Y_OWNPV_.*
         - Y_ISOLATION_.*

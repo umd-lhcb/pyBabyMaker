@@ -2,47 +2,27 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 02:22 PM -0400
+# Last Change: Wed Sep 04, 2019 at 05:49 PM -0400
 
 import pytest
 import os
-import yaml
 
 from pyBabyMaker.babymaker import BabyCppGenerator
 
-from pyBabyMaker.io.NestedYAMLLoader import NestedYAMLLoader
-from pyBabyMaker.io.TupleDump import PyTupleDump
-from pyBabyMaker.base import BaseConfigParser
 from pyBabyMaker.base import CppCodeDataStore, Variable
 
 
-SAMPLE_YAML = os.path.join('samples', 'sample-ntuple_process.yml')
-SAMPLE_ROOT = os.path.join('samples', 'sample.root')
-
-
-@pytest.fixture
-def load_files():
-    print(SAMPLE_YAML)
-    with open(SAMPLE_YAML) as f:
-        parsed_config = yaml.load(f, NestedYAMLLoader)
-    dumped_ntuple = PyTupleDump(SAMPLE_ROOT).dump()
-    return (parsed_config, dumped_ntuple)
+PWD = os.path.dirname(os.path.realpath(__file__))
+PARDIR = os.path.join(PWD, os.pardir)
+SAMPLE_YAML = os.path.join(PARDIR, 'samples', 'sample-babymaker.yml')
+SAMPLE_ROOT = os.path.join(PARDIR, 'samples', 'sample.root')
+SAMPLE_CPP = os.path.join(PARDIR, 'samples', 'sample_cpp',
+                          'sample-babymaker.cpp')
 
 
 @pytest.fixture
 def default_BabyCppGenerator():
     return BabyCppGenerator(list())
-
-
-@pytest.fixture
-def realistic_BabyCppGenerator(load_files):
-    config_parser = BaseConfigParser(*load_files)
-    config_parser.parse()
-    return BabyCppGenerator(
-        config_parser.instructions,
-        additional_system_headers=config_parser.additional_system_headers,
-        additional_user_headers=config_parser.additional_user_headers
-    )
 
 
 def test_default_BabyCppGenerator(default_BabyCppGenerator):

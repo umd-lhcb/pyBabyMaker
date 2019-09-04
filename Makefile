@@ -1,6 +1,8 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 04:18 PM -0400
+# Last Change: Wed Sep 04, 2019 at 04:52 PM -0400
+
+include ./samples/sample.mk
 
 .PHONY: build sdist clean doc test
 

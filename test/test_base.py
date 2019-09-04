@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 02:33 PM -0400
+# Last Change: Wed Sep 04, 2019 at 05:48 PM -0400
 
 import pytest
 import os
@@ -22,7 +22,7 @@ from pyBabyMaker.io.TupleDump import PyTupleDump
 
 PWD = os.path.dirname(os.path.realpath(__file__))
 PARDIR = os.path.join(PWD, os.pardir)
-SAMPLE_YAML = os.path.join(PARDIR, 'samples', 'sample-ntuple_process.yml')
+SAMPLE_YAML = os.path.join(PARDIR, 'samples', 'sample-babymaker.yml')
 SAMPLE_ROOT = os.path.join(PARDIR, 'samples', 'sample.root')
 
 

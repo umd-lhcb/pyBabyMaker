@@ -2,12 +2,15 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 05:49 PM -0400
+# Last Change: Wed Sep 04, 2019 at 06:11 PM -0400
 
 import pytest
 import os
 
+from tempfile import NamedTemporaryFile
+
 from pyBabyMaker.babymaker import BabyCppGenerator
+from pyBabyMaker.babymaker import BabyMaker
 
 from pyBabyMaker.base import CppCodeDataStore, Variable
 
@@ -65,3 +68,17 @@ output.Branch("y_pt", &y_pt_out);
 
   output_file->Write();
 }'''
+
+
+def test_BabyMaker():
+    maker = BabyMaker(SAMPLE_YAML, SAMPLE_ROOT, False)
+
+    with open(SAMPLE_CPP, 'r') as f:
+        expected = f.read()
+
+    with NamedTemporaryFile() as f:
+        maker.write(f.name)
+        with open(f.name, 'r') as t:
+            generated = t.read()
+
+    assert expected == generated

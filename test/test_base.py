@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 12:23 AM -0400
+# Last Change: Wed Sep 04, 2019 at 12:30 AM -0400
 
 import pytest
 import os
@@ -171,6 +171,22 @@ def test_BaseConfigParser_parse_ATuple(realistic_BaseConfigParser):
     assert realistic_BaseConfigParser.instructions[0].transient == [
         Variable('Double_t', 'TempStuff', 'D0_P+Y_PT'),
     ]
+
+
+def test_BaseConfigParser_parse_AnotherTuple(realistic_BaseConfigParser):
+    realistic_BaseConfigParser.parse()
+    assert realistic_BaseConfigParser.instructions[1].input_tree == \
+        'TupleB0/DecayTree'
+    assert realistic_BaseConfigParser.instructions[1].output_tree == \
+        'AnotherTuple'
+    assert realistic_BaseConfigParser.instructions[1].input_br == [
+        Variable('Double_t', 'Y_PT'),
+        Variable('Double_t', 'Y_PE'),
+    ]
+    assert realistic_BaseConfigParser.instructions[1].output_br == [
+        Variable('Double_t', 'Y_PT', 'Y_PT'),
+    ]
+    assert realistic_BaseConfigParser.system_headers == ['cmath', 'iostream']
 
 
 def test_BaseConfigParser_parse_headers_none(default_BaseConfigParser):

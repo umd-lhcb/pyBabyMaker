@@ -17,10 +17,10 @@ AnotherTuple:
     headers:
         system:
             - cmath
-            - iosteam
+            - iostream
     input_tree: TupleB0/DecayTree
     keep:
-        - Y_P.*
+        - Y_PT
     selection:
         - "Y_PT > 10000"
         - "&&"

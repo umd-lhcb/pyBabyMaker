@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 04:22 AM -0400
+# Last Change: Wed Sep 04, 2019 at 06:04 AM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -275,9 +275,6 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
     def __init__(self, instructions,
                  additional_system_headers=None, additional_user_headers=None):
         self.instructions = instructions
-        self.preamble = []
-        self.main = []
-
         self.system_headers = ['TFile.h', 'TTree.h', 'TTreeReader.h',
                                'TBranch.h']
         self.user_headers = []
@@ -320,6 +317,7 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
         pass
 
     # Helpers ##################################################################
+
     @staticmethod
     def deference_variables(expr, vars_to_deref):
         for var in vars_to_deref:
@@ -399,7 +397,7 @@ int main(int, char** argv) {{
 
 class BaseMaker(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def parse_config(self, filename):
+    def parse_config(self, config_filename):
         """
         Parse configuration file for the writer.
         """

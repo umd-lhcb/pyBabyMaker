@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 27, 2019 at 05:12 PM -0400
+# Last Change: Wed Sep 04, 2019 at 05:15 AM -0400
 
 from argparse import ArgumentParser
 from pyBabyMaker.babymaker import BabyMaker
@@ -34,12 +34,6 @@ path to output C++ file.''')
                         help='''
 path to data ntuple file.''')
 
-    parser.add_argument('-H', '--headers',
-                        nargs='+',
-                        default=[],
-                        help='''
-additional headers to be included in generated C++.''')
-
     return parser.parse_args()
 
 
@@ -49,6 +43,5 @@ additional headers to be included in generated C++.''')
 
 if __name__ == '__main__':
     args = parse_input()
-    generator = BabyMaker(args.data, args.headers)
-    generator.parse_conf(args.input)
+    generator = BabyMaker(args.input, args.data)
     generator.write(args.output)

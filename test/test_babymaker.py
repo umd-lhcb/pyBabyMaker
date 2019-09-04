@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 05:00 AM -0400
+# Last Change: Wed Sep 04, 2019 at 05:40 AM -0400
 
 import pytest
 import os
@@ -70,14 +70,15 @@ void generator_tree_out(TFile *input_file, TFile *output_file) {
   TTreeReaderValue<float> Y_PT(reader, "Y_PT");
 
   float y_pt_out;
-output.Branch(y_pt, &y_pt_out);
+output.Branch("y_pt", &y_pt_out);
 
 
   while (reader.Next()) {
     float temp = 1;
 
     if (*Y_PT > 1) {
-  float y_pt = *Y_PT+temp
+  float y_pt = *Y_PT+temp;
+
   output->Fill();
 }
   }

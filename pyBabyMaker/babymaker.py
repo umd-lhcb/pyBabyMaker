@@ -2,21 +2,43 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 05:01 AM -0400
+# Last Change: Wed Sep 04, 2019 at 06:03 AM -0400
 
-# from pyBabyMaker.base import BaseCppGenerator, BaseConfigParser, BaseMaker
-from pyBabyMaker.base import BaseCppGenerator
+from pyBabyMaker.base import BaseCppGenerator, BaseConfigParser, BaseMaker
 
 
 class BabyCppGenerator(BaseCppGenerator):
     def gen(self):
-        pass
+        result = ''
+        result += self.gen_headers()
+        result += self.gen_preamble()
+        result += self.gen_body()
+        return result
 
     def gen_preamble(self):
-        pass
+        result = ''
+        for data_store in self.instructions:
+            result += self.gen_preamble_single_output_tree(data_store)
+        return result
 
     def gen_body(self):
-        pass
+        function_calls = ''.join(
+            ['generator_{}(input_file, output_file);\n'.format(
+                self.cpp_make_var(i.output_tree)
+            ) for i in self.instructions]
+        )
+        body = '''
+TFile *input_file = new TFile(argv[1], "read");
+TFile *output_file = new TFile(argv[2], "recreate");
+
+{}
+
+output_file->Close();
+
+delete input_file;
+delete output_file;
+'''.format(function_calls)
+        return self.cpp_main(body)
 
     def gen_preamble_single_output_tree(self, data_store):
         input_tree = self.cpp_TTreeReader(
@@ -29,24 +51,27 @@ class BabyCppGenerator(BaseCppGenerator):
         output_br = []
         for v in data_store.output_br:
             output_br.append('{} {}_out;\n'.format(v.type, v.name))
-            output_br.append('output.Branch({0}, &{0}_out);\n'.format(v.name))
+            output_br.append('output.Branch("{0}", &{0}_out);\n'.format(v.name))
         output_br = ''.join(output_br)
 
-        transient = ''.join(['{} {} = {};\n'.format(v.type, v.name, v.rvalue)
-                             for v in data_store.transient])
+        transient = ''.join(
+            ['{} {} = {};\n'.format(
+                v.type, v.name, self.deference_variables(v.rvalue,
+                                                         data_store.input_br))
+             for v in data_store.transient])
 
-        output_vars = '\n'.join(['{} {} = {}'.format(
-            v.type, v.name, self.deference_variables(
-                v.rvalue, data_store.input_br)) for v in data_store.output_br])
+        output_vars = ''.join(['{}_out = {};\n'.format(
+            v.name, self.deference_variables(v.rvalue, data_store.input_br))
+            for v in data_store.output_br])
 
         if not data_store.selection:
             loop = '''{output_vars}
-output->Fill();'''.format(output_vars=output_vars)
+output.Fill();'''.format(output_vars=output_vars)
         else:
             # We need to prepend a '*' to dereference the value input branches
             loop = '''if ({selection}) {{
   {output_vars}
-  output->Fill();
+  output.Fill();
 }}'''.format(output_vars=output_vars,
              selection=self.deference_variables(
                  data_store.selection, data_store.input_br),
@@ -72,3 +97,29 @@ void generator_{name}(TFile *input_file, TFile *output_file) {{
              transient=transient, loop=loop)
 
         return result
+
+
+class BabyMaker(BaseMaker):
+    def __init__(self, config_filename, ntuple_filename):
+        self.config_filename = config_filename
+        self.ntuple_filename = ntuple_filename
+
+    def gen(self):
+        parsed_config = self.read(self.config_filename)
+        dumped_ntuple = self.dump(self.ntuple_filename)
+        parser = self.parse_config(parsed_config, dumped_ntuple)
+        generator = BabyCppGenerator(parser.instructions,
+                                     parser.system_headers,
+                                     parser.user_headers)
+        return generator.gen()
+
+    def parse_config(self, parsed_config, dumped_ntuple):
+        parser = BaseConfigParser(parsed_config, dumped_ntuple)
+        parser.parse()
+        return parser
+
+    def write(self, filename):
+        content = self.gen()
+        with open(filename, 'w') as f:
+            f.write(content)
+        self.reformat(filename)

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 12:39 AM -0400
+# Last Change: Wed Sep 04, 2019 at 04:22 AM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -272,9 +272,6 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
     """
     Basic C++ code snippets for n-tuple processing.
     """
-    cpp_input_filename = 'input_file'
-    cpp_output_filename = 'output_file'
-
     def __init__(self, instructions,
                  additional_system_headers=None, additional_user_headers=None):
         self.instructions = instructions
@@ -291,9 +288,7 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
         if additional_user_headers is not None:
             self.user_headers += additional_user_headers
 
-    ###################
-    # Code generation #
-    ###################
+    # Code generation ##########################################################
 
     def gen_headers(self):
         """
@@ -306,6 +301,12 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
         return system_headers + '\n' + user_headers
 
     @abc.abstractmethod
+    def gen(self):
+        """
+        Generate the full C++ output code.
+        """
+
+    @abc.abstractmethod
     def gen_preamble(self):
         """
         Generate C++ definitions and functions before ``main``.
@@ -316,10 +317,16 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
         '''
         Generate C++ code inside ``main`` function.
         '''
+        pass
 
-    ################
-    # C++ snippets #
-    ################
+    # Helpers ##################################################################
+    @staticmethod
+    def deference_variables(expr, vars_to_deref):
+        for var in vars_to_deref:
+            expr = re.sub(var.name, '*{}'.format(var.name), expr)
+        return expr
+
+    # C++ snippets #############################################################
 
     @staticmethod
     def cpp_gen_date(time_format='%Y-%m-%d %H:%M:%S.%f'):
@@ -345,8 +352,11 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
         Make a legal C++ variable name. This is typically used to convert a
         ``TTree`` name to a C++ variable name.
         """
-        return prefix + separator + re.sub('/', separator, name) + separator + \
-            suffix
+        if prefix != '':
+            prefix += separator
+        if suffix != '':
+            suffix = separator + suffix
+        return prefix + re.sub('/', separator, name) + suffix
 
     @staticmethod
     def cpp_main(body):

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 12:30 AM -0400
+# Last Change: Wed Sep 04, 2019 at 03:40 AM -0400
 
 import pytest
 import os
@@ -19,6 +19,10 @@ from pyBabyMaker.base import BaseMaker
 
 from pyBabyMaker.io.NestedYAMLLoader import NestedYAMLLoader
 from pyBabyMaker.io.TupleDump import PyTupleDump
+
+PWD = os.path.dirname(os.path.realpath(__file__))
+SAMPLE_YAML = os.path.join(PWD, 'sample-ntuple_process.yml')
+SAMPLE_ROOT = os.path.join(PWD, 'sample.root')
 
 
 ##################
@@ -134,16 +138,21 @@ def test_CppCodeDataStore_append_transient(default_CppCodeDataStore):
 ###########
 
 @pytest.fixture
+def load_files():
+    with open(SAMPLE_YAML) as f:
+        parsed_config = yaml.load(f, NestedYAMLLoader)
+    dumped_ntuple = PyTupleDump(SAMPLE_ROOT).dump()
+    return (parsed_config, dumped_ntuple)
+
+
+@pytest.fixture
 def default_BaseConfigParser():
     return BaseConfigParser(None, None)
 
 
 @pytest.fixture
-def realistic_BaseConfigParser():
-    with open(SAMPLE_YAML) as f:
-        parsed_config = yaml.load(f, NestedYAMLLoader)
-    dumped_ntuple = PyTupleDump(SAMPLE_ROOT).dump()
-    return BaseConfigParser(parsed_config, dumped_ntuple)
+def realistic_BaseConfigParser(load_files):
+    return BaseConfigParser(*load_files)
 
 
 def test_BaseConfigParser_parse_ATuple(realistic_BaseConfigParser):
@@ -352,6 +361,9 @@ def test_BaseConfigParser_LOAD_not_exist(default_BaseConfigParser):
 #######################
 
 class SimpleCppGenerator(BaseCppGenerator):
+    def gen(self):
+        pass
+
     def gen_preamble(self):
         pass
 
@@ -362,7 +374,7 @@ class SimpleCppGenerator(BaseCppGenerator):
 @pytest.fixture
 def default_SimpleCppGenerator():
     return SimpleCppGenerator(
-        None,
+        list(),
         additional_system_headers=['iostream'],
         additional_user_headers=['include/dummy.h']
     )
@@ -464,11 +476,6 @@ class SimpleMaker(BaseMaker):
 
     def write(self, filename):
         pass
-
-
-PWD = os.path.dirname(os.path.realpath(__file__))
-SAMPLE_YAML = os.path.join(PWD, 'sample-ntuple_process.yml')
-SAMPLE_ROOT = os.path.join(PWD, 'sample.root')
 
 
 @pytest.fixture

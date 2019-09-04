@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 05:15 AM -0400
+# Last Change: Wed Sep 04, 2019 at 05:00 PM -0400
 
 from argparse import ArgumentParser
 from pyBabyMaker.babymaker import BabyMaker
@@ -34,6 +34,11 @@ path to output C++ file.''')
                         help='''
 path to data ntuple file.''')
 
+    parser.add_argument('--no-format',
+                        action='store_false',
+                        help='''
+disable C++ code reformatter.''')
+
     return parser.parse_args()
 
 
@@ -43,5 +48,5 @@ path to data ntuple file.''')
 
 if __name__ == '__main__':
     args = parse_input()
-    generator = BabyMaker(args.input, args.data)
+    generator = BabyMaker(args.input, args.data, args.no_format)
     generator.write(args.output)

@@ -2,7 +2,14 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 12:07 AM -0400
+# Last Change: Wed Sep 04, 2019 at 12:36 AM -0400
+"""
+This module provides limited functionality to extract variables from certain
+type of C++ expressions.
+
+Currently, supported C++ expressions includes arithmetic and boolean calculation
+and nested function calls.
+"""
 
 import re
 

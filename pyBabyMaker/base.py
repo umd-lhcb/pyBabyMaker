@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 12:20 AM -0400
+# Last Change: Wed Sep 04, 2019 at 12:34 AM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -148,6 +148,9 @@ class BaseConfigParser(object):
             self.instructions.append(data_store)
 
     def parse_headers(self, config):
+        """
+        Parse ``headers`` section.
+        """
         try:
             self.system_headers += config['headers']['system']
         except KeyError:
@@ -159,6 +162,9 @@ class BaseConfigParser(object):
             pass
 
     def parse_drop_keep_rename(self, config, dumped_tree, data_store):
+        """
+        Parse ``drop, keep, rename`` sections.
+        """
         branches_to_keep = []
         for br_in, datatype in dumped_tree.items():
             if 'drop' in config.keys() and self.match(
@@ -180,6 +186,9 @@ class BaseConfigParser(object):
                 data_store.append_output_br(Variable(datatype, br_in, br_in))
 
     def parse_calculation(self, config, dumped_tree, data_store):
+        """
+        Parse ``calculation`` section.
+        """
         if 'calculation' in config.keys():
             for name, code in config['calculation'].items():
                 datatype, rvalue = code.split(';')
@@ -198,12 +207,19 @@ class BaseConfigParser(object):
                     self.load_missing_variables(rvalue, dumped_tree, data_store)
 
     def parse_selection(self, config, dumped_tree, data_store):
+        """
+        Parse ``selection`` section.
+        """
         if 'selection' in config.keys():
             data_store.selection = ' '.join(config['selection'])
             self.load_missing_variables(data_store.selection, dumped_tree,
                                         data_store)
 
     def load_missing_variables(self, expr, dumped_tree, data_store):
+        """
+        Load missing variables required for calculation or comparison, provided
+        that the variables are available directly in the n-tuple.
+        """
         variables = find_all_vars(expr)
         for v in variables:
             if v not in data_store.loaded_variables:
@@ -222,6 +238,9 @@ class BaseConfigParser(object):
 
     @staticmethod
     def LOAD(name, dumped_tree, data_store):
+        """
+        Load variable ``name`` from n-tuple, if it's available.
+        """
         try:
             datatype = dumped_tree[name]
             data_store.append_input_br(

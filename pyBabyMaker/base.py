@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 02:11 PM -0400
+# Last Change: Wed Sep 04, 2019 at 10:40 PM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -184,7 +184,7 @@ class BaseConfigParser(object):
             if 'drop' in config.keys() and self.match(
                     config['drop'], br_in):
                 print('Dropping branch: {}'.format(br_in))
-            elif self.match(config['keep'], br_in):
+            elif 'keep' in config.keys() and self.match(config['keep'], br_in):
                 branches_to_keep.append((datatype, br_in))
             elif 'rename' in config.keys() and self.match(
                     config['rename'].keys(), br_in):

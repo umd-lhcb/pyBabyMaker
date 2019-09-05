@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 11:22 PM -0400
+# Last Change: Wed Sep 04, 2019 at 11:33 PM -0400
 
 import setuptools
 import subprocess
@@ -20,17 +20,14 @@ with open('README.md', 'r') as ld:
 
 
 def get_git_version():
-    try:
-        import os
+    import os
+    if 'TRAVIS_TAG' in os.environ:
         version = os.environ['TRAVIS_TAG']
-    except KeyError:
-        if 'TRAVIS' in os.environ:
-            version = '0.0.1a'
-        else:
-            import subprocess
-            git = subprocess.Popen(['git', 'describe', '--tags', '--abbrev=0'],
-                                   stdout=subprocess.PIPE)
-            version = git.stdout.read().decode('utf-8').strip('\n')
+    if version == '':
+        import subprocess
+        git = subprocess.Popen(['git', 'describe', '--tags', '--abbrev=0'],
+                               stdout=subprocess.PIPE)
+        version = git.stdout.read().decode('utf-8').strip('\n')
     return version
 
 
@@ -99,6 +96,7 @@ setup(
     url='https://github.com/yipengsun/pyBabyMaker',
     packages=setuptools.find_packages(),
     scripts=['bin/ntpdump', 'bin/babymaker'],
+    include_package_data=True,
     install_requires=[
         'pyyaml'
     ],

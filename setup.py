@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 04:13 PM -0400
+# Last Change: Wed Sep 04, 2019 at 11:06 PM -0400
 
 import setuptools
 import subprocess
@@ -9,7 +9,6 @@ import re
 
 from setuptools.command.test import test as TestCommand
 from distutils.core import setup, Extension
-from pyBabyMaker import version
 
 
 ###########
@@ -18,6 +17,18 @@ from pyBabyMaker import version
 
 with open('README.md', 'r') as ld:
     long_description = ld.read()
+
+
+def get_git_version():
+    try:
+        import os
+        version = os.environ['TRAVIS_TAG']
+    except KeyError:
+        import subprocess
+        git = subprocess.Popen(['git', 'describe', '--tags', '--abbrev=0'],
+                               stdout=subprocess.PIPE)
+        version = git.stdout.read().decode('utf-8').strip('\n')
+    return version
 
 
 def get_pipe_output(cmd):
@@ -76,7 +87,7 @@ TupleDumpExtension = Extension(
 
 setup(
     name='pyBabyMaker',
-    version=version,
+    version=get_git_version(),
     author='Yipeng Sun',
     author_email='syp@umd.edu',
     description='Python babymaker (flat ntuple generation tool) library',

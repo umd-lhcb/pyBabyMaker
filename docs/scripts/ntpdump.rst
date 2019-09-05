@@ -8,4 +8,4 @@ Usage
 
 .. code-block:: console
 
-   $ ntpdump <ntuple_file> <output_yaml_file>
+   ntpdump <ntuple_file> <output_yaml_file>

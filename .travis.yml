@@ -13,6 +13,8 @@ install:
     - pip install codecov
 
 script:
+    - export PYBABYMAKER_VERSION=$(git describe --tags --abbrev=0)
+    - echo "version = ${PYBABYMAKER_VERSION}" >> ./pyBabyMaker/__init__.py
     - make test
 
 after_success:

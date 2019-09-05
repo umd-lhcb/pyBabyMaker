@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 11:33 PM -0400
+# Last Change: Wed Sep 04, 2019 at 11:49 PM -0400
 
 import setuptools
 import subprocess
@@ -20,10 +20,9 @@ with open('README.md', 'r') as ld:
 
 
 def get_git_version():
-    import os
-    if 'TRAVIS_TAG' in os.environ:
-        version = os.environ['TRAVIS_TAG']
-    if version == '':
+    try:
+        from pyBabyMaker import version
+    except ImportError:
         import subprocess
         git = subprocess.Popen(['git', 'describe', '--tags', '--abbrev=0'],
                                stdout=subprocess.PIPE)

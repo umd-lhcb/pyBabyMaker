@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 11:14 PM -0400
+# Last Change: Wed Sep 04, 2019 at 11:22 PM -0400
 
 import setuptools
 import subprocess
@@ -24,12 +24,13 @@ def get_git_version():
         import os
         version = os.environ['TRAVIS_TAG']
     except KeyError:
-        import subprocess
-        git = subprocess.Popen(['git', 'describe', '--tags', '--abbrev=0'],
-                               stdout=subprocess.PIPE)
-        version = git.stdout.read().decode('utf-8').strip('\n')
-        if version == '':
+        if 'TRAVIS' in os.environ:
             version = '0.0.1a'
+        else:
+            import subprocess
+            git = subprocess.Popen(['git', 'describe', '--tags', '--abbrev=0'],
+                                   stdout=subprocess.PIPE)
+            version = git.stdout.read().decode('utf-8').strip('\n')
     return version
 
 

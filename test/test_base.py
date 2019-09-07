@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 05:48 PM -0400
+# Last Change: Sat Sep 07, 2019 at 01:09 PM -0400
 
 import pytest
 import os
@@ -321,16 +321,24 @@ def test_BaseConfigParser_parse_selection(default_BaseConfigParser):
 
 
 def test_BaseConfigParser_match_True(default_BaseConfigParser):
-    assert default_BaseConfigParser.match(['quick', 'brown', 'fox'], r'fox')
+    assert default_BaseConfigParser.match(['quick', 'brown', 'fox'], 'fox')
 
 
 def test_BaseConfigParser_match_False(default_BaseConfigParser):
-    assert not default_BaseConfigParser.match(['quick', 'brown', 'fox'], r'Fox')
+    assert not default_BaseConfigParser.match(['quick', 'brown', 'fox'], 'Fox')
 
 
 def test_BaseConfigParser_match_True_inverse(default_BaseConfigParser):
-    assert not default_BaseConfigParser.match(['quick', 'brown', 'fox'], r'fox',
+    assert not default_BaseConfigParser.match(['quick', 'brown', 'fox'], 'fox',
                                               False)
+
+
+def test_BaseConfigParser_match_False_partial_match(default_BaseConfigParser):
+    assert not default_BaseConfigParser.match(['quick', 'brown', 'fox2'], 'fox')
+
+
+def test_BaseConfigParser_match_partial_match(default_BaseConfigParser):
+    assert default_BaseConfigParser.match(['quick', 'brown', 'fox'], 'fox2')
 
 
 def test_BaseConfigParser_LOAD_exist(default_BaseConfigParser):

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 10:40 PM -0400
+# Last Change: Sat Sep 07, 2019 at 01:11 PM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -181,13 +181,11 @@ class BaseConfigParser(object):
         """
         branches_to_keep = []
         for br_in, datatype in dumped_tree.items():
-            if 'drop' in config.keys() and self.match(
-                    config['drop'], br_in):
+            if 'drop' in config.keys() and self.match(config['drop'], br_in):
                 print('Dropping branch: {}'.format(br_in))
             elif 'keep' in config.keys() and self.match(config['keep'], br_in):
                 branches_to_keep.append((datatype, br_in))
-            elif 'rename' in config.keys() and self.match(
-                    config['rename'].keys(), br_in):
+            elif 'rename' in config.keys() and br_in in config['rename']:
                 branches_to_keep.append((datatype, br_in))
 
         for datatype, br_in in branches_to_keep:
@@ -246,7 +244,7 @@ class BaseConfigParser(object):
         in the ``patterns``. If there's a match, return ``return_value``.
         """
         for p in patterns:
-            if bool(re.search(p, string)):
+            if bool(re.search(r'{}'.format(p), string)):
                 return return_value
         return not return_value
 

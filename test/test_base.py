@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Sep 07, 2019 at 01:09 PM -0400
+# Last Change: Sat Sep 07, 2019 at 11:43 PM -0400
 
 import pytest
 import os
@@ -421,6 +421,24 @@ def test_SimpleCppGenerator_gen_headers_no_user():
 #include <TBranch.h>
 
 '''
+
+
+# Helpers ######################################################################
+
+def test_SimpleCppGenerator_dereference_variables_simple(
+        default_SimpleCppGenerator):
+    assert default_SimpleCppGenerator.dereference_variables(
+        'a > b_1 && b_1 < c', [Variable('int', 'a'), Variable('int', 'b_1'),
+                               Variable('int', 'c')]
+    )
+
+
+def test_SimpleCppGenerator_dereference_variables_duplicate(
+        default_SimpleCppGenerator):
+    assert default_SimpleCppGenerator.dereference_variables(
+        'a > b_1 && b_1 < c', [Variable('int', 'a'), Variable('int', 'b_1'),
+                               Variable('int', 'c'), Variable('int', 'b_1')]
+    )
 
 
 # C++ snippets #################################################################

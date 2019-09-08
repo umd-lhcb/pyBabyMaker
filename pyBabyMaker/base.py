@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Sep 07, 2019 at 11:39 PM -0400
+# Last Change: Sat Sep 07, 2019 at 11:55 PM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -331,14 +331,12 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
 
         The ``Y_PT`` inside the ``while`` loop needs to be dereferenced.
         """
-        variables = find_all_vars(expr)
-        ref_var_dict = {v.name: v for v in UniqueList(vars_to_deref)}
+        variables = UniqueList(find_all_vars(expr))
+        ref_variables = [v.name for v in vars_to_deref]
 
-        for var in variables:
-            try:
-                expr = re.sub(var, '(*{})'.format(ref_var_dict[var].name), expr)
-            except KeyError:
-                pass
+        for v in variables:
+            if v in ref_variables:
+                expr = re.sub(v, '(*{})'.format(v), expr)
 
         return expr
 

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Sep 07, 2019 at 11:43 PM -0400
+# Last Change: Sat Sep 07, 2019 at 11:47 PM -0400
 
 import pytest
 import os
@@ -430,7 +430,7 @@ def test_SimpleCppGenerator_dereference_variables_simple(
     assert default_SimpleCppGenerator.dereference_variables(
         'a > b_1 && b_1 < c', [Variable('int', 'a'), Variable('int', 'b_1'),
                                Variable('int', 'c')]
-    )
+    ) == '(*a) > (*b_1) && (*b_1) < (*c)'
 
 
 def test_SimpleCppGenerator_dereference_variables_duplicate(
@@ -438,7 +438,7 @@ def test_SimpleCppGenerator_dereference_variables_duplicate(
     assert default_SimpleCppGenerator.dereference_variables(
         'a > b_1 && b_1 < c', [Variable('int', 'a'), Variable('int', 'b_1'),
                                Variable('int', 'c'), Variable('int', 'b_1')]
-    )
+    ) == '(*a) > (*b_1) && (*b_1) < (*c)'
 
 
 # C++ snippets #################################################################

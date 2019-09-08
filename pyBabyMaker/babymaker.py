@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 02:16 PM -0400
+# Last Change: Sat Sep 07, 2019 at 11:38 PM -0400
 
 from pyBabyMaker.base import BaseCppGenerator, BaseConfigParser, BaseMaker
 
@@ -60,12 +60,12 @@ delete output_file;
 
         transient = ''.join(
             ['{} {} = {};\n'.format(
-                v.type, v.name, self.deference_variables(v.rvalue,
-                                                         data_store.input_br))
+                v.type, v.name, self.dereference_variables(v.rvalue,
+                                                           data_store.input_br))
              for v in data_store.transient])
 
         output_vars = ''.join(['{}_out = {};\n'.format(
-            v.name, self.deference_variables(v.rvalue, data_store.input_br))
+            v.name, self.dereference_variables(v.rvalue, data_store.input_br))
             for v in data_store.output_br])
 
         if not data_store.selection:
@@ -77,7 +77,7 @@ output.Fill();'''.format(output_vars=output_vars)
   {output_vars}
   output.Fill();
 }}'''.format(output_vars=output_vars,
-             selection=self.deference_variables(
+             selection=self.dereference_variables(
                  data_store.selection, data_store.input_br),
              )
 

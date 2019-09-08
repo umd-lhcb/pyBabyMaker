@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Sep 07, 2019 at 01:11 PM -0400
+# Last Change: Sat Sep 07, 2019 at 11:38 PM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -316,7 +316,7 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
     # Helpers ##################################################################
 
     @staticmethod
-    def deference_variables(expr, vars_to_deref):
+    def dereference_variables(expr, vars_to_deref):
         """
         Dereference variables loaded from n-tuple directly. For example:
 

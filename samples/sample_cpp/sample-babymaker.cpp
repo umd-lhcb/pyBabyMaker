@@ -50,6 +50,7 @@ RandStuff_out = TempStuff;
 
   output_file->Write();
 }
+
 void generator_AnotherTuple(TFile *input_file, TFile *output_file) {
   TTreeReader reader("TupleB0/DecayTree", input_file);
 
@@ -74,6 +75,7 @@ output.Branch("Y_PT", &Y_PT_out);
 
   output_file->Write();
 }
+
 void generator_YetAnotherTuple(TFile *input_file, TFile *output_file) {
   TTreeReader reader("TupleB0WSPi/DecayTree", input_file);
 
@@ -411,6 +413,7 @@ output.Fill();
 
   output_file->Write();
 }
+
 int main(int, char** argv) {
   
 TFile *input_file = new TFile(argv[1], "read");

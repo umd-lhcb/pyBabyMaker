@@ -2,14 +2,16 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Sep 07, 2019 at 11:38 PM -0400
+# Last Change: Sun Sep 08, 2019 at 12:31 AM -0400
 
 from pyBabyMaker.base import BaseCppGenerator, BaseConfigParser, BaseMaker
 
 
 class BabyCppGenerator(BaseCppGenerator):
-    def gen(self):
+    def gen(self, add_timestamp=True):
         result = ''
+        if add_timestamp:
+            result += self.cpp_gen_date()
         result += self.gen_headers()
         result += self.gen_preamble()
         result += self.gen_body()
@@ -95,10 +97,11 @@ void generator_{name}(TFile *input_file, TFile *output_file) {{
   }}
 
   output_file->Write();
-}}'''.format(name=self.cpp_make_var(data_store.output_tree),
-             input_tree=input_tree, output_tree=output_tree,
-             input_br=input_br, output_br=output_br,
-             transient=transient, loop=loop)
+}}
+'''.format(name=self.cpp_make_var(data_store.output_tree),
+           input_tree=input_tree, output_tree=output_tree,
+           input_br=input_br, output_br=output_br,
+           transient=transient, loop=loop)
 
         return result
 
@@ -115,22 +118,22 @@ class BabyMaker(BaseMaker):
         self.ntuple_filename = ntuple_filename
         self.use_reformater = use_reformater
 
-    def gen(self):
+    def gen(self, **kwargs):
         parsed_config = self.read(self.config_filename)
         dumped_ntuple = self.dump(self.ntuple_filename)
         parser = self.parse_config(parsed_config, dumped_ntuple)
         generator = BabyCppGenerator(parser.instructions,
                                      parser.system_headers,
                                      parser.user_headers)
-        return generator.gen()
+        return generator.gen(**kwargs)
 
     def parse_config(self, parsed_config, dumped_ntuple):
         parser = BaseConfigParser(parsed_config, dumped_ntuple)
         parser.parse()
         return parser
 
-    def write(self, filename):
-        content = self.gen()
+    def write(self, filename, **kwargs):
+        content = self.gen(**kwargs)
         with open(filename, 'w') as f:
             f.write(content)
         if self.use_reformater:

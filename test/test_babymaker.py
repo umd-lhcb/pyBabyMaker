@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 06:11 PM -0400
+# Last Change: Sun Sep 08, 2019 at 12:31 AM -0400
 
 import pytest
 import os
@@ -67,7 +67,8 @@ output.Branch("y_pt", &y_pt_out);
   }
 
   output_file->Write();
-}'''
+}
+'''
 
 
 def test_BabyMaker():
@@ -77,7 +78,7 @@ def test_BabyMaker():
         expected = f.read()
 
     with NamedTemporaryFile() as f:
-        maker.write(f.name)
+        maker.write(f.name, add_timestamp=False)
         with open(f.name, 'r') as t:
             generated = t.read()
 

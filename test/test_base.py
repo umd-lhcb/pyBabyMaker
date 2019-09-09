@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Sep 07, 2019 at 11:47 PM -0400
+# Last Change: Mon Sep 09, 2019 at 12:09 AM -0400
 
 import pytest
 import os
@@ -501,7 +501,7 @@ class SimpleMaker(BaseMaker):
     def parse_config(self, filename):
         pass
 
-    def write(self, filename):
+    def gen(self, filename):
         pass
 
 

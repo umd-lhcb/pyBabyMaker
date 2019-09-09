@@ -2,16 +2,15 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Sep 08, 2019 at 12:31 AM -0400
+# Last Change: Mon Sep 09, 2019 at 12:10 AM -0400
 
 from pyBabyMaker.base import BaseCppGenerator, BaseConfigParser, BaseMaker
 
 
 class BabyCppGenerator(BaseCppGenerator):
-    def gen(self, add_timestamp=True):
+    def gen(self):
         result = ''
-        if add_timestamp:
-            result += self.cpp_gen_date()
+        result += self.gen_timestamp()
         result += self.gen_headers()
         result += self.gen_preamble()
         result += self.gen_body()
@@ -118,23 +117,22 @@ class BabyMaker(BaseMaker):
         self.ntuple_filename = ntuple_filename
         self.use_reformater = use_reformater
 
-    def gen(self, **kwargs):
+    def gen(self, filename, **kwargs):
         parsed_config = self.read(self.config_filename)
         dumped_ntuple = self.dump(self.ntuple_filename)
         parser = self.parse_config(parsed_config, dumped_ntuple)
         generator = BabyCppGenerator(parser.instructions,
                                      parser.system_headers,
-                                     parser.user_headers)
-        return generator.gen(**kwargs)
+                                     parser.user_headers,
+                                     **kwargs)
+        content = generator.gen()
+
+        with open(filename, 'w') as f:
+            f.write(content)
+        if self.use_reformater:
+            self.reformat(filename)
 
     def parse_config(self, parsed_config, dumped_ntuple):
         parser = BaseConfigParser(parsed_config, dumped_ntuple)
         parser.parse()
         return parser
-
-    def write(self, filename, **kwargs):
-        content = self.gen(**kwargs)
-        with open(filename, 'w') as f:
-            f.write(content)
-        if self.use_reformater:
-            self.reformat(filename)

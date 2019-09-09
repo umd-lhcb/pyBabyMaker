@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Sep 07, 2019 at 11:55 PM -0400
+# Last Change: Mon Sep 09, 2019 at 12:09 AM -0400
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -271,8 +271,10 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
     Basic C++ code snippets for n-tuple processing.
     """
     def __init__(self, instructions,
-                 additional_system_headers=None, additional_user_headers=None):
+                 additional_system_headers=None, additional_user_headers=None,
+                 add_timestamp=True):
         self.instructions = instructions
+        self.add_timestamp = add_timestamp
         self.system_headers = ['TFile.h', 'TTree.h', 'TTreeReader.h',
                                'TBranch.h']
         self.user_headers = []
@@ -284,6 +286,15 @@ class BaseCppGenerator(metaclass=abc.ABCMeta):
             self.user_headers += additional_user_headers
 
     # Code generation ##########################################################
+
+    def gen_timestamp(self):
+        """
+        Generate a timestamp.
+        """
+        if self.add_timestamp:
+            return self.cpp_gen_date()
+        else:
+            return ''
 
     def gen_headers(self):
         """
@@ -419,9 +430,9 @@ class BaseMaker(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def write(self, filename):
+    def gen(self, filename):
         """
-        Write generated C++ file.
+        Generate C++ code and write it to file.
         """
 
     @staticmethod

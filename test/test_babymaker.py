@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Sep 08, 2019 at 12:31 AM -0400
+# Last Change: Mon Sep 09, 2019 at 12:08 AM -0400
 
 import pytest
 import os
@@ -78,7 +78,7 @@ def test_BabyMaker():
         expected = f.read()
 
     with NamedTemporaryFile() as f:
-        maker.write(f.name, add_timestamp=False)
+        maker.gen(f.name, add_timestamp=False)
         with open(f.name, 'r') as t:
             generated = t.read()
 

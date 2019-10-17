@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 04, 2019 at 11:55 PM -0400
+# Last Change: Thu Oct 17, 2019 at 02:35 AM -0400
 
 import setuptools
 import subprocess
@@ -83,7 +83,7 @@ setup(
     description='Python babymaker (flat ntuple generation tool) library',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/yipengsun/pyBabyMaker',
+    url='https://github.com/umd-lhcb/pyBabyMaker',
     packages=setuptools.find_packages(),
     scripts=['bin/ntpdump', 'bin/babymaker'],
     include_package_data=True,

@@ -1,6 +1,6 @@
 .python-version
 .lvimrc
-.ycm_extra_conf.py
+.ccls
 .coverage
 .eggs
 .pytest_cache

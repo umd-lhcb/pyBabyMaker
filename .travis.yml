@@ -13,8 +13,8 @@ install:
     - pip install codecov
 
 script:
-    - export PYBABYMAKER_VERSION=$(git describe --tags --abbrev=0)
-    - sed -i "s/0.0.1/${VERSION}/" ./pyTuplingUtils/__init__.py
+    - export VERSION=$(git describe --tags --abbrev=0)
+    - sed -i "s/0.0.1/${VERSION}/" ./pyBabyMaker/__init__.py
     - make test
 
 after_success:

@@ -1,16 +1,16 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Oct 17, 2019 at 02:35 AM -0400
+# Last Change: Fri May 01, 2020 at 05:08 PM +0800
 
 import setuptools
 import subprocess
 import sys
 import re
+import codecs
+import os.path
 
 from setuptools.command.test import test as TestCommand
 from distutils.core import setup, Extension
-
-from pyBabyMaker import version
 
 
 ###########
@@ -26,6 +26,21 @@ def get_pipe_output(cmd):
     proc = subprocess.Popen(cmd_splitted, stdout=subprocess.PIPE)
     result = proc.stdout.read().decode('utf-8')
     return result.strip('\n')
+
+
+def read(rel_path):
+    here = os.path.abspath(os.path.dirname(__file__))
+    with codecs.open(os.path.join(here, rel_path), 'r') as fp:
+        return fp.read()
+
+
+def get_version(rel_path):
+    for line in read(rel_path).splitlines():
+        if line.startswith('__version__'):
+            delim = '"' if '"' in line else "'"
+            return line.split(delim)[1]
+    else:
+        raise RuntimeError("Unable to find version string.")
 
 
 class PyTest(TestCommand):
@@ -77,7 +92,7 @@ TupleDumpExtension = Extension(
 
 setup(
     name='pyBabyMaker',
-    version=version,
+    version=get_version('pyBabyMaker/__init__.py'),
     author='Yipeng Sun',
     author_email='syp@umd.edu',
     description='Python babymaker (flat ntuple generation tool) library',

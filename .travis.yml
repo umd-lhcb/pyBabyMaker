@@ -14,7 +14,7 @@ install:
 
 script:
     - export PYBABYMAKER_VERSION=$(git describe --tags --abbrev=0)
-    - echo 'version = "'"${PYBABYMAKER_VERSION}"'"' >> ./pyBabyMaker/__init__.py
+    - sed -i "s/0.0.1/${VERSION}/" ./pyTuplingUtils/__init__.py
     - make test
 
 after_success:

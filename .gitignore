@@ -3,6 +3,7 @@
 .ccls
 .coverage
 .eggs
+.envrc
 .pytest_cache
 __pycache__
 

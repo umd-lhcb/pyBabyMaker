@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 03, 2019 at 11:55 PM -0400
+# Last Change: Wed May 27, 2020 at 08:29 PM +0800
 
 from pyBabyMaker.parse import is_numeral, find_all_args, find_all_vars
 
@@ -44,5 +44,6 @@ def test_find_all_args_bool():
 def test_find_all_vars():
     assert find_all_vars(
         '!(FUNC1(arg1, arg2) && FUNC2(FUNC3(arg3, arg4, FUNC4(1, 2)) + arg6))||'
-        'FUNC6(arg7, arg8, arg9*FUNC7())'
-    ) == ['arg1', 'arg2', 'arg3', 'arg4', 'arg6', 'arg7', 'arg8', 'arg9']
+        'FUNC6(arg7, arg8, arg9*FUNC7(arg10+arg11))'
+    ) == ['arg1', 'arg2', 'arg3', 'arg4', 'arg6', 'arg7', 'arg8', 'arg9',
+          'arg10', 'arg11']

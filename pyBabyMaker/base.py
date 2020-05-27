@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed May 27, 2020 at 08:42 PM +0800
+# Last Change: Wed May 27, 2020 at 09:24 PM +0800
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -235,7 +235,10 @@ class BaseConfigParser(object):
         variables = find_all_vars(expr)
         for v in variables:
             if v not in data_store.loaded_variables:
-                self.LOAD(v, dumped_tree, data_store)
+                try:
+                    self.LOAD(v, dumped_tree, data_store)
+                except Exception:
+                    print('WARNING: {} is not a known branch name.'.format(v))
 
     @staticmethod
     def match(patterns, string, return_value=True):

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Sep 09, 2019 at 12:08 AM -0400
+# Last Change: Wed May 27, 2020 at 05:06 PM +0800
 
 import pytest
 import os
@@ -34,8 +34,8 @@ def test_default_BabyCppGenerator(default_BabyCppGenerator):
         output_file='output.root',
         input_tree='tree_in',
         output_tree='tree_out',
-        selection='Y_PT > 1',
-        input_br=[Variable('float', 'Y_PT')],
+        selection='Y_P > 1',
+        input_br=[Variable('float', 'Y_PT'), Variable('float', 'Y_P')],
         output_br=[Variable('float', 'y_pt', 'Y_PT+temp')],
         transient=[Variable('float', 'temp', '1')]
     )
@@ -51,6 +51,7 @@ void generator_tree_out(TFile *input_file, TFile *output_file) {
 
 
   TTreeReaderValue<float> Y_PT(reader, "Y_PT");
+TTreeReaderValue<float> Y_P(reader, "Y_P");
 
   float y_pt_out;
 output.Branch("y_pt", &y_pt_out);
@@ -59,7 +60,7 @@ output.Branch("y_pt", &y_pt_out);
   while (reader.Next()) {
     float temp = 1;
 
-    if ((*Y_PT) > 1) {
+    if ((*Y_P) > 1) {
   y_pt_out = (*Y_PT)+temp;
 
   output.Fill();

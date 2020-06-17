@@ -6,7 +6,7 @@ let
 in
 
 pkgs.mkShell {
-  name = "pip-env";
+  name = "pyBabyMaker";
   buildInputs = with pythonPackages; [
     # Compilers and other build dependencies
     pkgs.stdenv

@@ -10,3 +10,6 @@ ADDFLAGS	:=	-Iinclude
 
 $(BINPATH)/%: $(SRCPATH)/%.cpp
 	$(COMPILER) $(CXXFLAGS) $(ADDFLAGS) -o $@ $< $(LINKFLAGS)
+
+%: $(SRCPATH)/%.cpp
+	$(COMPILER) $(CXXFLAGS) $(ADDFLAGS) -o $(BINPATH)/$@ $< $(LINKFLAGS)

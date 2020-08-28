@@ -10,6 +10,7 @@ pkgs.mkShell {
   buildInputs = with pythonPackages; [
     # Compilers and other build dependencies
     pkgs.stdenv
+    pkgs.root
 
     # Travis CI util
     travis

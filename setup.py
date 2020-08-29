@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Aug 30, 2020 at 03:22 AM +0800
+# Last Change: Sun Aug 30, 2020 at 03:54 AM +0800
 
 import setuptools
 import subprocess
@@ -103,7 +103,7 @@ setup(
     scripts=['bin/ntpdump', 'bin/babymaker'],
     include_package_data=True,
     install_requires=[
-        'pyyaml'
+        'pyyaml',
         'lark-parser'
     ],
     classifiers=[

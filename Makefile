@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Aug 30, 2020 at 12:56 AM +0800
+# Last Change: Sun Aug 30, 2020 at 01:23 AM +0800
 
 include ./samples/sample.mk
 
@@ -34,6 +34,8 @@ test: unittest integrationtest
 ##############
 
 unittest: install
+	@pip list
+	@tree /home/travis/virtualenv/python3.8.1/lib/site-packages
 	@coverage run -m pytest ./test
 
 unittest-local: install

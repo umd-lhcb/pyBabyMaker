@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Aug 29, 2020 at 05:42 PM +0800
+# Last Change: Sat Aug 29, 2020 at 05:45 PM +0800
 
 from pyBabyMaker.engine.identifiers import full_line_id, inline_id
 
@@ -21,6 +21,8 @@ def test_full_line_id_match():
 
 def test_inline_id_no_match():
     assert not inline_id.search('  /* random stuff //')
+    assert not inline_id.search('  /* random stuff */')
+    assert not inline_id.search('  /* {%} random stuff */')
 
 
 def test_inline_id_match():

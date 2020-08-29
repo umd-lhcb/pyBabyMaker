@@ -2,9 +2,19 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Aug 29, 2020 at 05:45 PM +0800
+# Last Change: Sat Aug 29, 2020 at 05:54 PM +0800
+
+import pytest
 
 from pyBabyMaker.engine.identifiers import full_line_id, inline_id
+from pyBabyMaker.engine.identifiers import Identifier
+
+
+def test_Identifier_misdef():
+    with pytest.raises(AssertionError) as execinfo:
+        Identifier('wrong', 2, [False])
+
+    assert "Mismatch" in str(execinfo.value)
 
 
 def test_full_line_id_no_match():

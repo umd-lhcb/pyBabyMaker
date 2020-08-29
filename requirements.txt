@@ -1,3 +1,4 @@
 cython
 pyyaml
 pytest
+lark-parser

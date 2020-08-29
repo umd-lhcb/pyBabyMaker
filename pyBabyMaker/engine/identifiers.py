@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Aug 30, 2020 at 03:32 AM +0800
+# Last Change: Sun Aug 30, 2020 at 03:43 AM +0800
 """
 This module defines various identifiers to extract macros from C++ files.
 """
@@ -23,10 +23,10 @@ class Identifier(object):
         Initialize identifier.
 
         :param str pattern: pattern to be compiled into a ``re`` object.
-        :param int: Specify number of groups in the matching regex
-        :param list: A list of boolean, indicating if group(``idx+1``) should
-                     be stripped. ``idx`` is the index of the boolean in this
-                     list.
+        :param int group: Specify number of groups in the matching regexp.
+        :param list strip_policy:
+            A list of boolean, indicating if group(``idx+1``) should be
+            stripped. ``idx`` is the index of the boolean in this list.
         """
         self.regex = re.compile(pattern)
         self.groups = groups

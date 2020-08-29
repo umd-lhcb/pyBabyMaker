@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Aug 30, 2020 at 05:06 AM +0800
+# Last Change: Sun Aug 30, 2020 at 05:26 AM +0800
 """
 This module provide a parser for template macros extracted from C++ files.
 """
@@ -26,6 +26,7 @@ template_macro_grammar = '''
         | "-"atom    -> neg
         | BOOL       -> bool
         | NAME       -> var
+        | STRING     -> str
         | "(" atom_expr ")"
 
     arguments: (atom_expr ",")* (atom_expr [","])
@@ -33,9 +34,11 @@ template_macro_grammar = '''
     %import common.SIGNED_NUMBER -> NUMBER
     %import common.CNAME -> NAME
     %import common.WS_INLINE
+    %import common.ESCAPED_STRING -> _STRING
 
     %ignore WS_INLINE
 
+    STRING: _STRING "i"?
     BOOL.2: "True" | "False" | "true" | "false"  // these have higher priority
 '''
 

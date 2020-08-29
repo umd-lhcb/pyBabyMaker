@@ -1,12 +1,12 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Aug 30, 2020 at 01:43 AM +0800
+# Last Change: Sun Aug 30, 2020 at 02:46 AM +0800
 
 include ./samples/sample.mk
 
 .PHONY: build sdist clean doc \
 	install install-egg gen \
-	test unittest unittest-local integrationtest
+	test unittest integrationtest
 
 build:
 	@python ./compile.py build_ext --inplace
@@ -30,16 +30,13 @@ clean:
 doc:
 	@sphinx-build -b html docs build
 
-test: unittest integrationtest
+test: unittest
 
 ##############
 # Unit tests #
 ##############
 
-unittest: install-egg
-	@coverage run -m pytest ./test
-
-unittest-local: install
+unittest: install
 	@pytest ./test
 
 #####################

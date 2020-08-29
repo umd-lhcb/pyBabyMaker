@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Aug 29, 2020 at 05:48 PM +0800
+# Last Change: Sat Aug 29, 2020 at 05:52 PM +0800
 
 import re
 
@@ -13,11 +13,8 @@ class Identifier(object):
         self.groups = groups
         self.strip_policy = [False] + strip_policy
 
-        try:
-            assert len(self.strip_policy) == self.groups+1
-        except AssertionError:
-            raise AssertionError(
-                'Mismatch: number of groups and number of strip policy!')
+        assert len(self.strip_policy) == self.groups+1, \
+            'Mismatch: number of groups and number of strip policy!'
 
         self.macro_idx = None
         for i in range(len(self.strip_policy)):

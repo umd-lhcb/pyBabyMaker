@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Aug 29, 2020 at 05:05 PM +0800
+# Last Change: Sat Aug 29, 2020 at 05:11 PM +0800
 
 import re
 
@@ -30,4 +30,5 @@ class Identifier(object):
 
 
 full_line_id = Identifier(r'^(\s*)//\s*\{%\s*(.*)%\}\s*$', 2, [False, True])
-inline_id = Identifier(r'(.*)/\*\s*\{%\s*(.*)%\}(.*)', 3, [False, True, False])
+inline_id = Identifier(r'^(.*)/\*\s*\{%\s*(.*)%\}\s*\*/(.*)$', 3,
+                       [False, True, False])

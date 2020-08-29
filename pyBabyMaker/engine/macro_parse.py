@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Aug 30, 2020 at 04:48 AM +0800
+# Last Change: Sun Aug 30, 2020 at 04:50 AM +0800
 """
 This module provide a parser for template macros extracted from C++ files.
 """
@@ -11,7 +11,7 @@ from lark import Lark
 
 
 template_macro_grammar = '''
-    ?start: for_stmt
+    ?start: atom_expr
 
     for_stmt: "for" atom_expr "in" atom_expr
 

@@ -1,10 +1,12 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Aug 30, 2020 at 12:32 AM +0800
+# Last Change: Sun Aug 30, 2020 at 12:48 AM +0800
 
 include ./samples/sample.mk
 
-.PHONY: build sdist clean doc test unittest integrationtest
+.PHONY: build sdist clean doc \
+	install \
+	test unittest unittest-local integrationtest
 
 build:
 	@python ./compile.py build_ext --inplace
@@ -13,7 +15,7 @@ sdist:
 	@python ./setup.py sdist
 
 install:
-	@python ./setup.py install
+	@pip install .
 
 clean:
 	@rm -rf ./build
@@ -31,8 +33,7 @@ test: unittest integrationtest
 # Unit tests #
 ##############
 
-unittest:
-	@pip install . --force-reinstall
+unittest: install
 	@coverage run -m pytest ./test
 
 unittest-local:

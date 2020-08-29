@@ -10,12 +10,14 @@ install:
     # Install package dependency
     - pip install -r ./requirements.txt
     # For code coverage
-    - pip install codecov
+    - pip install pytest-cov coverage
 
 script:
     - export VERSION=$(git describe --tags --abbrev=0)
     - sed -i "s/0.0.1/${VERSION}/" ./pyBabyMaker/__init__.py
-    - make test
+    - make integrationtest
+    - cd ./test
+    - pytest --cov pyBabyMaker .
 
 after_success:
     - codecov

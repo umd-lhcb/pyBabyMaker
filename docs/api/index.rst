@@ -10,3 +10,4 @@ API
    pyBabyMaker.parse
    pyBabyMaker.babymaker
    pyBabyMaker.io.NestedYAMLLoader
+   pyBabyMaker.engine.identifiers

@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Aug 30, 2020 at 01:27 AM +0800
+# Last Change: Sun Aug 30, 2020 at 01:36 AM +0800
 
 include ./samples/sample.mk
 
@@ -35,7 +35,7 @@ test: unittest integrationtest
 
 unittest: install
 	@pip list
-	@ls /home/travis/virtualenv/python3.8.1/lib/site-packages/pyBabyMaker/io
+	@ls /home/travis/virtualenv/python3.8.1/lib/python3.8/site-packages/pyBabyMaker/io
 	@coverage run -m pytest ./test
 
 unittest-local: install

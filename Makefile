@@ -1,11 +1,11 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Aug 30, 2020 at 01:36 AM +0800
+# Last Change: Sun Aug 30, 2020 at 01:43 AM +0800
 
 include ./samples/sample.mk
 
 .PHONY: build sdist clean doc \
-	install gen \
+	install install-egg gen \
 	test unittest unittest-local integrationtest
 
 build:
@@ -16,6 +16,9 @@ sdist:
 
 install:
 	@pip install . --force-reinstall
+
+install-egg:
+	@python ./setup.py install
 
 clean:
 	@rm -rf ./build
@@ -33,9 +36,7 @@ test: unittest integrationtest
 # Unit tests #
 ##############
 
-unittest: install
-	@pip list
-	@ls /home/travis/virtualenv/python3.8.1/lib/python3.8/site-packages/pyBabyMaker/io
+unittest: install-egg
 	@coverage run -m pytest ./test
 
 unittest-local: install

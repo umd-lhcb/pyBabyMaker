@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Aug 30, 2020 at 12:30 AM +0800
+# Last Change: Sun Aug 30, 2020 at 12:32 AM +0800
 
 include ./samples/sample.mk
 
@@ -32,7 +32,8 @@ test: unittest integrationtest
 ##############
 
 unittest:
-	@coverage run --source pyBabyMaker setup.py test
+	@pip install . --force-reinstall
+	@coverage run -m pytest ./test
 
 unittest-local:
 	@pip install . --force-reinstall

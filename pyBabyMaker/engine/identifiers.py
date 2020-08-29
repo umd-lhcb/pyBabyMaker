@@ -2,9 +2,10 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Aug 30, 2020 at 03:43 AM +0800
+# Last Change: Sun Aug 30, 2020 at 04:09 AM +0800
 """
-This module defines various identifiers to extract macros from C++ files.
+This module defines various identifiers to extract template macros from C++
+files.
 """
 
 import re

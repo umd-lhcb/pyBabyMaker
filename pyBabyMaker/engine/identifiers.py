@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Aug 29, 2020 at 05:11 PM +0800
+# Last Change: Sat Aug 29, 2020 at 05:41 PM +0800
 
 import re
 
@@ -12,6 +12,11 @@ class Identifier(object):
         self.regex = re.compile(pattern)
         self.groups = groups
         self.strip_policy = [False] + strip_policy
+
+        self.macro_idx = None
+        for i in range(len(self.strip_policy)):
+            if self.strip_policy[i]:
+                self.macro_idx = i
 
     def search(self, string):
         return self.strip_whitespaces(self.regex.search(string))

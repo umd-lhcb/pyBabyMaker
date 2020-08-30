@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 02:10 AM +0800
+# Last Change: Mon Aug 31, 2020 at 02:52 AM +0800
 
 import pytest
 
@@ -35,3 +35,47 @@ def test_endfor_invalid():
         template_macro_parser.parse('endfor x')
 
     assert 'Expected one of' in str(execinfo.value)
+
+
+def test_getattr():
+    assert template_macro_parser.parse('x.y').pretty() == \
+        "getattr\n" \
+        "  var\tx\n" \
+        "  y\n"
+
+
+def test_getitem_var():
+    assert template_macro_parser.parse('x[y]').pretty() == \
+        "getitem\n" \
+        "  var\tx\n" \
+        "  var\ty\n"
+
+
+def test_getitem_num():
+    assert template_macro_parser.parse('x[1]').pretty() == \
+        "getitem\n" \
+        "  var\tx\n" \
+        "  num\t1\n"
+
+
+def test_func_call():
+    assert template_macro_parser.parse('f: x, y').pretty() == \
+        "func_call\n" \
+        "  var\tf\n" \
+        "  arguments\n" \
+        "    var\tx\n" \
+        "    var\ty\n"
+
+
+def test_func_call_nested():
+    assert template_macro_parser.parse('f: (x: z, 1), y, 21').pretty() == \
+        "func_call\n" \
+        "  var\tf\n" \
+        "  arguments\n" \
+        "    func_call\n" \
+        "      var\tx\n" \
+        "      arguments\n" \
+        "        var\tz\n" \
+        "        num\t1\n" \
+        "    var\ty\n" \
+        "    num\t21\n"

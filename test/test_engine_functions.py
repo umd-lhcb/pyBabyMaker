@@ -2,9 +2,13 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 04:14 AM +0800
+# Last Change: Mon Aug 31, 2020 at 04:46 AM +0800
 
 from pyBabyMaker.engine.functions import macro_funcs
+
+
+def test_func_identity():
+    assert macro_funcs['identity'](1) == 1
 
 
 def test_func_join():

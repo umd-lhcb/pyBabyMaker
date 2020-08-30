@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Aug 30, 2020 at 04:09 AM +0800
+# Last Change: Mon Aug 31, 2020 at 02:56 AM +0800
 """
 This module defines various identifiers to extract template macros from C++
 files.
@@ -19,7 +19,7 @@ class Identifier(object):
     These wrappers will provide saner return value, and strip heading/trailing
     white spaces if configured.
     """
-    def __init__(self, pattern, groups, strip_policy):
+    def __init__(self, pattern, groups, strip_policy, indent_idx=None):
         """
         Initialize identifier.
 
@@ -40,6 +40,9 @@ class Identifier(object):
         for i in range(len(self.strip_policy)):
             if self.strip_policy[i]:
                 self.macro_idx = i
+
+        if indent_idx is not None:
+            self.indent_idx = indent_idx
 
     def search(self, string):
         """
@@ -67,6 +70,7 @@ class Identifier(object):
             return False
 
 
-full_line_id = Identifier(r'^(\s*)//\s*\{%\s*(.*)%\}\s*$', 2, [False, True])
+full_line_id = Identifier(r'^(\s*)//\s*\{%\s*(.*)%\}\s*$', 2, [False, True],
+                          indent_idx=1)
 inline_id = Identifier(r'^(.*)/\*\s*\{%\s*(.*)%\}\s*\*/(.*)$', 3,
                        [False, True, False])

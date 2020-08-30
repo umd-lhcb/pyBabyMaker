@@ -2,12 +2,12 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 02:52 AM +0800
+# Last Change: Mon Aug 31, 2020 at 04:14 AM +0800
 
 import pytest
 
 from lark.exceptions import UnexpectedToken
-from pyBabyMaker.engine.macro_parse import template_macro_parser
+from pyBabyMaker.engine.syntax import template_macro_parser
 
 
 def test_for_stmt_simple():

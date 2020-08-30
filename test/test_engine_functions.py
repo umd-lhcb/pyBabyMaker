@@ -2,9 +2,9 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 04:08 AM +0800
+# Last Change: Mon Aug 31, 2020 at 04:14 AM +0800
 
-from pyBabyMaker.engine.macro_funcs import macro_funcs
+from pyBabyMaker.engine.functions import macro_funcs
 
 
 def test_func_join():

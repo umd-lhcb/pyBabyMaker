@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 04:43 AM +0800
+# Last Change: Mon Aug 31, 2020 at 05:08 AM +0800
 """
 This module provide template macro evaluation.
 """
@@ -16,7 +16,7 @@ class DelayedEvaluator(object):
     stage.
 
     :param str func_name: function name. Must be defined in ``macro_funcs``.
-    :param tuple args: function arguments.
+    :param tuple/list args: function arguments.
     """
     def __init__(self, func_name, args):
         try:

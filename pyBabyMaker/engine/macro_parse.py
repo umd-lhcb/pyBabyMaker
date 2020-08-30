@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Aug 30, 2020 at 10:45 PM +0800
+# Last Change: Mon Aug 31, 2020 at 03:57 AM +0800
 """
 This module provide a parser for template macros extracted from C++ files.
 """

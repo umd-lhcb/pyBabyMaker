@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 04:57 PM +0800
+# Last Change: Mon Aug 31, 2020 at 05:19 PM +0800
 
 from pyBabyMaker.engine.eval import DelayedEvaluator
 from pyBabyMaker.engine.eval import TransForTemplateMacro
@@ -18,6 +18,11 @@ def test_DelayedEvaluator_nested():
     inner = DelayedEvaluator('join', (['a', 'b'], '.'))
     outer = DelayedEvaluator('identity', (inner, ))
     assert outer.eval() == 'a.b'
+
+
+def test_DelayedEvaluator_no_arg():
+    exe = DelayedEvaluator('one', [])
+    assert exe.eval() == 1
 
 
 def test_TransForTemplateMacro_int():

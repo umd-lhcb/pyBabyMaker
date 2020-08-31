@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 09:44 PM +0800
+# Last Change: Mon Aug 31, 2020 at 09:53 PM +0800
 
 from pyBabyMaker.engine.eval import DelayedEvaluator
 from pyBabyMaker.engine.eval import TransForTemplateMacro
@@ -125,3 +125,14 @@ def test_TransForTemplateMacro_for_stmt_nested():
 
     assert known_symb['idx'] == [7, 8, 9]
     assert known_symb['j'] == 9
+
+
+def test_TransForTemplateMacro_endfor_stmt():
+    expr = template_macro_parser.parse('endfor')
+    scope = [[1]]
+    transformer = TransForTemplateMacro(scope, {})
+
+    exe = transformer.transform(expr)
+    exe.eval()
+
+    assert scope == []

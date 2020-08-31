@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 09:30 PM +0800
+# Last Change: Mon Aug 31, 2020 at 09:57 PM +0800
 """
 This module provide template macro evaluation.
 """
@@ -140,4 +140,4 @@ class TransForTemplateMacro(Transformer):
 
     @v_args(inline=True)
     def endfor_stmt(self):
-        self.scope.pop()
+        return DelayedEvaluator('pop', (self.scope,))

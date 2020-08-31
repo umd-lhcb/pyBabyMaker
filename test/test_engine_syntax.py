@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 04:14 AM +0800
+# Last Change: Mon Aug 31, 2020 at 05:59 PM +0800
 
 import pytest
 
@@ -61,7 +61,7 @@ def test_getitem_num():
 def test_func_call():
     assert template_macro_parser.parse('f: x, y').pretty() == \
         "func_call\n" \
-        "  var\tf\n" \
+        "  f\n" \
         "  arguments\n" \
         "    var\tx\n" \
         "    var\ty\n"
@@ -70,10 +70,10 @@ def test_func_call():
 def test_func_call_nested():
     assert template_macro_parser.parse('f: (x: z, 1), y, 21').pretty() == \
         "func_call\n" \
-        "  var\tf\n" \
+        "  f\n" \
         "  arguments\n" \
         "    func_call\n" \
-        "      var\tx\n" \
+        "      x\n" \
         "      arguments\n" \
         "        var\tz\n" \
         "        num\t1\n" \

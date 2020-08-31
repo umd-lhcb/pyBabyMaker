@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 04:57 PM +0800
+# Last Change: Mon Aug 31, 2020 at 05:10 PM +0800
 """
 This module provide template macro evaluation.
 """
@@ -74,3 +74,14 @@ class TransForTemplateMacro(Transformer):
     @v_args(inline=True)
     def var(self, val):
         return self.known_symb[val]
+
+    #################
+    # Function call #
+    #################
+
+    @v_args(inline=True)
+    def func_call(self, func_name, arguments=None):
+        if arguments is not None:
+            return self.known_funcs[str(func_name)](*arguments.children)
+        else:
+            return self.known_funcs[str(func_name)]()

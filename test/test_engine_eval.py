@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 08:28 PM +0800
+# Last Change: Mon Aug 31, 2020 at 09:36 PM +0800
 
 from pyBabyMaker.engine.eval import DelayedEvaluator
 from pyBabyMaker.engine.eval import TransForTemplateMacro
@@ -96,3 +96,16 @@ def test_TransForTemplateMacro_getitem():
         [], {'data': [0, 1]})
     exe = transformer.transform(expr)
     assert exe.eval() == 1
+
+
+def test_TransForTemplateMacro_for_stmt():
+    expr = template_macro_parser.parse('for idx in data.value')
+    scope = []
+    known_symb = {'data': {'value': [1, 2, 3]}}
+
+    transformer = TransForTemplateMacro(scope, known_symb)
+    exe = transformer.transform(expr)
+    exe.eval()
+
+    assert scope == [[]]
+    assert known_symb['idx'] == 3

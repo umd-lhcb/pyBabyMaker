@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 08:26 PM +0800
+# Last Change: Mon Aug 31, 2020 at 09:30 PM +0800
 """
 This module provide template macro evaluation.
 """
@@ -37,6 +37,37 @@ class DelayedEvaluator(object):
         args_eval = [arg.eval() if hasattr(arg, 'eval') else arg
                      for arg in self.args]
         return self.func(*args_eval)
+
+
+class ForStmtEvaluator(object):
+    """
+    General container for storing info needed for executing macro at a later
+    stage.
+    """
+    def __init__(self, idx, iterable, scope, known_symb):
+        """
+        Initialize for-statement evaluator.
+
+        :param str idx: name of the loop variable.
+        :param DelayedEvaluator iterable: iterable in the for-loop.
+        """
+        self.eval_list = []
+        scope.append(self.eval_list)
+
+        self.idx = idx
+        self.iterable = iterable
+
+        self.known_symb = known_symb
+
+    def eval(self):
+        """
+        Evaluate for-loop and all evaluable in its scope.
+        """
+
+        for i in self.iterable.eval():
+            self.known_symb[self.idx] = i
+            for evaluator in self.eval_list:
+                evaluator.eval()
 
 
 class TransForTemplateMacro(Transformer):
@@ -98,3 +129,15 @@ class TransForTemplateMacro(Transformer):
     @v_args(inline=True)
     def getitem(self, val, key):
         return DelayedEvaluator('getitem', (val, key))
+
+    ##############
+    # Statements #
+    ##############
+
+    @v_args(inline=True)
+    def for_stmt(self, idx, iterable):
+        return ForStmtEvaluator(idx, iterable, self.scope, self.known_symb)
+
+    @v_args(inline=True)
+    def endfor_stmt(self):
+        self.scope.pop()

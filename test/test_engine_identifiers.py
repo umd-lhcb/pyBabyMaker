@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Aug 29, 2020 at 05:54 PM +0800
+# Last Change: Tue Sep 01, 2020 at 03:07 AM +0800
 
 import pytest
 
@@ -12,7 +12,7 @@ from pyBabyMaker.engine.identifiers import Identifier
 
 def test_Identifier_misdef():
     with pytest.raises(AssertionError) as execinfo:
-        Identifier('wrong', 2, [False])
+        Identifier('wrong', 'wrong', 2, [False])
 
     assert "Mismatch" in str(execinfo.value)
 

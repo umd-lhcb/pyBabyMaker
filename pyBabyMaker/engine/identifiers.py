@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 02:56 AM +0800
+# Last Change: Tue Sep 01, 2020 at 03:08 AM +0800
 """
 This module defines various identifiers to extract template macros from C++
 files.
@@ -19,11 +19,12 @@ class Identifier(object):
     These wrappers will provide saner return value, and strip heading/trailing
     white spaces if configured.
     """
-    def __init__(self, pattern, groups, strip_policy, indent_idx=None):
+    def __init__(self, pattern, name, groups, strip_policy):
         """
         Initialize identifier.
 
         :param str pattern: pattern to be compiled into a ``re`` object.
+        :param str name: name of the identifier.
         :param int group: Specify number of groups in the matching regexp.
         :param list strip_policy:
             A list of boolean, indicating if group(``idx+1``) should be
@@ -40,9 +41,6 @@ class Identifier(object):
         for i in range(len(self.strip_policy)):
             if self.strip_policy[i]:
                 self.macro_idx = i
-
-        if indent_idx is not None:
-            self.indent_idx = indent_idx
 
     def search(self, string):
         """
@@ -70,7 +68,7 @@ class Identifier(object):
             return False
 
 
-full_line_id = Identifier(r'^(\s*)//\s*\{%\s*(.*)%\}\s*$', 2, [False, True],
-                          indent_idx=1)
-inline_id = Identifier(r'^(.*)/\*\s*\{%\s*(.*)%\}\s*\*/(.*)$', 3,
-                       [False, True, False])
+full_line_id = Identifier(r'^(\s*)//\s*\{%\s*(.*)%\}\s*$', 'full_line',
+                          2, [False, True])
+inline_id = Identifier(r'^(.*)/\*\s*\{%\s*(.*)%\}\s*\*/(.*)$', 'inline',
+                       3, [False, True, False])

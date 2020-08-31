@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 04:25 AM +0800
+# Last Change: Tue Sep 01, 2020 at 04:32 AM +0800
 """
 This module glues all submodules in ``engine`` together to parse and evaluate
 template macros in a C++ file.
@@ -34,7 +34,7 @@ def helper_flatten(lst, result=None):
     :param list lst: list to be flattened.
     :param list result: (partially) flattened list.
     """
-    result = [] if not result else result
+    result = [] if result is None else result
 
     for i in lst:
         if type(i) == list:
@@ -94,4 +94,4 @@ def template_evaluator(parsed):
 
     :param list parsed: list of transformed evaluators.
     """
-    return [eva.eval() for eva in parsed]
+    return helper_flatten([eva.eval() for eva in parsed])

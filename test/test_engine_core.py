@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 04:21 AM +0800
+# Last Change: Tue Sep 01, 2020 at 04:30 AM +0800
 
 import pytest
 
@@ -16,6 +16,10 @@ def test_helper_flatten_trivial():
 
 def test_helper_flatten_complex():
     assert helper_flatten([1, [2, [3, 4, 5, [6, 7]]], 8]) == list(range(1, 9))
+
+
+def test_helper_flatten_corner_case1():
+    assert helper_flatten([[1, [2, 3, 4, [5, 6]]]]) == list(range(1, 7))
 
 
 def test_template_transformer_trivial_line():
@@ -45,7 +49,6 @@ def test_template_evaluator_inline_simple():
                                           '    if(1  )\n']
 
 
-@pytest.mark.skip(reason="no way of currently testing this")
 def test_template_evaluator_for_stmt_simple():
     file_content = [
         '// {% for i in directive.b %}\n',

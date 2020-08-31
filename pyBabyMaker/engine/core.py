@@ -2,14 +2,15 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 03:50 AM +0800
+# Last Change: Tue Sep 01, 2020 at 04:25 AM +0800
 """
 This module glues all submodules in ``engine`` together to parse and evaluate
 template macros in a C++ file.
 """
 
 from .identifiers import full_line_id, inline_id
-from .eval import DelayedEvaluator, TransForTemplateMacro
+from .eval import DelayedEvaluator
+from .eval import TransForTemplateMacro
 from .syntax import template_macro_parser
 
 
@@ -24,6 +25,24 @@ def helper_eval_args(match, pattern, evaluator):
     """
     return [match[i] if i != pattern.macro_idx else evaluator
             for i in range(1, pattern.groups+1)]
+
+
+def helper_flatten(lst, result=None):
+    """
+    Helper function to flatten a multi-depth list.
+
+    :param list lst: list to be flattened.
+    :param list result: (partially) flattened list.
+    """
+    result = [] if not result else result
+
+    for i in lst:
+        if type(i) == list:
+            helper_flatten(i, result)
+        else:
+            result.append(i)
+
+    return result
 
 
 def template_transformer(file_content, directive, do_check=True, eol='\n'):
@@ -48,9 +67,14 @@ def template_transformer(file_content, directive, do_check=True, eol='\n'):
         if match:
             macro = template_macro_parser.parse(match[pattern.macro_idx])
             eva = transformer.transform(macro, lineno=lineno)
-            scope[-1].append(DelayedEvaluator(
-                'format', ('{}'*pattern.groups+eol, *helper_eval_args(
-                    match, pattern, eva))))
+
+            if type(eva) == DelayedEvaluator:
+                scope[-1].append(DelayedEvaluator(
+                    'format', ('{}'*pattern.groups+eol, *helper_eval_args(
+                        match, pattern, eva))))
+
+            else:
+                scope[-2].append(eva)
 
         else:  # Line without any template macro
             scope[-1].append(DelayedEvaluator('identity', (line,)))
@@ -58,7 +82,7 @@ def template_transformer(file_content, directive, do_check=True, eol='\n'):
     if do_check:
         for stmt, counter in transformer.stmt_counters.items():
             if counter > 0:
-                raise ValueError('Mismatch: statment "{}" has a counter value of {}'.format(
+                raise ValueError('Mismatch: statment "{}" has a non-zero counter value of {}'.format(
                     stmt, counter))
 
     return parsed

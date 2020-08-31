@@ -2,11 +2,12 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 05:19 PM +0800
+# Last Change: Mon Aug 31, 2020 at 06:34 PM +0800
 
 from pyBabyMaker.engine.eval import DelayedEvaluator
 from pyBabyMaker.engine.eval import TransForTemplateMacro
 from pyBabyMaker.engine.syntax import template_macro_parser
+from collections import namedtuple
 
 
 def test_DelayedEvaluator_simple():
@@ -53,3 +54,33 @@ def test_TransForTemplateMacro_neg():
     expr = template_macro_parser.parse('-some_var')
     transformer = TransForTemplateMacro([], {'some_var': 1})
     assert transformer.transform(expr) == -1
+
+
+def test_TransForTemplateMacro_func_call():
+    expr = template_macro_parser.parse('join: (list: "a", "b"), ","')
+    transformer = TransForTemplateMacro([], {})
+    exe = transformer.transform(expr)
+    assert exe.eval() == 'a,b'
+
+
+def test_TransForTemplateMacro_getattr_normal():
+    container = namedtuple('container', 'value meta')
+    expr = template_macro_parser.parse('data.value')
+    transformer = TransForTemplateMacro(
+        [], {'data': container(1, 2)})
+    assert transformer.transform(expr) == 1
+
+
+def test_TransForTemplateMacro_getattr_dict():
+    expr = template_macro_parser.parse('data.value')
+    transformer = TransForTemplateMacro(
+        [], {'data': {'value': 1}})
+    assert transformer.transform(expr) == 1
+
+
+def test_TransForTemplateMacro_getattr_complex():
+    container = namedtuple('container', 'value meta')
+    expr = template_macro_parser.parse('data.value.stuff')
+    transformer = TransForTemplateMacro(
+        [], {'data': container({'stuff': 1}, 2)})
+    assert transformer.transform(expr) == 1

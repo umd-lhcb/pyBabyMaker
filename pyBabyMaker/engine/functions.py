@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 05:19 PM +0800
+# Last Change: Mon Aug 31, 2020 at 05:51 PM +0800
 """
 This module defines functions for template macro.
 """
@@ -23,4 +23,5 @@ macro_funcs = {
     'join': lambda lst, string: string.join(lst),
     'input': func_input,
     'one': lambda: 1,
+    'list': lambda *args: [i for i in args]
 }

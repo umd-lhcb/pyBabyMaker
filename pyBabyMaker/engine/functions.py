@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 05:51 PM +0800
+# Last Change: Mon Aug 31, 2020 at 08:25 PM +0800
 """
 This module defines functions for template macro.
 """
@@ -18,10 +18,21 @@ def func_input(path):
         return f.readlines()
 
 
+def func_getattr(val, attr):
+    try:
+        return getattr(val, str(attr))
+    except Exception:
+        return val[str(attr)]
+
+
 macro_funcs = {
     'identity': lambda x: x,
     'join': lambda lst, string: string.join(lst),
     'input': func_input,
     'one': lambda: 1,
-    'list': lambda *args: [i for i in args]
+    'list': lambda *args: [i for i in args],
+    'val': lambda val, attrs: attrs[val],
+    'neg': lambda val: -val,
+    'getattr': func_getattr,
+    'getitem': lambda val, key: val[key],
 }

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 07:10 PM +0800
+# Last Change: Mon Aug 31, 2020 at 08:28 PM +0800
 
 from pyBabyMaker.engine.eval import DelayedEvaluator
 from pyBabyMaker.engine.eval import TransForTemplateMacro
@@ -53,7 +53,8 @@ def test_TransForTemplateMacro_str():
 def test_TransForTemplateMacro_neg():
     expr = template_macro_parser.parse('-some_var')
     transformer = TransForTemplateMacro([], {'some_var': 1})
-    assert transformer.transform(expr) == -1
+    exe = transformer.transform(expr)
+    assert exe.eval() == -1
 
 
 def test_TransForTemplateMacro_func_call():
@@ -68,14 +69,16 @@ def test_TransForTemplateMacro_getattr_normal():
     expr = template_macro_parser.parse('data.value')
     transformer = TransForTemplateMacro(
         [], {'data': container(1, 2)})
-    assert transformer.transform(expr) == 1
+    exe = transformer.transform(expr)
+    assert exe.eval() == 1
 
 
 def test_TransForTemplateMacro_getattr_dict():
     expr = template_macro_parser.parse('data.value')
     transformer = TransForTemplateMacro(
         [], {'data': {'value': 1}})
-    assert transformer.transform(expr) == 1
+    exe = transformer.transform(expr)
+    assert exe.eval() == 1
 
 
 def test_TransForTemplateMacro_getattr_complex():
@@ -83,11 +86,13 @@ def test_TransForTemplateMacro_getattr_complex():
     expr = template_macro_parser.parse('data.value.stuff')
     transformer = TransForTemplateMacro(
         [], {'data': container({'stuff': 1}, 2)})
-    assert transformer.transform(expr) == 1
+    exe = transformer.transform(expr)
+    assert exe.eval() == 1
 
 
 def test_TransForTemplateMacro_getitem():
     expr = template_macro_parser.parse('data[1]')
     transformer = TransForTemplateMacro(
         [], {'data': [0, 1]})
-    assert transformer.transform(expr) == 1
+    exe = transformer.transform(expr)
+    assert exe.eval() == 1

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 07:08 PM +0800
+# Last Change: Mon Aug 31, 2020 at 08:26 PM +0800
 """
 This module provide template macro evaluation.
 """
@@ -63,16 +63,20 @@ class TransForTemplateMacro(Transformer):
         return True if val.lower() == 'true' else False
 
     @v_args(inline=True)
-    def neg(self, val):
-        return -val
-
-    @v_args(inline=True)
     def str(self, val):
         return val.replace('"', '')
 
+    #######################
+    # Delayed evaluations #
+    #######################
+
     @v_args(inline=True)
     def var(self, val):
-        return self.known_symb[val]
+        return DelayedEvaluator('val', (val, self.known_symb))
+
+    @v_args(inline=True)
+    def neg(self, val):
+        return DelayedEvaluator('neg', (val,))
 
     #################
     # Function call #
@@ -89,11 +93,8 @@ class TransForTemplateMacro(Transformer):
 
     @v_args(inline=True)
     def getattr(self, val, attr):
-        try:
-            return getattr(val, str(attr))
-        except Exception:
-            return val[str(attr)]
+        return DelayedEvaluator('getattr', (val, attr))
 
     @v_args(inline=True)
     def getitem(self, val, key):
-        return val[key]
+        return DelayedEvaluator('getitem', (val, key))

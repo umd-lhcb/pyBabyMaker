@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 05:42 AM +0800
+# Last Change: Mon Aug 31, 2020 at 04:57 PM +0800
 """
 This module provide template macro evaluation.
 """
@@ -44,6 +44,7 @@ class TransForTemplateMacro(Transformer):
     Transformer for template macro.
     """
     def __init__(self, scope, known_symb, known_funcs=macro_funcs):
+        self.scope = scope
         self.known_symb = known_symb
         self.known_funcs = known_funcs
 
@@ -68,4 +69,8 @@ class TransForTemplateMacro(Transformer):
 
     @v_args(inline=True)
     def str(self, val):
-        return val.replace('""', '')
+        return val.replace('"', '')
+
+    @v_args(inline=True)
+    def var(self, val):
+        return self.known_symb[val]

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 09:56 PM +0800
+# Last Change: Tue Sep 01, 2020 at 02:12 AM +0800
 """
 This module defines functions for template macro.
 """
@@ -19,6 +19,13 @@ def func_input(path):
 
 
 def func_getattr(val, attr):
+    """
+    Return attribute if it exists; otherwise treat attribute as a dict key.
+
+    :param Any val: an object that either has attribute ``attr`` or is a dict and
+                    has a key named ``attr``
+    :param str attr: name of the attribute/dict key.
+    """
     try:
         return getattr(val, str(attr))
     except Exception:

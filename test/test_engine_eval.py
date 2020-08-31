@@ -2,7 +2,9 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 02:37 AM +0800
+# Last Change: Tue Sep 01, 2020 at 02:46 AM +0800
+
+import pytest
 
 from pyBabyMaker.engine.eval import DelayedEvaluator
 from pyBabyMaker.engine.eval import TransForTemplateMacro
@@ -133,7 +135,18 @@ def test_TransForTemplateMacro_endfor_stmt():
     transformer = TransForTemplateMacro(scope, {})
     transformer.stmt_counters['for'] += 1
 
-    exe = transformer.transform(expr)
-    exe.eval()
+    result = transformer.transform(expr)
 
+    assert result == [1]
     assert scope == []
+
+
+def test_TransForTemplateMacro_endfor_stmt_mismatch():
+    expr = template_macro_parser.parse('endfor')
+    scope = [[1]]
+    transformer = TransForTemplateMacro(scope, {})
+
+    with pytest.raises(Exception) as execinfo:
+        transformer.transform(expr, lineno=11)
+
+    assert 'Line 11' in str(execinfo.value)

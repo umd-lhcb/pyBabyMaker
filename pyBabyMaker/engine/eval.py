@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 02:39 AM +0800
+# Last Change: Tue Sep 01, 2020 at 02:43 AM +0800
 """
 This module provide template macro evaluation.
 """
@@ -154,7 +154,7 @@ class TransForTemplateMacro(Transformer):
         self.stmt_counters['for'] -= 1
 
         if self.stmt_counters['for'] >= 0:
-            return DelayedEvaluator('pop', (self.scope,))
+            return self.scope.pop()
         else:
             raise ValueError('Line {}: Unmatched "endfor" statement.'.format(
                 self.lineno

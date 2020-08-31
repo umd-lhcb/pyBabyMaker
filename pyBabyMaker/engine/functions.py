@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 08:25 PM +0800
+# Last Change: Mon Aug 31, 2020 at 08:43 PM +0800
 """
 This module defines functions for template macro.
 """
@@ -35,4 +35,5 @@ macro_funcs = {
     'neg': lambda val: -val,
     'getattr': func_getattr,
     'getitem': lambda val, key: val[key],
+    'format': lambda str_template, *args: str_template.format(*args),
 }

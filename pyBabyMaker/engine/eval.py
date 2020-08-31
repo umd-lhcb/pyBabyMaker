@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 09:57 PM +0800
+# Last Change: Tue Sep 01, 2020 at 02:39 AM +0800
 """
 This module provide template macro evaluation.
 """
@@ -77,6 +77,16 @@ class TransForTemplateMacro(Transformer):
     def __init__(self, scope, known_symb):
         self.scope = scope
         self.known_symb = known_symb
+        self.stmt_counters = {'for': 0}
+        self.lineno = 0
+
+    ###########
+    # General #
+    ###########
+
+    def transform(self, *args, lineno=0, **kwargs):
+        self.lineno = lineno
+        return super().transform(*args, **kwargs)
 
     ########
     # atom #
@@ -136,8 +146,16 @@ class TransForTemplateMacro(Transformer):
 
     @v_args(inline=True)
     def for_stmt(self, idx, iterable):
+        self.stmt_counters['for'] += 1
         return ForStmtEvaluator(idx, iterable, self.scope, self.known_symb)
 
     @v_args(inline=True)
     def endfor_stmt(self):
-        return DelayedEvaluator('pop', (self.scope,))
+        self.stmt_counters['for'] -= 1
+
+        if self.stmt_counters['for'] >= 0:
+            return DelayedEvaluator('pop', (self.scope,))
+        else:
+            raise ValueError('Line {}: Unmatched "endfor" statement.'.format(
+                self.lineno
+            ))

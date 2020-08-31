@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 09:53 PM +0800
+# Last Change: Tue Sep 01, 2020 at 02:37 AM +0800
 
 from pyBabyMaker.engine.eval import DelayedEvaluator
 from pyBabyMaker.engine.eval import TransForTemplateMacro
@@ -131,6 +131,7 @@ def test_TransForTemplateMacro_endfor_stmt():
     expr = template_macro_parser.parse('endfor')
     scope = [[1]]
     transformer = TransForTemplateMacro(scope, {})
+    transformer.stmt_counters['for'] += 1
 
     exe = transformer.transform(expr)
     exe.eval()

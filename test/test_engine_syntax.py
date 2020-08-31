@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 05:59 PM +0800
+# Last Change: Mon Aug 31, 2020 at 09:14 PM +0800
 
 import pytest
 
@@ -13,14 +13,14 @@ from pyBabyMaker.engine.syntax import template_macro_parser
 def test_for_stmt_simple():
     assert template_macro_parser.parse('for h in data').pretty() == \
         "for_stmt\n" \
-        "  var\th\n" \
+        "  h\n" \
         "  var\tdata\n"
 
 
 def test_for_stmt_complex():
     assert template_macro_parser.parse('for h in data.value').pretty() == \
         "for_stmt\n" \
-        "  var\th\n" \
+        "  h\n" \
         "  getattr\n" \
         "    var\tdata\n" \
         "    value\n"

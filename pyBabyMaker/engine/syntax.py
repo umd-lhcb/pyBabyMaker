@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 08:06 PM +0800
+# Last Change: Mon Aug 31, 2020 at 09:02 PM +0800
 """
 This module provide a parser for template macros extracted from C++ files.
 """
@@ -15,7 +15,7 @@ template_macro_grammar = '''
 
     ?stmt: for_stmt | endfor_stmt | atom_expr
 
-    for_stmt: "for" atom_expr "in" atom_expr
+    for_stmt: "for" NAME "in" atom_expr
 
     endfor_stmt: "endfor"
 

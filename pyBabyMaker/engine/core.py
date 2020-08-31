@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 03:17 AM +0800
+# Last Change: Tue Sep 01, 2020 at 03:50 AM +0800
 """
 This module glues all submodules in ``engine`` together to parse and evaluate
 template macros in a C++ file.
@@ -13,7 +13,20 @@ from .eval import DelayedEvaluator, TransForTemplateMacro
 from .syntax import template_macro_parser
 
 
-def template_transformer(file_content, directive):
+def helper_eval_args(match, pattern, evaluator):
+    """
+    Helper function to figure out how to put identifier groups into 'format'
+    function properly.
+
+    :param list match: regexp search groups.
+    :param Identifier pattern: Identifier used for the regexp search.
+    :param Any evaluator: Transformed template macro evaluator.
+    """
+    return [match[i] if i != pattern.macro_idx else evaluator
+            for i in range(1, pattern.groups+1)]
+
+
+def template_transformer(file_content, directive, do_check=True, eol='\n'):
     """
     Transform raw template into fully working C++ code.
 
@@ -33,9 +46,20 @@ def template_transformer(file_content, directive):
                 break
 
         if match:
-            pass
+            macro = template_macro_parser.parse(match[pattern.macro_idx])
+            eva = transformer.transform(macro, lineno=lineno)
+            scope[-1].append(DelayedEvaluator(
+                'format', ('{}'*pattern.groups+eol, *helper_eval_args(
+                    match, pattern, eva))))
+
         else:  # Line without any template macro
             scope[-1].append(DelayedEvaluator('identity', (line,)))
+
+    if do_check:
+        for stmt, counter in transformer.stmt_counters.items():
+            if counter > 0:
+                raise ValueError('Mismatch: statment "{}" has a counter value of {}'.format(
+                    stmt, counter))
 
     return parsed
 

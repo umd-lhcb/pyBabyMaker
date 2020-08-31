@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 04:30 AM +0800
+# Last Change: Tue Sep 01, 2020 at 04:35 AM +0800
 
 import pytest
 
@@ -58,9 +58,9 @@ def test_template_evaluator_for_stmt_simple():
     result = template_transformer(file_content, {'b': [1, 2, 3]}, False)
     assert template_evaluator(result) == [
         'cout << "Random stuff";\n',
-        'cout << 1 ;\n'
+        'cout << 1 ;\n',
         'cout << "Random stuff";\n',
-        'cout << 2 ;\n'
+        'cout << 2 ;\n',
         'cout << "Random stuff";\n',
         'cout << 3 ;\n'
     ]

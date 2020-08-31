@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 06:22 PM +0800
+# Last Change: Mon Aug 31, 2020 at 07:08 PM +0800
 """
 This module provide template macro evaluation.
 """
@@ -93,3 +93,7 @@ class TransForTemplateMacro(Transformer):
             return getattr(val, str(attr))
         except Exception:
             return val[str(attr)]
+
+    @v_args(inline=True)
+    def getitem(self, val, key):
+        return val[key]

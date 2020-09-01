@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 04:25 PM +0800
+# Last Change: Tue Sep 01, 2020 at 05:32 PM +0800
 
 import pytest
 
@@ -64,6 +64,23 @@ def test_getitem_num():
         "getitem\n" \
         "  var\tx\n" \
         "  num\t1\n"
+
+
+def test_method_call():
+    assert template_macro_parser.parse('data->m: a, b').pretty() == \
+        "method_call\n" \
+        "  var\tdata\n" \
+        "  m\n" \
+        "  arguments\n" \
+        "    var\ta\n" \
+        "    var\tb\n"
+
+
+def test_method_call_no_arg():
+    assert template_macro_parser.parse('data->m:').pretty() == \
+        "method_call\n" \
+        "  var\tdata\n" \
+        "  m\n"
 
 
 def test_func_call():

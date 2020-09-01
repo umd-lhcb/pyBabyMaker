@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 02:12 AM +0800
+# Last Change: Tue Sep 01, 2020 at 05:41 PM +0800
 """
 This module defines functions for template macro.
 """
@@ -44,4 +44,6 @@ macro_funcs = {
     'getitem': lambda val, key: val[key],
     'format': lambda str_template, *args: str_template.format(*args),
     'pop': lambda lst: lst.pop() if lst else None,
+    'method_call': lambda instance, method_name, *args:
+        getattr(instance, method_name)(*args),
 }

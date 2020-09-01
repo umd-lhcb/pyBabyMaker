@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 05:01 PM +0800
+# Last Change: Tue Sep 01, 2020 at 05:47 PM +0800
 
 import pytest
 
@@ -98,6 +98,26 @@ def test_TransForTemplateMacro_getitem():
         [], {'data': [0, 1]})
     exe = transformer.transform(expr)
     assert exe.eval() == 1
+
+
+def test_TransForTemplateMacro_method_call():
+    class Tester():
+        def add(self, x, y):
+            return x+y
+
+    expr = template_macro_parser.parse('data.tester->add: 11, 2')
+    transformer = TransForTemplateMacro(
+        [], {'data': {'tester': Tester()}})
+    exe = transformer.transform(expr)
+    assert exe.eval() == 13
+
+
+def test_TransForTemplateMacro_method_call_no_arg():
+    expr = template_macro_parser.parse('data.stuff->items:')
+    transformer = TransForTemplateMacro(
+        [], {'data': {'stuff': {'a': 1, 'b': 2}}})
+    exe = transformer.transform(expr)
+    assert exe.eval() == {'a': 1, 'b': 2}.items()
 
 
 def test_TransForTemplateMacro_for_stmt():

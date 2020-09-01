@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 05:02 PM +0800
+# Last Change: Tue Sep 01, 2020 at 05:42 PM +0800
 """
 This module provide template macro evaluation.
 """
@@ -128,14 +128,19 @@ class TransForTemplateMacro(Transformer):
     def neg(self, val):
         return DelayedEvaluator('neg', (val,))
 
-    #################
-    # Function call #
-    #################
+    ########################
+    # Function/method call #
+    ########################
 
     @v_args(inline=True)
     def func_call(self, func_name, arguments=None):
         args = arguments.children if arguments is not None else []
         return DelayedEvaluator(str(func_name), args)
+
+    @v_args(inline=True)
+    def method_call(self, instance, method_name, arguments=None):
+        args = arguments.children if arguments is not None else []
+        return DelayedEvaluator('method_call', (instance, method_name, *args))
 
     ###########
     # Getters #

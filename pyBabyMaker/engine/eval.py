@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 04:13 AM +0800
+# Last Change: Tue Sep 01, 2020 at 04:54 PM +0800
 """
 This module provide template macro evaluation.
 """
@@ -65,8 +65,14 @@ class ForStmtEvaluator(object):
         """
         out = []
 
-        for i in self.iterable.eval():
-            self.known_symb[self.idx] = i
+        for loop_var in self.iterable.eval():
+            # Set up loop variables in the global scope (known_symb)
+            if len(self.idx) > 1:  # unpack only if more than one loop variable
+                for i, var_name in enumerate(self.idx):
+                    self.known_symb[var_name] = loop_var[i]
+            else:
+                self.known_symb[self.idx[0]] = loop_var
+
             for evaluator in self.eval_list:
                 out.append(evaluator.eval())
 
@@ -148,7 +154,10 @@ class TransForTemplateMacro(Transformer):
     ##############
 
     @v_args(inline=True)
-    def for_stmt(self, idx, iterable):
+    def for_stmt(self, *args):
+        idx = [str(i) for i in args[:-1]]
+        iterable = args[-1]
+
         self.stmt_counters['for'] += 1
         return ForStmtEvaluator(idx, iterable, self.scope, self.known_symb)
 

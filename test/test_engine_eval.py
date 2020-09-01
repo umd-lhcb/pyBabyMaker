@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 02:46 AM +0800
+# Last Change: Tue Sep 01, 2020 at 05:01 PM +0800
 
 import pytest
 
@@ -126,6 +126,19 @@ def test_TransForTemplateMacro_for_stmt_nested():
     exe.eval()
 
     assert known_symb['idx'] == [7, 8, 9]
+    assert known_symb['j'] == 9
+
+
+def test_TransForTemplateMacro_for_stmt_multi_idx():
+    expr = template_macro_parser.parse('for i, j in data.value')
+    scope = []
+    known_symb = {'data': {'value': [[1, 2], [5, 6], [7, 9]]}}
+
+    transformer = TransForTemplateMacro(scope, known_symb)
+    exe = transformer.transform(expr)
+    exe.eval()
+
+    assert known_symb['i'] == 7
     assert known_symb['j'] == 9
 
 

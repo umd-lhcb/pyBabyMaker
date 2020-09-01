@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Aug 31, 2020 at 09:14 PM +0800
+# Last Change: Tue Sep 01, 2020 at 04:25 PM +0800
 
 import pytest
 
@@ -24,6 +24,14 @@ def test_for_stmt_complex():
         "  getattr\n" \
         "    var\tdata\n" \
         "    value\n"
+
+
+def test_for_stmt_multi_idx():
+    assert template_macro_parser.parse('for i, j in data').pretty() == \
+        "for_stmt\n" \
+        "  i\n" \
+        "  j\n" \
+        "  var\tdata\n"
 
 
 def test_endfor_valid():

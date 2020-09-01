@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 05:55 PM +0800
+# Last Change: Tue Sep 01, 2020 at 06:21 PM +0800
 
 import pytest
 
@@ -93,14 +93,25 @@ def test_template_evaluator_for_stmt_nested():
 def test_template_evaluator_for_stmt_multi_idx():
     file_content = [
         '// {% for key, val in directive.b->items: %}\n',
-        '  cout << /* {% format: "{} = {}", key, val %} */;\n'
+        '  cout << /* {% format: "{} = {}", key, val %} */ <<endl;\n'
     ]
     result = template_transformer(
         file_content,
         {'b': {'a': 1, 'b': 2, 'c': 3}},
         False)
     assert template_evaluator(result) == [
-        '  cout << a = 1;\n',
-        '  cout << b = 2;\n',
-        '  cout << c = 3;\n',
+        '  cout << a = 1 <<endl;\n',
+        '  cout << b = 2 <<endl;\n',
+        '  cout << c = 3 <<endl;\n',
     ]
+
+
+def test_template_transformer_for_stmt_mismatch():
+    file_content = [
+        '// {% for key, val in directive.b->items: %}\n',
+        '  cout << /* {% format: "{} = {}", key, val %} */ <<endl;\n'
+    ]
+    with pytest.raises(ValueError) as execinfo:
+        template_transformer(file_content, {'b': {'a': 1, 'b': 2}})
+
+    assert 'Mismatch: statement' in str(execinfo.value)

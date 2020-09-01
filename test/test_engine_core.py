@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 04:40 AM +0800
+# Last Change: Tue Sep 01, 2020 at 05:55 PM +0800
 
 import pytest
 
@@ -87,4 +87,20 @@ def test_template_evaluator_for_stmt_nested():
         '  cout << 4 ;\n',
         '  cout << 5 ;\n',
         '  cout << 6 ;\n'
+    ]
+
+
+def test_template_evaluator_for_stmt_multi_idx():
+    file_content = [
+        '// {% for key, val in directive.b->items: %}\n',
+        '  cout << /* {% format: "{} = {}", key, val %} */;\n'
+    ]
+    result = template_transformer(
+        file_content,
+        {'b': {'a': 1, 'b': 2, 'c': 3}},
+        False)
+    assert template_evaluator(result) == [
+        '  cout << a = 1;\n',
+        '  cout << b = 2;\n',
+        '  cout << c = 3;\n',
     ]

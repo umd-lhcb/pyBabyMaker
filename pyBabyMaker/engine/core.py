@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 06:21 PM +0800
+# Last Change: Tue Sep 01, 2020 at 06:35 PM +0800
 """
 This module glues all submodules in ``engine`` together to parse and evaluate
 template macros in a C++ file.
@@ -73,7 +73,7 @@ def template_transformer(file_content, directive, do_check=True, eol='\n'):
                     'format', ('{}'*pattern.groups+eol, *helper_eval_args(
                         match, pattern, eva))))
 
-            else:
+            elif type(eva) != list:
                 scope[-2].append(eva)
 
         else:  # Line without any template macro

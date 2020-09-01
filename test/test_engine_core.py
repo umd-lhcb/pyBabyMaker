@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 06:21 PM +0800
+# Last Change: Tue Sep 01, 2020 at 06:35 PM +0800
 
 import pytest
 
@@ -115,3 +115,33 @@ def test_template_transformer_for_stmt_mismatch():
         template_transformer(file_content, {'b': {'a': 1, 'b': 2}})
 
     assert 'Mismatch: statement' in str(execinfo.value)
+
+
+def test_template_evaluator_for_stmt_proper():
+    file_content = [
+        '// {% for key, val in directive.b->items: %}\n',
+        '  cout << /* {% key %} */ <<endl;\n',
+        '  // {% for v in val %}',
+        '    cout << /* {% v %} */ <<endl;\n',
+        '  // {% endfor %}\n',
+        '  cout << "stuff" <<endl;\n',
+        '// {% endfor %}\n',
+    ]
+    result = template_transformer(
+        file_content,
+        {'b': {'a': [1, 2], 'b': [3, 4, 5], 'c': [6]}},
+        False)
+    assert template_evaluator(result) == [
+        '  cout << a <<endl;\n',
+        '    cout << 1 <<endl;\n',
+        '    cout << 2 <<endl;\n',
+        '  cout << "stuff" <<endl;\n',
+        '  cout << b <<endl;\n',
+        '    cout << 3 <<endl;\n',
+        '    cout << 4 <<endl;\n',
+        '    cout << 5 <<endl;\n',
+        '  cout << "stuff" <<endl;\n',
+        '  cout << c <<endl;\n',
+        '    cout << 6 <<endl;\n',
+        '  cout << "stuff" <<endl;\n',
+    ]

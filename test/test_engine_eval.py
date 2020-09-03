@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 05:47 PM +0800
+# Last Change: Fri Sep 04, 2020 at 03:53 AM +0800
 
 import pytest
 
@@ -50,6 +50,18 @@ def test_TransForTemplateMacro_str():
     expr = template_macro_parser.parse('"random_str"')
     transformer = TransForTemplateMacro([], {})
     assert transformer.transform(expr) == 'random_str'
+
+
+def test_TransForTemplateMacro_str_escaped_double_quote():
+    expr = template_macro_parser.parse('"random_str \\"something\\" "')
+    transformer = TransForTemplateMacro([], {})
+    assert transformer.transform(expr) == 'random_str "something" '
+
+
+def test_TransForTemplateMacro_str_unescaped_single_quote():
+    expr = template_macro_parser.parse(""" "some 'single quote'" """)
+    transformer = TransForTemplateMacro([], {})
+    assert transformer.transform(expr) == "some 'single quote'"
 
 
 def test_TransForTemplateMacro_neg():

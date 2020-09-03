@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 04:05 AM +0800
+# Last Change: Fri Sep 04, 2020 at 04:06 AM +0800
 
 import re
 
@@ -52,8 +52,8 @@ class BabyConfigParser(object):
             self.parse_headers(config, directive)
             self.parse_drop_keep_rename(config, dumped_tree,
                                         directive[output_tree])
-            self.parse_calculation(config, dumped_tree, directive)
-            self.parse_selection(config, dumped_tree, directive)
+            self.parse_calculation(config, dumped_tree, directive[output_tree])
+            self.parse_selection(config, dumped_tree, directive[output_tree])
 
         return directive
 

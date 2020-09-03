@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed May 27, 2020 at 09:24 PM +0800
+# Last Change: Fri Sep 04, 2020 at 01:06 AM +0800
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -14,10 +14,9 @@ import re
 import subprocess
 
 from collections import namedtuple
-from datetime import datetime
 from shutil import which
 
-from pyBabyMaker.parse import find_all_vars
+from pyBabyMaker.boolean.utils import find_all_vars
 
 
 ##################
@@ -262,163 +261,6 @@ class BaseConfigParser(object):
                 Variable(datatype, name))
         except KeyError:
             raise KeyError('Branch {} not found.'.format(name))
-
-
-#######################
-# C++ code generators #
-#######################
-
-
-class BaseCppGenerator(metaclass=abc.ABCMeta):
-    """
-    Basic C++ code snippets for n-tuple processing.
-    """
-    def __init__(self, instructions,
-                 additional_system_headers=None, additional_user_headers=None,
-                 add_timestamp=True):
-        self.instructions = instructions
-        self.add_timestamp = add_timestamp
-        self.system_headers = ['TFile.h', 'TTree.h', 'TTreeReader.h',
-                               'TBranch.h']
-        self.user_headers = []
-
-        if additional_system_headers is not None:
-            self.system_headers += additional_system_headers
-
-        if additional_user_headers is not None:
-            self.user_headers += additional_user_headers
-
-    # Code generation ##########################################################
-
-    def gen_timestamp(self):
-        """
-        Generate a timestamp.
-        """
-        if self.add_timestamp:
-            return self.cpp_gen_date()
-        else:
-            return ''
-
-    def gen_headers(self):
-        """
-        Generate C++ ``#include`` macros.
-        """
-        system_headers = ''.join([
-            self.cpp_header(i) for i in self.system_headers])
-        user_headers = ''.join([
-            self.cpp_header(i, system=False) for i in self.user_headers])
-        return system_headers + '\n' + user_headers
-
-    @abc.abstractmethod
-    def gen(self):
-        """
-        Generate the full C++ output code.
-        """
-
-    @abc.abstractmethod
-    def gen_preamble(self):
-        """
-        Generate C++ definitions and functions before ``main``.
-        """
-
-    @abc.abstractmethod
-    def gen_body(self):
-        '''
-        Generate C++ code inside ``main`` function.
-        '''
-
-    # Helpers ##################################################################
-
-    @staticmethod
-    def dereference_variables(expr, vars_to_deref):
-        """
-        Dereference variables loaded from n-tuple directly. For example:
-
-        .. code-block:: c++
-
-            TTreeReader reader("tree", input_file)
-            TTreeReaderValue<double> Y_PT(reader, "Y_PT");
-
-            while (reader.Next()) {
-                cout << (*Y_PT)
-            }
-
-        The ``Y_PT`` inside the ``while`` loop needs to be dereferenced.
-        """
-        variables = UniqueList(find_all_vars(expr))
-        ref_variables = [v.name for v in vars_to_deref]
-
-        for v in variables:
-            if v in ref_variables:
-                expr = re.sub(r'\b'+v+r'\b', '(*{})'.format(v), expr)
-
-        return expr
-
-    # C++ snippets #############################################################
-
-    @staticmethod
-    def cpp_gen_date(time_format='%Y-%m-%d %H:%M:%S.%f'):
-        """
-        C++ code generation time stamp.
-        """
-        return '// Generated on: {}\n'.format(
-            datetime.now().strftime(time_format))
-
-    @staticmethod
-    def cpp_header(header, system=True):
-        """
-        C++ ``#include`` snippets.
-        """
-        if system:
-            return '#include <{}>\n'.format(header)
-        else:
-            return '#include "{}"\n'.format(header)
-
-    @staticmethod
-    def cpp_make_var(name, prefix='', suffix='', separator='_'):
-        """
-        Make a legal C++ variable name. This is typically used to convert a
-        ``TTree`` name to a C++ variable name.
-        """
-        if prefix != '':
-            prefix += separator
-        if suffix != '':
-            suffix = separator + suffix
-        return prefix + re.sub('/', separator, name) + suffix
-
-    @staticmethod
-    def cpp_main(body):
-        """
-        C++ (dumb) main function snippet.
-        """
-        return '''
-int main(int, char** argv) {{
-  {0}
-  return 0;
-}}'''.format(body)
-
-    @staticmethod
-    def cpp_TTree(var, name):
-        """
-        C++ ``TTree`` initializer snippet.
-        """
-        return 'TTree {0}("{1}", "{1}");\n'.format(var, name)
-
-    @staticmethod
-    def cpp_TTreeReader(var, name, TFile):
-        """
-        C++ ``TTreeReader`` initializer snippet.
-        """
-        return 'TTreeReader {0}("{1}", {2});\n'.format(var, name, TFile)
-
-    @staticmethod
-    def cpp_TTreeReaderValue(datatype, var, TTreeReader, branch_name):
-        """
-        C++ ``TTreeReaderValue`` initializer snippet.
-        """
-        return 'TTreeReaderValue<{0}> {1}({2}, "{3}");\n'.format(
-            datatype, var, TTreeReader, branch_name
-        )
 
 
 ##############

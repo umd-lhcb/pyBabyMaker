@@ -2,17 +2,17 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 02:53 AM +0800
+# Last Change: Fri Sep 04, 2020 at 03:08 AM +0800
 
 import re
 
 from pyBabyMaker.base import UniqueList, BaseMaker, Variable
+from pyBabyMaker.boolean.utils import find_all_vars
 
 
 ########################
 # Configuration parser #
 ########################
-
 
 class BabyConfigParser(object):
     """
@@ -51,7 +51,8 @@ class BabyConfigParser(object):
                 'input_tree': input_tree,
                 'input_branches': UniqueList(),
                 'output_branches': UniqueList(),
-                'transient_variables': UniqueList(),
+                'temp_variables': UniqueList(),
+                'selection': [],
             }
 
             self.parse_headers(config, directive)
@@ -97,39 +98,42 @@ class BabyConfigParser(object):
         if 'calculation' in config.keys():
             for name, code in config['calculation'].items():
                 datatype, rvalue = code.split(';')
-                if datatype == '^':
-                    self.__getattribute__(rvalue)(name, dumped_tree, data_store)
-                elif '^' in datatype:
-                    datatype = datatype.strip('^')
-                    data_store.append_transient(
-                        Variable(datatype, name, rvalue)
-                    )
-                    self.load_missing_variables(rvalue, dumped_tree, data_store)
-                else:
-                    data_store.append_output_br(
-                        Variable(datatype, name, rvalue)
-                    )
-                    self.load_missing_variables(rvalue, dumped_tree, data_store)
 
-    def parse_selection(self, config, dumped_tree, data_store):
+                if '^' in datatype:
+                    datatype = datatype.strip('^')
+                    directive['temp_variables'].append(
+                        Variable(datatype, name, rvalue))
+                    self.load_missing_vars(rvalue, dumped_tree, directive)
+
+                else:
+                    directive['output_branches'].append(
+                        Variable(datatype, name, rvalue))
+                    self.load_missing_vars(rvalue, dumped_tree, directive)
+
+    def parse_selection(self, config, dumped_tree, directive):
         """
         Parse ``selection`` section.
         """
         if 'selection' in config.keys():
-            data_store.selection = ' '.join(config['selection'])
-            self.load_missing_variables(data_store.selection, dumped_tree,
-                                        data_store)
+            directive['selection'] = config['selection']
 
-    def load_missing_variables(self, expr, dumped_tree, data_store):
+            for expr in config['selection']:
+                self.load_missing_vars(expr, dumped_tree, directive)
+
+    def load_missing_vars(self, expr, dumped_tree, directive):
         """
         Load missing variables required for calculation or comparison, provided
-        that the variables are available directly in the n-tuple.
+        that the variables are available directly in the ntuple.
         """
-        variables = find_all_vars(expr)
+        variables = UniqueList(find_all_vars(expr))
+        loaded_variables = [v.name for v in directive['input_branches']]
+
         for v in variables:
-            if v not in data_store.loaded_variables:
+            if v not in loaded_variables:
                 try:
-                    self.LOAD(v, dumped_tree, data_store)
+                    datatype = self.load_var(v, dumped_tree)
+                    directive['input_branches'].append(
+                        Variable(datatype, v))
                 except Exception:
                     print('WARNING: {} is not a known branch name.'.format(v))
 
@@ -145,14 +149,13 @@ class BabyConfigParser(object):
         return not return_value
 
     @staticmethod
-    def LOAD(name, dumped_tree, data_store):
+    def load_var(name, dumped_tree):
         """
-        Load variable ``name`` from n-tuple, if it's available.
+        Load variable ``name`` from ntuple, if it's available.
         """
         try:
             datatype = dumped_tree[name]
-            data_store.append_input_br(
-                Variable(datatype, name))
+            return datatype
         except KeyError:
             raise KeyError('Branch {} not found.'.format(name))
 

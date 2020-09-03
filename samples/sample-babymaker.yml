@@ -21,9 +21,11 @@ AnotherTuple:
     input_tree: TupleB0/DecayTree
     keep:
         - Y_PT
+    # Assume all conditions are concatenated with '&&'.
+    # This is always true because any boolean expression can be
+    # written in conjunctive normal form.
     selection:
         - "Y_PT > 10000"
-        - "&&"
         - "Y_PE > (100 * pow(10, 3))"
 
 YetAnotherTuple:

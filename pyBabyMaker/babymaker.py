@@ -2,12 +2,13 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 03:08 AM +0800
+# Last Change: Fri Sep 04, 2020 at 03:25 AM +0800
 
 import re
 
 from pyBabyMaker.base import UniqueList, BaseMaker, Variable
 from pyBabyMaker.boolean.utils import find_all_vars
+from pyBabyMaker.engine.core import template_transformer, template_evaluator
 
 
 ########################
@@ -33,7 +34,7 @@ class BabyConfigParser(object):
         self.output_variables = UniqueList()
         self.transient_variables = UniqueList()
 
-    def gen_directive(self):
+    def parse(self):
         """
         Parse the loaded YAML dict (in ``self.parsed_config`) and dumped ntuple
         tree structure (in ``self.dumped_ntuple``).
@@ -168,30 +169,32 @@ class BabyMaker(BaseMaker):
     """
     ``babymaker`` class to glue parser and code generator together.
     """
-    def __init__(self, config_filename, ntuple_filename, use_reformater=True):
+    def __init__(self, config_filename, ntuple_filename, template_filename,
+                 use_reformater=True):
         """
         Initialize with path to YAML file and n-tuple file.
         """
         self.config_filename = config_filename
         self.ntuple_filename = ntuple_filename
+        self.template_filename = template_filename
         self.use_reformater = use_reformater
 
     def gen(self, filename, **kwargs):
         parsed_config = self.read(self.config_filename)
         dumped_ntuple = self.dump(self.ntuple_filename)
-        parser = self.parse_config(parsed_config, dumped_ntuple)
-        generator = BabyCppGenerator(parser.instructions,
-                                     parser.system_headers,
-                                     parser.user_headers,
-                                     **kwargs)
-        content = generator.gen()
+        directive = self.directive_gen(parsed_config, dumped_ntuple)
+
+        with open(self.template_filename) as tmpl:
+            macros = template_transformer(tmpl, directive)
+
+        output_cpp = template_evaluator(macros)
 
         with open(filename, 'w') as f:
-            f.write(content)
+            f.write(''.join(output_cpp))
         if self.use_reformater:
             self.reformat(filename)
 
-    def parse_config(self, parsed_config, dumped_ntuple):
-        parser = BaseConfigParser(parsed_config, dumped_ntuple)
-        parser.parse()
-        return parser
+    @staticmethod
+    def directive_gen(parsed_config, dumped_ntuple):
+        parser = BabyConfigParser(parsed_config, dumped_ntuple)
+        return parser.parse()

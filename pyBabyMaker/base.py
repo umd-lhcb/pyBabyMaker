@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 01:55 AM +0800
+# Last Change: Fri Sep 04, 2020 at 04:01 AM +0800
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -53,7 +53,7 @@ class UniqueList(list):
         return UniqueList(super().__iadd__(value))
 
 
-def load_file(filepath, current_file_path):
+def load_file(filepath, current_file_path=__file__):
     """
     Return relative path based on current file directory if ``filepath`` starts
     with ``!:``.

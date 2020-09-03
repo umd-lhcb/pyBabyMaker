@@ -2,7 +2,9 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 02:40 AM +0800
+# Last Change: Fri Sep 04, 2020 at 02:53 AM +0800
+
+import re
 
 from pyBabyMaker.base import UniqueList, BaseMaker, Variable
 
@@ -65,37 +67,30 @@ class BabyConfigParser(object):
         Parse ``headers`` section.
         """
         for header_type in ('system', 'user'):
-            try:
+            if header_type in config['headers'].keys():
                 directive['{}_headers'.format(header_type)] += \
                     config['headers'][header_type]
-            except KeyError:
-                pass
 
     def parse_drop_keep_rename(self, config, dumped_tree, directive):
         """
         Parse ``drop, keep, rename`` sections.
         """
-        branches_to_keep = []
         for br_in, datatype in dumped_tree.items():
             if 'drop' in config.keys() and self.match(config['drop'], br_in):
                 print('Dropping branch: {}'.format(br_in))
-            elif 'keep' in config.keys() and self.match(config['keep'], br_in):
-                branches_to_keep.append((datatype, br_in))
-            elif 'rename' in config.keys() and br_in in config['rename']:
-                branches_to_keep.append((datatype, br_in))
 
-        for datatype, br_in in branches_to_keep:
-            directive['input_branches'].append(Variable(datatype, br_in))
-            # Handle branch rename here
-            try:
-                br_out = config['rename'][br_in]
-                directive['output_branches'].append(
-                    Variable(datatype, br_out, br_in))
-            except KeyError:
+            elif 'keep' in config.keys() and self.match(config['keep'], br_in):
+                directive['input_branches'].append(Variable(datatype, br_in))
                 directive['output_branches'].append(
                     Variable(datatype, br_in, br_in))
 
-    def parse_calculation(self, config, dumped_tree, data_store):
+            elif 'rename' in config.keys() and br_in in config['rename']:
+                directive['input_branches'].append(Variable(datatype, br_in))
+                br_out = config['rename'][br_in]
+                directive['output_branches'].append(
+                    Variable(datatype, br_out, br_in))
+
+    def parse_calculation(self, config, dumped_tree, directive):
         """
         Parse ``calculation`` section.
         """

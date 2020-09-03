@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 06:35 PM +0800
+# Last Change: Thu Sep 03, 2020 at 09:40 PM +0800
 """
 This module glues all submodules in ``engine`` together to parse and evaluate
 template macros in a C++ file.
@@ -32,7 +32,7 @@ def helper_flatten(lst, result=None):
     Helper function to flatten a multi-depth list.
 
     :param list lst: list to be flattened.
-    :param list result: (partially) flattened list.
+    :param list result: (partially) flattened list. Optional
     """
     result = [] if result is None else result
 

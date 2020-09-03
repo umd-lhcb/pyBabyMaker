@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 03:51 AM +0800
+# Last Change: Fri Sep 04, 2020 at 04:27 AM +0800
 """
 This module provide template macro evaluation.
 """
@@ -116,8 +116,13 @@ class TransForTemplateMacro(Transformer):
     def str(self, val):
         # First, remove the literal " at string boundaries
         val = val[1:-1]
-        # Now replace the escaped "
-        return val.replace('\\"', '"')
+        # Now replace escaped UNIX EOL with regular EOL
+        for src, dst in (
+            ('\\"', '"'),    # escaped "
+            ('\\n', '\n'),   # escaped \n
+        ):
+            val = val.replace(src, dst)
+        return val
 
     #######################
     # Delayed evaluations #

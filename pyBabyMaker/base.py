@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 01:30 AM +0800
+# Last Change: Fri Sep 04, 2020 at 01:55 AM +0800
 """
 This module provides basic infrastructure for n-tuple related C++ code
 generation.
@@ -66,8 +66,7 @@ def load_file(filepath, current_file_path):
         return filepath
 
 
-Variable = namedtuple('Variable', 'type name rvalue, dependency',
-                      defaults=(None, None))
+Variable = namedtuple('Variable', 'type name rvalue', defaults=(None,))
 
 
 ##############

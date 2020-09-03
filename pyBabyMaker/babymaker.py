@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 03:40 AM +0800
+# Last Change: Fri Sep 04, 2020 at 04:05 AM +0800
 
 import re
 
@@ -62,7 +62,7 @@ class BabyConfigParser(object):
         Parse ``headers`` section.
         """
         for header_type in ('system', 'user'):
-            if header_type in config['headers'].keys():
+            if 'headers' in config and header_type in config['headers']:
                 directive['{}_headers'.format(header_type)] += \
                     config['headers'][header_type]
 
@@ -71,15 +71,15 @@ class BabyConfigParser(object):
         Parse ``drop, keep, rename`` sections.
         """
         for br_in, datatype in dumped_tree.items():
-            if 'drop' in config.keys() and self.match(config['drop'], br_in):
+            if 'drop' in config and self.match(config['drop'], br_in):
                 print('Dropping branch: {}'.format(br_in))
 
-            elif 'keep' in config.keys() and self.match(config['keep'], br_in):
+            elif 'keep' in config and self.match(config['keep'], br_in):
                 directive['input_branches'].append(Variable(datatype, br_in))
                 directive['output_branches'].append(
                     Variable(datatype, br_in, br_in))
 
-            elif 'rename' in config.keys() and br_in in config['rename']:
+            elif 'rename' in config and br_in in config['rename']:
                 directive['input_branches'].append(Variable(datatype, br_in))
                 br_out = config['rename'][br_in]
                 directive['output_branches'].append(
@@ -89,7 +89,7 @@ class BabyConfigParser(object):
         """
         Parse ``calculation`` section.
         """
-        if 'calculation' in config.keys():
+        if 'calculation' in config:
             for name, code in config['calculation'].items():
                 datatype, rvalue = code.split(';')
 
@@ -108,7 +108,7 @@ class BabyConfigParser(object):
         """
         Parse ``selection`` section.
         """
-        if 'selection' in config.keys():
+        if 'selection' in config:
             directive['selection'] = config['selection']
 
             for expr in config['selection']:

@@ -2,10 +2,12 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 05:41 PM +0800
+# Last Change: Fri Sep 04, 2020 at 12:37 AM +0800
 """
 This module defines functions for template macro.
 """
+
+from datetime import datetime
 
 
 def func_input(path):
@@ -46,4 +48,6 @@ macro_funcs = {
     'pop': lambda lst: lst.pop() if lst else None,
     'method_call': lambda instance, method_name, *args:
         getattr(instance, method_name)(*args),
+    'gendate': lambda fmt='%Y-%m-%d %H:%M:%S.%f': '// Generated on: {}'.format(
+        datetime.now().strftime(fmt)),
 }

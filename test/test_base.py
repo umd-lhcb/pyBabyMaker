@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Sep 09, 2019 at 12:09 AM -0400
+# Last Change: Fri Sep 04, 2020 at 12:18 AM +0800
 
 import pytest
 import os
@@ -363,134 +363,6 @@ def test_BaseConfigParser_LOAD_not_exist(default_BaseConfigParser):
     data_store = CppCodeDataStore()
     with pytest.raises(KeyError):
         default_BaseConfigParser.LOAD('Z_PX', dumped_tree, data_store)
-
-
-#######################
-# C++ code generators #
-#######################
-
-class SimpleCppGenerator(BaseCppGenerator):
-    def gen(self):
-        pass
-
-    def gen_preamble(self):
-        pass
-
-    def gen_body(self):
-        pass
-
-
-@pytest.fixture
-def default_SimpleCppGenerator():
-    return SimpleCppGenerator(
-        list(),
-        additional_system_headers=['iostream'],
-        additional_user_headers=['include/dummy.h']
-    )
-
-
-# Headers ######################################################################
-
-def test_SimpleCppGenerator_custom_system_headers(default_SimpleCppGenerator):
-    assert default_SimpleCppGenerator.system_headers == \
-        ['TFile.h', 'TTree.h', 'TTreeReader.h', 'TBranch.h', 'iostream']
-
-
-def test_SimpleCppGenerator_custom_user_headers(default_SimpleCppGenerator):
-    assert default_SimpleCppGenerator.user_headers == ['include/dummy.h']
-
-
-def test_SimpleCppGenerator_gen_headers(default_SimpleCppGenerator):
-    assert default_SimpleCppGenerator.gen_headers() == \
-        '''#include <TFile.h>
-#include <TTree.h>
-#include <TTreeReader.h>
-#include <TBranch.h>
-#include <iostream>
-
-#include "include/dummy.h"
-'''
-
-
-def test_SimpleCppGenerator_gen_headers_no_user():
-    cpp_generator = SimpleCppGenerator(None)
-    assert cpp_generator.gen_headers() == \
-        '''#include <TFile.h>
-#include <TTree.h>
-#include <TTreeReader.h>
-#include <TBranch.h>
-
-'''
-
-
-# Helpers ######################################################################
-
-def test_SimpleCppGenerator_dereference_variables_simple(
-        default_SimpleCppGenerator):
-    assert default_SimpleCppGenerator.dereference_variables(
-        'a > b_1 && b_1 < c', [Variable('int', 'a'), Variable('int', 'b_1'),
-                               Variable('int', 'c')]
-    ) == '(*a) > (*b_1) && (*b_1) < (*c)'
-
-
-def test_SimpleCppGenerator_dereference_variables_duplicate(
-        default_SimpleCppGenerator):
-    assert default_SimpleCppGenerator.dereference_variables(
-        'a > b_1 && b_1 < c', [Variable('int', 'a'), Variable('int', 'b_1'),
-                               Variable('int', 'c'), Variable('int', 'b_1')]
-    ) == '(*a) > (*b_1) && (*b_1) < (*c)'
-
-
-# C++ snippets #################################################################
-
-def test_SimpleCppGenerator_cpp_gen_date(default_SimpleCppGenerator):
-    with patch('pyBabyMaker.base.datetime') as m:
-        m.now.return_value = datetime(2019, 8, 31, 3, 46, 15, 98809)
-        assert default_SimpleCppGenerator.cpp_gen_date() == \
-            '// Generated on: 2019-08-31 03:46:15.098809\n'
-
-
-def test_SimpleCppGenerator_cpp_header_system(default_SimpleCppGenerator):
-    assert default_SimpleCppGenerator.cpp_header('iostream') == \
-        '#include <iostream>\n'
-
-
-def test_SimpleCppGenerator_cpp_header_user(default_SimpleCppGenerator):
-    assert default_SimpleCppGenerator.cpp_header('include/dummy.h', False) == \
-        '#include "include/dummy.h"\n'
-
-
-def test_SimpleCppGenerator_cpp_make_var(default_SimpleCppGenerator):
-    assert default_SimpleCppGenerator.cpp_make_var(
-        'Variable1/Old',
-        prefix='pre', suffix='suf', separator='_'
-    ) == 'pre_Variable1_Old_suf'
-
-
-def test_SimpleCppGenerator_cpp_main(default_SimpleCppGenerator):
-    assert default_SimpleCppGenerator.cpp_main('body') == \
-        '''
-int main(int, char** argv) {
-  body
-  return 0;
-}'''
-
-
-def test_SimpleCppGenerator_cpp_TTree(default_SimpleCppGenerator):
-    assert default_SimpleCppGenerator.cpp_TTree('tree', 'tree') == \
-        'TTree tree("tree", "tree");\n'
-
-
-def test_SimpleCppGenerator_cpp_TTreeReader(default_SimpleCppGenerator):
-    assert default_SimpleCppGenerator.cpp_TTreeReader(
-        'reader', 'tree', 'input_file') == \
-        'TTreeReader reader("tree", input_file);\n'
-
-
-def test_SimpleCppGenerator_cpp_TTreeReaderValue(default_SimpleCppGenerator):
-    assert default_SimpleCppGenerator.cpp_TTreeReaderValue(
-        'float', 'value', 'reader', 'some_branch') == \
-        'TTreeReaderValue<float> value(reader, "some_branch");\n'
 
 
 ##############

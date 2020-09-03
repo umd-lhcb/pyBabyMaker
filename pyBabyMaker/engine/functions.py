@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 02:05 AM +0800
+# Last Change: Fri Sep 04, 2020 at 03:38 AM +0800
 """
 This module defines functions for template macro.
 """
@@ -63,6 +63,17 @@ def func_deref_var(expr, vars_to_deref):
     return expr
 
 
+def func_format_list(str_template, lst):
+    """
+    Return attribute if it exists; otherwise treat attribute as a dict key.
+
+    :param str str_template: string template to be formatted.
+    :param list lst: list of arguments to be used to format string template.
+    """
+    args = [[a] if not isinstance(a, list) else a for a in lst]
+    return [str_template.format(*a) for a in args]
+
+
 macro_funcs = {
     'identity': lambda x: x,
     'join': lambda lst, string: string.join(lst),
@@ -80,4 +91,5 @@ macro_funcs = {
     'gendate': lambda fmt='%Y-%m-%d %H:%M:%S.%f': '// Generated on: {}'.format(
         datetime.now().strftime(fmt)),
     'deref_var': func_deref_var,
+    'format_list': func_format_list,
 }

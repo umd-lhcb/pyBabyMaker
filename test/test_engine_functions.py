@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 02:09 AM +0800
+# Last Change: Fri Sep 04, 2020 at 03:31 AM +0800
 
 from pyBabyMaker.engine.functions import macro_funcs
 
@@ -24,3 +24,9 @@ def test_func_deref_var():
     vars_to_deref = ['a', 'b_1', 'c']
     assert macro_funcs['deref_var'](expr, vars_to_deref) == \
         '(*a) > (*b_1) && (*b_1) < (*c)'
+
+
+def test_func_format_list():
+    lst = ['cmath', 'std']
+    assert macro_funcs['format_list']('#include <{}>', lst) == \
+        ['#include <cmath>', '#include <std>']

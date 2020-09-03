@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 03:25 AM +0800
+# Last Change: Fri Sep 04, 2020 at 03:40 AM +0800
 
 import re
 
@@ -26,13 +26,6 @@ class BabyConfigParser(object):
         """
         self.parsed_config = parsed_config
         self.dumped_ntuple = dumped_ntuple
-
-        # Components in the template macro directive
-        self.system_headers = UniqueList()
-        self.user_headers = UniqueList()
-        self.input_branches = UniqueList()
-        self.output_variables = UniqueList()
-        self.transient_variables = UniqueList()
 
     def parse(self):
         """

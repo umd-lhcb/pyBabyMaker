@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 04:06 AM +0800
+# Last Change: Fri Sep 04, 2020 at 04:47 AM +0800
 
 import re
 
@@ -35,13 +35,14 @@ class BabyConfigParser(object):
         directive = {
             'system_headers': UniqueList(),
             'user_headers': UniqueList(),
+            'trees': {},
         }
 
         for output_tree, config in self.parsed_config.items():
             input_tree = config['input_tree']
             dumped_tree = self.dumped_ntuple[input_tree]
 
-            directive[output_tree] = {
+            subdirective = {
                 'input_tree': input_tree,
                 'input_branches': UniqueList(),
                 'output_branches': UniqueList(),
@@ -50,10 +51,11 @@ class BabyConfigParser(object):
             }
 
             self.parse_headers(config, directive)
-            self.parse_drop_keep_rename(config, dumped_tree,
-                                        directive[output_tree])
-            self.parse_calculation(config, dumped_tree, directive[output_tree])
-            self.parse_selection(config, dumped_tree, directive[output_tree])
+            self.parse_drop_keep_rename(config, dumped_tree, subdirective)
+            self.parse_calculation(config, dumped_tree, subdirective)
+            self.parse_selection(config, dumped_tree, subdirective)
+
+            directive['trees'][output_tree] = subdirective
 
         return directive
 

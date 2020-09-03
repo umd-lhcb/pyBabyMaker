@@ -2,108 +2,169 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Sep 09, 2019 at 12:10 AM -0400
+# Last Change: Fri Sep 04, 2020 at 02:40 AM +0800
 
-from pyBabyMaker.base import BaseCppGenerator, BaseConfigParser, BaseMaker
+from pyBabyMaker.base import UniqueList, BaseMaker, Variable
 
 
-class BabyCppGenerator(BaseCppGenerator):
-    def gen(self):
-        result = ''
-        result += self.gen_timestamp()
-        result += self.gen_headers()
-        result += self.gen_preamble()
-        result += self.gen_body()
-        return result
+########################
+# Configuration parser #
+########################
 
-    def gen_preamble(self):
-        result = ''
-        for data_store in self.instructions:
-            result += self.gen_preamble_single_output_tree(data_store)
-        return result
 
-    def gen_body(self):
-        function_calls = ''.join(
-            ['generator_{}(input_file, output_file);\n'.format(
-                self.cpp_make_var(i.output_tree)
-            ) for i in self.instructions]
-        )
-        body = '''
-TFile *input_file = new TFile(argv[1], "read");
-TFile *output_file = new TFile(argv[2], "recreate");
-
-{}
-
-output_file->Close();
-
-delete input_file;
-delete output_file;
-'''.format(function_calls)
-        return self.cpp_main(body)
-
-    def gen_preamble_single_output_tree(self, data_store):
+class BabyConfigParser(object):
+    """
+    Basic parser for YAML C++ code instruction.
+    """
+    def __init__(self, parsed_config, dumped_ntuple):
         """
-        Generate the body of function call for each ``input_tree`` and
-        ``output_tree``.
+        Initialize the config parser with parsed YAML file and dumped n-tuple
+        structure.
         """
-        input_tree = self.cpp_TTreeReader(
-            'reader', data_store.input_tree, 'input_file')
-        output_tree = self.cpp_TTree('output', data_store.output_tree)
+        self.parsed_config = parsed_config
+        self.dumped_ntuple = dumped_ntuple
 
-        input_br = ''.join(
-            [self.cpp_TTreeReaderValue(v.type, v.name, 'reader', v.name)
-             for v in data_store.input_br])
-        output_br = []
-        for v in data_store.output_br:
-            output_br.append('{} {}_out;\n'.format(v.type, v.name))
-            output_br.append('output.Branch("{0}", &{0}_out);\n'.format(v.name))
-        output_br = ''.join(output_br)
+        # Components in the template macro directive
+        self.system_headers = UniqueList()
+        self.user_headers = UniqueList()
+        self.input_branches = UniqueList()
+        self.output_variables = UniqueList()
+        self.transient_variables = UniqueList()
 
-        transient = ''.join(
-            ['{} {} = {};\n'.format(
-                v.type, v.name, self.dereference_variables(v.rvalue,
-                                                           data_store.input_br))
-             for v in data_store.transient])
+    def gen_directive(self):
+        """
+        Parse the loaded YAML dict (in ``self.parsed_config`) and dumped ntuple
+        tree structure (in ``self.dumped_ntuple``).
+        """
+        directive = {
+            'system_headers': UniqueList(),
+            'user_headers': UniqueList(),
+        }
 
-        output_vars = ''.join(['{}_out = {};\n'.format(
-            v.name, self.dereference_variables(v.rvalue, data_store.input_br))
-            for v in data_store.output_br])
+        for output_tree, config in self.parsed_config.items():
+            input_tree = config['input_tree']
+            dumped_tree = self.dumped_ntuple[input_tree]
 
-        if not data_store.selection:
-            loop = '''{output_vars}
-output.Fill();'''.format(output_vars=output_vars)
-        else:
-            # We need to prepend a '*' to dereference the value input branches
-            loop = '''if ({selection}) {{
-  {output_vars}
-  output.Fill();
-}}'''.format(output_vars=output_vars,
-             selection=self.dereference_variables(
-                 data_store.selection, data_store.input_br),
-             )
+            directive[output_tree] = {
+                'input_tree': input_tree,
+                'input_branches': UniqueList(),
+                'output_branches': UniqueList(),
+                'transient_variables': UniqueList(),
+            }
 
-        result = '''
-void generator_{name}(TFile *input_file, TFile *output_file) {{
-  {input_tree}
-  {output_tree}
+            self.parse_headers(config, directive)
+            self.parse_drop_keep_rename(config, dumped_tree,
+                                        directive[output_tree])
+            self.parse_calculation(config, dumped_tree, directive)
+            self.parse_selection(config, dumped_tree, directive)
 
-  {input_br}
-  {output_br}
+        return directive
 
-  while (reader.Next()) {{
-    {transient}
-    {loop}
-  }}
+    def parse_headers(self, config, directive):
+        """
+        Parse ``headers`` section.
+        """
+        for header_type in ('system', 'user'):
+            try:
+                directive['{}_headers'.format(header_type)] += \
+                    config['headers'][header_type]
+            except KeyError:
+                pass
 
-  output_file->Write();
-}}
-'''.format(name=self.cpp_make_var(data_store.output_tree),
-           input_tree=input_tree, output_tree=output_tree,
-           input_br=input_br, output_br=output_br,
-           transient=transient, loop=loop)
+    def parse_drop_keep_rename(self, config, dumped_tree, directive):
+        """
+        Parse ``drop, keep, rename`` sections.
+        """
+        branches_to_keep = []
+        for br_in, datatype in dumped_tree.items():
+            if 'drop' in config.keys() and self.match(config['drop'], br_in):
+                print('Dropping branch: {}'.format(br_in))
+            elif 'keep' in config.keys() and self.match(config['keep'], br_in):
+                branches_to_keep.append((datatype, br_in))
+            elif 'rename' in config.keys() and br_in in config['rename']:
+                branches_to_keep.append((datatype, br_in))
 
-        return result
+        for datatype, br_in in branches_to_keep:
+            directive['input_branches'].append(Variable(datatype, br_in))
+            # Handle branch rename here
+            try:
+                br_out = config['rename'][br_in]
+                directive['output_branches'].append(
+                    Variable(datatype, br_out, br_in))
+            except KeyError:
+                directive['output_branches'].append(
+                    Variable(datatype, br_in, br_in))
 
+    def parse_calculation(self, config, dumped_tree, data_store):
+        """
+        Parse ``calculation`` section.
+        """
+        if 'calculation' in config.keys():
+            for name, code in config['calculation'].items():
+                datatype, rvalue = code.split(';')
+                if datatype == '^':
+                    self.__getattribute__(rvalue)(name, dumped_tree, data_store)
+                elif '^' in datatype:
+                    datatype = datatype.strip('^')
+                    data_store.append_transient(
+                        Variable(datatype, name, rvalue)
+                    )
+                    self.load_missing_variables(rvalue, dumped_tree, data_store)
+                else:
+                    data_store.append_output_br(
+                        Variable(datatype, name, rvalue)
+                    )
+                    self.load_missing_variables(rvalue, dumped_tree, data_store)
+
+    def parse_selection(self, config, dumped_tree, data_store):
+        """
+        Parse ``selection`` section.
+        """
+        if 'selection' in config.keys():
+            data_store.selection = ' '.join(config['selection'])
+            self.load_missing_variables(data_store.selection, dumped_tree,
+                                        data_store)
+
+    def load_missing_variables(self, expr, dumped_tree, data_store):
+        """
+        Load missing variables required for calculation or comparison, provided
+        that the variables are available directly in the n-tuple.
+        """
+        variables = find_all_vars(expr)
+        for v in variables:
+            if v not in data_store.loaded_variables:
+                try:
+                    self.LOAD(v, dumped_tree, data_store)
+                except Exception:
+                    print('WARNING: {} is not a known branch name.'.format(v))
+
+    @staticmethod
+    def match(patterns, string, return_value=True):
+        """
+        Test if ``string`` (a regular expression) matches at least one element
+        in the ``patterns``. If there's a match, return ``return_value``.
+        """
+        for p in patterns:
+            if bool(re.search(r'{}'.format(p), string)):
+                return return_value
+        return not return_value
+
+    @staticmethod
+    def LOAD(name, dumped_tree, data_store):
+        """
+        Load variable ``name`` from n-tuple, if it's available.
+        """
+        try:
+            datatype = dumped_tree[name]
+            data_store.append_input_br(
+                Variable(datatype, name))
+        except KeyError:
+            raise KeyError('Branch {} not found.'.format(name))
+
+
+#############
+# BabyMaker #
+#############
 
 class BabyMaker(BaseMaker):
     """

@@ -24,7 +24,7 @@ void generator_/* {% output_tree %} */(TFile *input_file, TFile *output_file) {
   // Define output branches
   // {% for var in config.output_branches %}
   // {% format: "{} {}_out;", var.type, var.name %}
-  // {% format: "output.Branch(\"{}\", {}_out);", var.name, var.name %}
+  // {% format: "output.Branch(\"{}\", &{}_out);", var.name, var.name %}
   // {% endfor %}
 
   while (reader.Next()) {

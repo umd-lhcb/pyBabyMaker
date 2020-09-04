@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Sep 05, 2020 at 12:35 AM +0800
+# Last Change: Sat Sep 05, 2020 at 12:50 AM +0800
 
 import pytest
 import os
@@ -96,6 +96,16 @@ def directive():
     }
 
 
+@pytest.fixture
+def subdirective():
+    return {
+        'input_branches': UniqueList(),
+        'output_branches': UniqueList(),
+        'temp_variables': UniqueList(),
+        'selection': [],
+    }
+
+
 def test_BabyConfigParser_parse_headers_none(directive,
                                              default_BabyConfigParser):
     default_BabyConfigParser.parse_headers({}, directive)
@@ -128,7 +138,8 @@ def test_BabyConfigParser_parse_headers_user_only(directive,
     assert directive['user_headers'] == ['include/dummy.h']
 
 
-def test_BabyConfigParser_parse_drop_keep_rename(default_BabyConfigParser):
+def test_BabyConfigParser_parse_drop_keep_rename(subdirective,
+                                                 default_BabyConfigParser):
     config = {
         'drop': ['Y_P.*'],
         'keep': ['Y_P.*', 'Z_PX', 'X_P.*'],
@@ -145,18 +156,17 @@ def test_BabyConfigParser_parse_drop_keep_rename(default_BabyConfigParser):
         'Z_PY': 'float',
         'Z_PZ': 'float',
     }
-    data_store = CppCodeDataStore()
-
     default_BabyConfigParser.parse_drop_keep_rename(
-        config, dumped_tree, data_store)
-    assert data_store.input_br == [
+        config, dumped_tree, subdirective)
+
+    assert subdirective['input_branches'] == [
         Variable('float', 'X_PX'),
         Variable('float', 'X_PY'),
         Variable('float', 'X_PZ'),
         Variable('float', 'Z_PX'),
         Variable('float', 'Z_PY'),
     ]
-    assert data_store.output_br == [
+    assert subdirective['output_branches'] == [
         Variable('float', 'X_PX', 'X_PX'),
         Variable('float', 'X_PY', 'X_PY'),
         Variable('float', 'X_PZ', 'X_PZ'),
@@ -165,7 +175,8 @@ def test_BabyConfigParser_parse_drop_keep_rename(default_BabyConfigParser):
     ]
 
 
-def test_BabyConfigParser_parse_calculation(default_BabyConfigParser):
+def test_BabyConfigParser_parse_calculation(subdirective,
+                                            default_BabyConfigParser):
     config = {
         'calculation': {
             'Y_PX': '^;LOAD',
@@ -178,34 +189,35 @@ def test_BabyConfigParser_parse_calculation(default_BabyConfigParser):
         'Y_PY': 'float',
         'Y_PZ': 'float',
     }
-    data_store = CppCodeDataStore()
-
     default_BabyConfigParser.parse_calculation(
-        config, dumped_tree, data_store)
-    assert data_store.input_br == [Variable('float', 'Y_PX')]
-    assert data_store.output_br == [Variable('double', 'Y_P_shift', 'Y_P_TEMP')]
-    assert data_store.transient == [Variable('double', 'Y_P_TEMP', 'Y_PX+1')]
+        config, dumped_tree, subdirective)
+
+    assert subdirective['input_branches'] == [Variable('float', 'Y_PX')]
+    assert subdirective['output_branches'] == [
+        Variable('double', 'Y_P_shift', 'Y_P_TEMP')]
+    assert subdirective['temp_variables'] == [
+        Variable('double', 'Y_P_TEMP', 'Y_PX+1')]
 
 
 def test_BabyConfigParser_parse_load_missing_variables(
-        default_BabyConfigParser):
+        subdirective, default_BabyConfigParser):
     expr = '!(Y_PX > 10) && FUNCTOR(Y_PY, Y_PZ) != 10'
     dumped_tree = {
         'Y_PX': 'float',
         'Y_PY': 'float',
         'Y_PZ': 'float',
     }
-    data_store = CppCodeDataStore()
-    default_BabyConfigParser.load_missing_variables(expr, dumped_tree,
-                                                    data_store)
-    assert data_store.input_br == [
+    default_BabyConfigParser.load_missing_variables(
+        expr, dumped_tree, subdirective)
+    assert subdirective['input_branches'] == [
         Variable('float', 'Y_PX'),
         Variable('float', 'Y_PY'),
         Variable('float', 'Y_PZ'),
     ]
 
 
-def test_BabyConfigParser_parse_selection(default_BabyConfigParser):
+def test_BabyConfigParser_parse_selection(subdirective,
+                                          default_BabyConfigParser):
     config = {
         'selection': ['Y_PT > 100000', '&&', 'Y_PE > (100 * pow(10, 3))']
     }
@@ -216,12 +228,15 @@ def test_BabyConfigParser_parse_selection(default_BabyConfigParser):
         'Y_PT': 'float',
         'Y_PE': 'float',
     }
-    data_store = CppCodeDataStore()
-
     default_BabyConfigParser.parse_selection(
-        config, dumped_tree, data_store)
-    assert data_store.selection == ' '.join(config['selection'])
+        config, dumped_tree, subdirective)
 
+    assert subdirective['selection'] == config['selection']
+
+
+##################
+# Helper methods #
+##################
 
 def test_BabyConfigParser_match_True(default_BabyConfigParser):
     assert default_BabyConfigParser.match(['quick', 'brown', 'fox'], 'fox')
@@ -244,25 +259,24 @@ def test_BabyConfigParser_match_partial_match(default_BabyConfigParser):
     assert default_BabyConfigParser.match(['quick', 'brown', 'fox'], 'fox2')
 
 
-def test_BabyConfigParser_LOAD_exist(default_BabyConfigParser):
+def test_BabyConfigParser_load_var_exist(default_BabyConfigParser):
     dumped_tree = {
         'X_PX': 'float',
         'X_PY': 'float',
         'X_PZ': 'float',
         'Y_PX': 'float',
     }
-    data_store = CppCodeDataStore()
-    default_BabyConfigParser.LOAD('X_PX', dumped_tree, data_store)
-    assert data_store.input_br == [Variable('float', 'X_PX')]
+    result = default_BabyConfigParser.load_var('X_PX', dumped_tree)
+
+    assert result == 'float'
 
 
-def test_BabyConfigParser_LOAD_not_exist(default_BabyConfigParser):
+def test_BabyConfigParser_load_var_not_exist(default_BabyConfigParser):
     dumped_tree = {
         'X_PX': 'float',
         'X_PY': 'float',
         'X_PZ': 'float',
         'Y_PX': 'float',
     }
-    data_store = CppCodeDataStore()
     with pytest.raises(KeyError):
-        default_BabyConfigParser.LOAD('Z_PX', dumped_tree, data_store)
+        default_BabyConfigParser.load_var('Z_PX', dumped_tree)

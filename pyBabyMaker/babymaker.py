@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Sep 05, 2020 at 02:49 AM +0800
+# Last Change: Sat Sep 05, 2020 at 02:53 AM +0800
 
 import re
 
@@ -48,6 +48,9 @@ class BabyConfigParser(object):
             self.parse_drop_keep_rename(config, dumped_tree, subdirective)
             self.parse_calculation(config, dumped_tree, subdirective)
             self.parse_selection(config, dumped_tree, subdirective)
+
+            subdirective['input_branch_names'] = [
+                v.name for v in subdirective['input_branches']]
 
             directive['trees'][output_tree] = subdirective
 

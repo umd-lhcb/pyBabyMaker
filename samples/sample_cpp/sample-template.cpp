@@ -27,7 +27,17 @@ void generator_/* {% output_tree %} */(TFile *input_file, TFile *output_file) {
   // {% endfor %}
 
   while (reader.Next()) {
-    if (/* {% join: (deref_var_list: config.selection, config.loaded_variables), " && " %} */) {
+    if (/* {% join: (deref_var_list: config.selection, config.input_branch_names), " && " %} */) {
+      // Define temp variables
+      // {% for var in config.temp_variables %}
+      // {% format: "{} {} = {};", var.type, var.name, (deref_var: var.rvalue, config.input_branch_names) %}
+      // {% endfor %}
+
+      // Assign values for each output branch in this loop
+      // {% for var in config.output_branches %}
+      // {% format: "{}_out = {};", var.name, (deref_var: var.rvalue, config.input_branch_names) %}
+      // {% endfor %}
+
       output.Fill();
     }
   }

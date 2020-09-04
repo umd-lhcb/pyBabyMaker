@@ -7,7 +7,12 @@ API
 .. toctree::
 
    pyBabyMaker.base
-   pyBabyMaker.parse
    pyBabyMaker.babymaker
    pyBabyMaker.io.NestedYAMLLoader
+   pyBabyMaker.engine.core
+   pyBabyMaker.engine.eval
+   pyBabyMaker.engine.functions
    pyBabyMaker.engine.identifiers
+   pyBabyMaker.engine.syntax
+   pyBabyMaker.boolean.syntax
+   pyBabyMaker.boolean.utils

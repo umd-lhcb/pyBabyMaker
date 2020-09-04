@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Sep 05, 2020 at 02:19 AM +0800
+# Last Change: Sat Sep 05, 2020 at 02:35 AM +0800
 
 import pytest
 import os
@@ -97,13 +97,8 @@ def directive():
 
 
 @pytest.fixture
-def subdirective():
-    return {
-        'input_branches': UniqueList(),
-        'output_branches': UniqueList(),
-        'temp_variables': UniqueList(),
-        'selection': [],
-    }
+def subdirective(default_BabyConfigParser):
+    return default_BabyConfigParser.gen_subdirective('sample_tree')
 
 
 def test_BabyConfigParser_parse_headers_none(directive,

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Sep 05, 2020 at 02:23 AM +0800
+# Last Change: Sat Sep 05, 2020 at 02:33 AM +0800
 
 import re
 
@@ -42,13 +42,7 @@ class BabyConfigParser(object):
             input_tree = config['input_tree']
             dumped_tree = self.dumped_ntuple[input_tree]
 
-            subdirective = {
-                'input_tree': input_tree,
-                'input_branches': UniqueList(),
-                'output_branches': UniqueList(),
-                'temp_variables': UniqueList(),
-                'selection': [],
-            }
+            subdirective = self.gen_subdirective(input_tree)
 
             self.parse_headers(config, directive)
             self.parse_drop_keep_rename(config, dumped_tree, subdirective)
@@ -83,6 +77,7 @@ class BabyConfigParser(object):
             elif 'keep' in config and self.match(config['keep'], br_in) or \
                     'rename' in config and br_in in config['rename']:
                 branches_to_keep.append((datatype, br_in))
+                directive['known_names'].append(br_in)
 
         for datatype, br_in in branches_to_keep:
             directive['input_branches'].append(Variable(datatype, br_in))
@@ -102,6 +97,7 @@ class BabyConfigParser(object):
         if 'calculation' in config:
             for name, code in config['calculation'].items():
                 datatype, rvalue = code.split(';')
+                directive['known_names'].append(name)
 
                 if '^' in datatype:
                     datatype = datatype.strip('^')
@@ -124,25 +120,32 @@ class BabyConfigParser(object):
             for expr in config['selection']:
                 self.load_missing_vars(expr, dumped_tree, directive)
 
-        else:
-            directive['selection'] = ['true']
-
     def load_missing_vars(self, expr, dumped_tree, directive):
         """
         Load missing variables required for calculation or comparison, provided
         that the variables are available directly in the ntuple.
         """
         variables = UniqueList(find_all_vars(expr))
-        loaded_variables = [v.name for v in directive['input_branches']]
 
         for v in variables:
-            if v not in loaded_variables:
+            if v not in directive['known_names']:
                 try:
                     datatype = self.load_var(v, dumped_tree)
                     directive['input_branches'].append(
                         Variable(datatype, v))
+                    directive['known_names'].append(v)
                 except Exception:
                     print('WARNING: {} is not a known branch name.'.format(v))
+
+    @staticmethod
+    def gen_subdirective(input_tree):
+        return {'input_tree': input_tree,
+                'input_branches': UniqueList(),
+                'output_branches': UniqueList(),
+                'temp_variables': UniqueList(),
+                'selection': ['true'],
+                'known_names': UniqueList(),
+                }
 
     @staticmethod
     def match(patterns, string, return_value=True):

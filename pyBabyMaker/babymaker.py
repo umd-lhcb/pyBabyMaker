@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Sep 05, 2020 at 02:53 AM +0800
+# Last Change: Sat Sep 05, 2020 at 03:53 AM +0800
 
 import re
 
@@ -29,7 +29,7 @@ class BabyConfigParser(object):
 
     def parse(self):
         """
-        Parse the loaded YAML dict (in ``self.parsed_config`) and dumped ntuple
+        Parse the loaded YAML dict (in ``self.parsed_config``) and dumped ntuple
         tree structure (in ``self.dumped_ntuple``).
         """
         directive = {

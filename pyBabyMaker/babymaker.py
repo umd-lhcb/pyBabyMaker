@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 04:47 AM +0800
+# Last Change: Fri Sep 04, 2020 at 08:38 PM +0800
 
 import re
 
@@ -54,6 +54,9 @@ class BabyConfigParser(object):
             self.parse_drop_keep_rename(config, dumped_tree, subdirective)
             self.parse_calculation(config, dumped_tree, subdirective)
             self.parse_selection(config, dumped_tree, subdirective)
+
+            subdirective['loaded_variables'] = [
+                var.name for var in subdirective['input_branches']]
 
             directive['trees'][output_tree] = subdirective
 
@@ -115,6 +118,9 @@ class BabyConfigParser(object):
 
             for expr in config['selection']:
                 self.load_missing_vars(expr, dumped_tree, directive)
+
+        else:
+            directive['selection'] = ['true']
 
     def load_missing_vars(self, expr, dumped_tree, directive):
         """

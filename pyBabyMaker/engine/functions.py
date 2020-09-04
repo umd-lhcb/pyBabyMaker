@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 03:38 AM +0800
+# Last Change: Fri Sep 04, 2020 at 08:39 PM +0800
 """
 This module defines functions for template macro.
 """
@@ -92,4 +92,7 @@ macro_funcs = {
         datetime.now().strftime(fmt)),
     'deref_var': func_deref_var,
     'format_list': func_format_list,
+    'deref_var_list': lambda expr_lst, vars_to_deref:
+        ['({})'.format(func_deref_var(expr, vars_to_deref))
+         for expr in expr_lst],
 }

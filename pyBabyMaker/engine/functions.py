@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 08:39 PM +0800
+# Last Change: Sat Sep 05, 2020 at 03:26 AM +0800
 """
 This module defines functions for template macro.
 """
@@ -44,11 +44,13 @@ def func_deref_var(expr, vars_to_deref):
     Dereference variables loaded from n-tuple directly. For example:
 
     .. code-block:: c++
-        TTreeReader reader("tree", input_file)
-        TTreeReaderValue<double> Y_PT(reader, "Y_PT");
-        while (reader.Next()) {
-            cout << (*Y_PT)
-        }
+
+       TTreeReader reader("tree", input_file)
+       TTreeReaderValue<double> Y_PT(reader, "Y_PT");
+       while (reader.Next()) {
+         cout << (*Y_PT)
+       }
+
     The ``Y_PT`` inside the ``while`` loop needs to be dereferenced.
 
     :param str expr: C++ expression that has variables to be dereferenced.

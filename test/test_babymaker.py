@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Sep 05, 2020 at 12:57 AM +0800
+# Last Change: Sat Sep 05, 2020 at 01:19 AM +0800
 
 import pytest
 import os
@@ -209,9 +209,9 @@ def test_BabyConfigParser_parse_load_missing_vars(
     default_BabyConfigParser.load_missing_vars(
         expr, dumped_tree, subdirective)
     assert subdirective['input_branches'] == [
-        Variable('float', 'Y_PX'),
         Variable('float', 'Y_PY'),
         Variable('float', 'Y_PZ'),
+        Variable('float', 'Y_PX'),
     ]
 
 

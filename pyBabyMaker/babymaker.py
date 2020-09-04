@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 08:38 PM +0800
+# Last Change: Sat Sep 05, 2020 at 01:49 AM +0800
 
 import re
 
@@ -75,20 +75,27 @@ class BabyConfigParser(object):
         """
         Parse ``drop, keep, rename`` sections.
         """
+        branches_to_keep = []
         for br_in, datatype in dumped_tree.items():
             if 'drop' in config and self.match(config['drop'], br_in):
                 print('Dropping branch: {}'.format(br_in))
 
             elif 'keep' in config and self.match(config['keep'], br_in):
-                directive['input_branches'].append(Variable(datatype, br_in))
-                directive['output_branches'].append(
-                    Variable(datatype, br_in, br_in))
+                branches_to_keep.append((datatype, br_in))
 
             elif 'rename' in config and br_in in config['rename']:
-                directive['input_branches'].append(Variable(datatype, br_in))
+                branches_to_keep.append((datatype, br_in))
+
+        for datatype, br_in in branches_to_keep:
+            directive['input_branches'].append(Variable(datatype, br_in))
+            try:
+                # Handle possible branch rename here
                 br_out = config['rename'][br_in]
-                directive['output_branches'].append(
-                    Variable(datatype, br_out, br_in))
+            except KeyError:
+                br_out = br_in
+
+            directive['output_branches'].append(
+                Variable(datatype, br_out, br_in))
 
     def parse_calculation(self, config, dumped_tree, directive):
         """

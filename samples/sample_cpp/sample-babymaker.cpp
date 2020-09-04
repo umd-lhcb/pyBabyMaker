@@ -1,14 +1,14 @@
+// Generated on: 2020-09-05 03:11:46.664047
+#include <TBranch.h>
 #include <TFile.h>
 #include <TTree.h>
 #include <TTreeReader.h>
-#include <TBranch.h>
 
 // System headers
 #include <cmath>
 #include <iostream>
 
 // User headers
-
 
 // Generator for each output tree
 void generator_ATuple(TFile *input_file, TFile *output_file) {
@@ -25,22 +25,22 @@ void generator_ATuple(TFile *input_file, TFile *output_file) {
 
   // Define output branches
   Double_t y_pt_out;
-  output.Branch("y_pt", y_pt_out);
+  output.Branch("y_pt", &y_pt_out);
   Double_t Y_PE_out;
-  output.Branch("Y_PE", Y_PE_out);
+  output.Branch("Y_PE", &Y_PE_out);
   Double_t y_px_out;
-  output.Branch("y_px", y_px_out);
+  output.Branch("y_px", &y_px_out);
   Double_t y_py_out;
-  output.Branch("y_py", y_py_out);
+  output.Branch("y_py", &y_py_out);
   Double_t y_pz_out;
-  output.Branch("y_pz", y_pz_out);
+  output.Branch("y_pz", &y_pz_out);
   Double_t RandStuff_out;
-  output.Branch("RandStuff", RandStuff_out);
+  output.Branch("RandStuff", &RandStuff_out);
 
   while (reader.Next()) {
     if (((*Y_PT) > 10000)) {
       // Define temp variables
-      Double_t TempStuff = (*D0_P)+(*Y_PT);
+      Double_t TempStuff = (*D0_P) + (*Y_PT);
 
       // Assign values for each output branch in this loop
       y_pt_out = (*Y_PT);
@@ -67,7 +67,7 @@ void generator_AnotherTuple(TFile *input_file, TFile *output_file) {
 
   // Define output branches
   Double_t Y_PT_out;
-  output.Branch("Y_PT", Y_PT_out);
+  output.Branch("Y_PT", &Y_PT_out);
 
   while (reader.Next()) {
     if (((*Y_PT) > 10000) && ((*Y_PE) > (100 * pow(10, 3)))) {
@@ -130,7 +130,8 @@ void generator_YetAnotherTuple(TFile *input_file, TFile *output_file) {
   TTreeReaderValue<Float_t> Y_ISOLATION_NNpi2(reader, "Y_ISOLATION_NNpi2");
   TTreeReaderValue<Float_t> Y_ISOLATION_NNp2(reader, "Y_ISOLATION_NNp2");
   TTreeReaderValue<Float_t> Y_ISOLATION_IsMuon2(reader, "Y_ISOLATION_IsMuon2");
-  TTreeReaderValue<Float_t> Y_ISOLATION_NNghost2(reader, "Y_ISOLATION_NNghost2");
+  TTreeReaderValue<Float_t> Y_ISOLATION_NNghost2(reader,
+                                                 "Y_ISOLATION_NNghost2");
   TTreeReaderValue<Int_t> Y_ISOLATION_TRUEID2(reader, "Y_ISOLATION_TRUEID2");
   TTreeReaderValue<Double_t> Y_ISOLATION_CHI23(reader, "Y_ISOLATION_CHI23");
   TTreeReaderValue<Int_t> Y_ISOLATION_SC3(reader, "Y_ISOLATION_SC3");
@@ -148,7 +149,8 @@ void generator_YetAnotherTuple(TFile *input_file, TFile *output_file) {
   TTreeReaderValue<Float_t> Y_ISOLATION_NNpi3(reader, "Y_ISOLATION_NNpi3");
   TTreeReaderValue<Float_t> Y_ISOLATION_NNp3(reader, "Y_ISOLATION_NNp3");
   TTreeReaderValue<Float_t> Y_ISOLATION_IsMuon3(reader, "Y_ISOLATION_IsMuon3");
-  TTreeReaderValue<Float_t> Y_ISOLATION_NNghost3(reader, "Y_ISOLATION_NNghost3");
+  TTreeReaderValue<Float_t> Y_ISOLATION_NNghost3(reader,
+                                                 "Y_ISOLATION_NNghost3");
   TTreeReaderValue<Int_t> Y_ISOLATION_TRUEID3(reader, "Y_ISOLATION_TRUEID3");
   TTreeReaderValue<Double_t> Y_ISOLATION_CHI24(reader, "Y_ISOLATION_CHI24");
   TTreeReaderValue<Int_t> Y_ISOLATION_SC4(reader, "Y_ISOLATION_SC4");
@@ -166,170 +168,171 @@ void generator_YetAnotherTuple(TFile *input_file, TFile *output_file) {
   TTreeReaderValue<Float_t> Y_ISOLATION_NNpi4(reader, "Y_ISOLATION_NNpi4");
   TTreeReaderValue<Float_t> Y_ISOLATION_NNp4(reader, "Y_ISOLATION_NNp4");
   TTreeReaderValue<Float_t> Y_ISOLATION_IsMuon4(reader, "Y_ISOLATION_IsMuon4");
-  TTreeReaderValue<Float_t> Y_ISOLATION_NNghost4(reader, "Y_ISOLATION_NNghost4");
+  TTreeReaderValue<Float_t> Y_ISOLATION_NNghost4(reader,
+                                                 "Y_ISOLATION_NNghost4");
   TTreeReaderValue<Int_t> Y_ISOLATION_TRUEID4(reader, "Y_ISOLATION_TRUEID4");
 
   // Define output branches
   Double_t Y_OWNPV_X_out;
-  output.Branch("Y_OWNPV_X", Y_OWNPV_X_out);
+  output.Branch("Y_OWNPV_X", &Y_OWNPV_X_out);
   Double_t Y_OWNPV_Y_out;
-  output.Branch("Y_OWNPV_Y", Y_OWNPV_Y_out);
+  output.Branch("Y_OWNPV_Y", &Y_OWNPV_Y_out);
   Double_t Y_OWNPV_Z_out;
-  output.Branch("Y_OWNPV_Z", Y_OWNPV_Z_out);
+  output.Branch("Y_OWNPV_Z", &Y_OWNPV_Z_out);
   Double_t Y_OWNPV_XERR_out;
-  output.Branch("Y_OWNPV_XERR", Y_OWNPV_XERR_out);
+  output.Branch("Y_OWNPV_XERR", &Y_OWNPV_XERR_out);
   Double_t Y_OWNPV_YERR_out;
-  output.Branch("Y_OWNPV_YERR", Y_OWNPV_YERR_out);
+  output.Branch("Y_OWNPV_YERR", &Y_OWNPV_YERR_out);
   Double_t Y_OWNPV_ZERR_out;
-  output.Branch("Y_OWNPV_ZERR", Y_OWNPV_ZERR_out);
+  output.Branch("Y_OWNPV_ZERR", &Y_OWNPV_ZERR_out);
   Double_t Y_OWNPV_CHI2_out;
-  output.Branch("Y_OWNPV_CHI2", Y_OWNPV_CHI2_out);
+  output.Branch("Y_OWNPV_CHI2", &Y_OWNPV_CHI2_out);
   Int_t Y_OWNPV_NDOF_out;
-  output.Branch("Y_OWNPV_NDOF", Y_OWNPV_NDOF_out);
+  output.Branch("Y_OWNPV_NDOF", &Y_OWNPV_NDOF_out);
   Double_t Y_ISOLATION_CHI2_out;
-  output.Branch("Y_ISOLATION_CHI2", Y_ISOLATION_CHI2_out);
+  output.Branch("Y_ISOLATION_CHI2", &Y_ISOLATION_CHI2_out);
   Double_t Y_ISOLATION_ANGLE_out;
-  output.Branch("Y_ISOLATION_ANGLE", Y_ISOLATION_ANGLE_out);
+  output.Branch("Y_ISOLATION_ANGLE", &Y_ISOLATION_ANGLE_out);
   Int_t Y_ISOLATION_SC_out;
-  output.Branch("Y_ISOLATION_SC", Y_ISOLATION_SC_out);
+  output.Branch("Y_ISOLATION_SC", &Y_ISOLATION_SC_out);
   Double_t Y_ISOLATION_BDT_out;
-  output.Branch("Y_ISOLATION_BDT", Y_ISOLATION_BDT_out);
+  output.Branch("Y_ISOLATION_BDT", &Y_ISOLATION_BDT_out);
   Float_t Y_ISOLATION_CHARGE_out;
-  output.Branch("Y_ISOLATION_CHARGE", Y_ISOLATION_CHARGE_out);
+  output.Branch("Y_ISOLATION_CHARGE", &Y_ISOLATION_CHARGE_out);
   Float_t Y_ISOLATION_Type_out;
-  output.Branch("Y_ISOLATION_Type", Y_ISOLATION_Type_out);
+  output.Branch("Y_ISOLATION_Type", &Y_ISOLATION_Type_out);
   Float_t Y_ISOLATION_PE_out;
-  output.Branch("Y_ISOLATION_PE", Y_ISOLATION_PE_out);
+  output.Branch("Y_ISOLATION_PE", &Y_ISOLATION_PE_out);
   Float_t Y_ISOLATION_PX_out;
-  output.Branch("Y_ISOLATION_PX", Y_ISOLATION_PX_out);
+  output.Branch("Y_ISOLATION_PX", &Y_ISOLATION_PX_out);
   Float_t Y_ISOLATION_PY_out;
-  output.Branch("Y_ISOLATION_PY", Y_ISOLATION_PY_out);
+  output.Branch("Y_ISOLATION_PY", &Y_ISOLATION_PY_out);
   Float_t Y_ISOLATION_PZ_out;
-  output.Branch("Y_ISOLATION_PZ", Y_ISOLATION_PZ_out);
+  output.Branch("Y_ISOLATION_PZ", &Y_ISOLATION_PZ_out);
   Float_t Y_ISOLATION_PIDK_out;
-  output.Branch("Y_ISOLATION_PIDK", Y_ISOLATION_PIDK_out);
+  output.Branch("Y_ISOLATION_PIDK", &Y_ISOLATION_PIDK_out);
   Float_t Y_ISOLATION_PIDp_out;
-  output.Branch("Y_ISOLATION_PIDp", Y_ISOLATION_PIDp_out);
+  output.Branch("Y_ISOLATION_PIDp", &Y_ISOLATION_PIDp_out);
   Float_t Y_ISOLATION_NNk_out;
-  output.Branch("Y_ISOLATION_NNk", Y_ISOLATION_NNk_out);
+  output.Branch("Y_ISOLATION_NNk", &Y_ISOLATION_NNk_out);
   Float_t Y_ISOLATION_NNpi_out;
-  output.Branch("Y_ISOLATION_NNpi", Y_ISOLATION_NNpi_out);
+  output.Branch("Y_ISOLATION_NNpi", &Y_ISOLATION_NNpi_out);
   Float_t Y_ISOLATION_NNp_out;
-  output.Branch("Y_ISOLATION_NNp", Y_ISOLATION_NNp_out);
+  output.Branch("Y_ISOLATION_NNp", &Y_ISOLATION_NNp_out);
   Float_t Y_ISOLATION_IsMuon_out;
-  output.Branch("Y_ISOLATION_IsMuon", Y_ISOLATION_IsMuon_out);
+  output.Branch("Y_ISOLATION_IsMuon", &Y_ISOLATION_IsMuon_out);
   Float_t Y_ISOLATION_NNghost_out;
-  output.Branch("Y_ISOLATION_NNghost", Y_ISOLATION_NNghost_out);
+  output.Branch("Y_ISOLATION_NNghost", &Y_ISOLATION_NNghost_out);
   Int_t Y_ISOLATION_TRUEID_out;
-  output.Branch("Y_ISOLATION_TRUEID", Y_ISOLATION_TRUEID_out);
+  output.Branch("Y_ISOLATION_TRUEID", &Y_ISOLATION_TRUEID_out);
   Double_t Y_ISOLATION_CHI22_out;
-  output.Branch("Y_ISOLATION_CHI22", Y_ISOLATION_CHI22_out);
+  output.Branch("Y_ISOLATION_CHI22", &Y_ISOLATION_CHI22_out);
   Int_t Y_ISOLATION_SC2_out;
-  output.Branch("Y_ISOLATION_SC2", Y_ISOLATION_SC2_out);
+  output.Branch("Y_ISOLATION_SC2", &Y_ISOLATION_SC2_out);
   Double_t Y_ISOLATION_ANGLE2_out;
-  output.Branch("Y_ISOLATION_ANGLE2", Y_ISOLATION_ANGLE2_out);
+  output.Branch("Y_ISOLATION_ANGLE2", &Y_ISOLATION_ANGLE2_out);
   Double_t Y_ISOLATION_BDT2_out;
-  output.Branch("Y_ISOLATION_BDT2", Y_ISOLATION_BDT2_out);
+  output.Branch("Y_ISOLATION_BDT2", &Y_ISOLATION_BDT2_out);
   Float_t Y_ISOLATION_CHARGE2_out;
-  output.Branch("Y_ISOLATION_CHARGE2", Y_ISOLATION_CHARGE2_out);
+  output.Branch("Y_ISOLATION_CHARGE2", &Y_ISOLATION_CHARGE2_out);
   Float_t Y_ISOLATION_Type2_out;
-  output.Branch("Y_ISOLATION_Type2", Y_ISOLATION_Type2_out);
+  output.Branch("Y_ISOLATION_Type2", &Y_ISOLATION_Type2_out);
   Float_t Y_ISOLATION_PE2_out;
-  output.Branch("Y_ISOLATION_PE2", Y_ISOLATION_PE2_out);
+  output.Branch("Y_ISOLATION_PE2", &Y_ISOLATION_PE2_out);
   Float_t Y_ISOLATION_PX2_out;
-  output.Branch("Y_ISOLATION_PX2", Y_ISOLATION_PX2_out);
+  output.Branch("Y_ISOLATION_PX2", &Y_ISOLATION_PX2_out);
   Float_t Y_ISOLATION_PY2_out;
-  output.Branch("Y_ISOLATION_PY2", Y_ISOLATION_PY2_out);
+  output.Branch("Y_ISOLATION_PY2", &Y_ISOLATION_PY2_out);
   Float_t Y_ISOLATION_PZ2_out;
-  output.Branch("Y_ISOLATION_PZ2", Y_ISOLATION_PZ2_out);
+  output.Branch("Y_ISOLATION_PZ2", &Y_ISOLATION_PZ2_out);
   Float_t Y_ISOLATION_PIDK2_out;
-  output.Branch("Y_ISOLATION_PIDK2", Y_ISOLATION_PIDK2_out);
+  output.Branch("Y_ISOLATION_PIDK2", &Y_ISOLATION_PIDK2_out);
   Float_t Y_ISOLATION_PIDp2_out;
-  output.Branch("Y_ISOLATION_PIDp2", Y_ISOLATION_PIDp2_out);
+  output.Branch("Y_ISOLATION_PIDp2", &Y_ISOLATION_PIDp2_out);
   Float_t Y_ISOLATION_NNk2_out;
-  output.Branch("Y_ISOLATION_NNk2", Y_ISOLATION_NNk2_out);
+  output.Branch("Y_ISOLATION_NNk2", &Y_ISOLATION_NNk2_out);
   Float_t Y_ISOLATION_NNpi2_out;
-  output.Branch("Y_ISOLATION_NNpi2", Y_ISOLATION_NNpi2_out);
+  output.Branch("Y_ISOLATION_NNpi2", &Y_ISOLATION_NNpi2_out);
   Float_t Y_ISOLATION_NNp2_out;
-  output.Branch("Y_ISOLATION_NNp2", Y_ISOLATION_NNp2_out);
+  output.Branch("Y_ISOLATION_NNp2", &Y_ISOLATION_NNp2_out);
   Float_t Y_ISOLATION_IsMuon2_out;
-  output.Branch("Y_ISOLATION_IsMuon2", Y_ISOLATION_IsMuon2_out);
+  output.Branch("Y_ISOLATION_IsMuon2", &Y_ISOLATION_IsMuon2_out);
   Float_t Y_ISOLATION_NNghost2_out;
-  output.Branch("Y_ISOLATION_NNghost2", Y_ISOLATION_NNghost2_out);
+  output.Branch("Y_ISOLATION_NNghost2", &Y_ISOLATION_NNghost2_out);
   Int_t Y_ISOLATION_TRUEID2_out;
-  output.Branch("Y_ISOLATION_TRUEID2", Y_ISOLATION_TRUEID2_out);
+  output.Branch("Y_ISOLATION_TRUEID2", &Y_ISOLATION_TRUEID2_out);
   Double_t Y_ISOLATION_CHI23_out;
-  output.Branch("Y_ISOLATION_CHI23", Y_ISOLATION_CHI23_out);
+  output.Branch("Y_ISOLATION_CHI23", &Y_ISOLATION_CHI23_out);
   Int_t Y_ISOLATION_SC3_out;
-  output.Branch("Y_ISOLATION_SC3", Y_ISOLATION_SC3_out);
+  output.Branch("Y_ISOLATION_SC3", &Y_ISOLATION_SC3_out);
   Double_t Y_ISOLATION_BDT3_out;
-  output.Branch("Y_ISOLATION_BDT3", Y_ISOLATION_BDT3_out);
+  output.Branch("Y_ISOLATION_BDT3", &Y_ISOLATION_BDT3_out);
   Double_t Y_ISOLATION_ANGLE3_out;
-  output.Branch("Y_ISOLATION_ANGLE3", Y_ISOLATION_ANGLE3_out);
+  output.Branch("Y_ISOLATION_ANGLE3", &Y_ISOLATION_ANGLE3_out);
   Float_t Y_ISOLATION_CHARGE3_out;
-  output.Branch("Y_ISOLATION_CHARGE3", Y_ISOLATION_CHARGE3_out);
+  output.Branch("Y_ISOLATION_CHARGE3", &Y_ISOLATION_CHARGE3_out);
   Float_t Y_ISOLATION_Type3_out;
-  output.Branch("Y_ISOLATION_Type3", Y_ISOLATION_Type3_out);
+  output.Branch("Y_ISOLATION_Type3", &Y_ISOLATION_Type3_out);
   Float_t Y_ISOLATION_PE3_out;
-  output.Branch("Y_ISOLATION_PE3", Y_ISOLATION_PE3_out);
+  output.Branch("Y_ISOLATION_PE3", &Y_ISOLATION_PE3_out);
   Float_t Y_ISOLATION_PX3_out;
-  output.Branch("Y_ISOLATION_PX3", Y_ISOLATION_PX3_out);
+  output.Branch("Y_ISOLATION_PX3", &Y_ISOLATION_PX3_out);
   Float_t Y_ISOLATION_PY3_out;
-  output.Branch("Y_ISOLATION_PY3", Y_ISOLATION_PY3_out);
+  output.Branch("Y_ISOLATION_PY3", &Y_ISOLATION_PY3_out);
   Float_t Y_ISOLATION_PZ3_out;
-  output.Branch("Y_ISOLATION_PZ3", Y_ISOLATION_PZ3_out);
+  output.Branch("Y_ISOLATION_PZ3", &Y_ISOLATION_PZ3_out);
   Float_t Y_ISOLATION_PIDK3_out;
-  output.Branch("Y_ISOLATION_PIDK3", Y_ISOLATION_PIDK3_out);
+  output.Branch("Y_ISOLATION_PIDK3", &Y_ISOLATION_PIDK3_out);
   Float_t Y_ISOLATION_PIDp3_out;
-  output.Branch("Y_ISOLATION_PIDp3", Y_ISOLATION_PIDp3_out);
+  output.Branch("Y_ISOLATION_PIDp3", &Y_ISOLATION_PIDp3_out);
   Float_t Y_ISOLATION_NNk3_out;
-  output.Branch("Y_ISOLATION_NNk3", Y_ISOLATION_NNk3_out);
+  output.Branch("Y_ISOLATION_NNk3", &Y_ISOLATION_NNk3_out);
   Float_t Y_ISOLATION_NNpi3_out;
-  output.Branch("Y_ISOLATION_NNpi3", Y_ISOLATION_NNpi3_out);
+  output.Branch("Y_ISOLATION_NNpi3", &Y_ISOLATION_NNpi3_out);
   Float_t Y_ISOLATION_NNp3_out;
-  output.Branch("Y_ISOLATION_NNp3", Y_ISOLATION_NNp3_out);
+  output.Branch("Y_ISOLATION_NNp3", &Y_ISOLATION_NNp3_out);
   Float_t Y_ISOLATION_IsMuon3_out;
-  output.Branch("Y_ISOLATION_IsMuon3", Y_ISOLATION_IsMuon3_out);
+  output.Branch("Y_ISOLATION_IsMuon3", &Y_ISOLATION_IsMuon3_out);
   Float_t Y_ISOLATION_NNghost3_out;
-  output.Branch("Y_ISOLATION_NNghost3", Y_ISOLATION_NNghost3_out);
+  output.Branch("Y_ISOLATION_NNghost3", &Y_ISOLATION_NNghost3_out);
   Int_t Y_ISOLATION_TRUEID3_out;
-  output.Branch("Y_ISOLATION_TRUEID3", Y_ISOLATION_TRUEID3_out);
+  output.Branch("Y_ISOLATION_TRUEID3", &Y_ISOLATION_TRUEID3_out);
   Double_t Y_ISOLATION_CHI24_out;
-  output.Branch("Y_ISOLATION_CHI24", Y_ISOLATION_CHI24_out);
+  output.Branch("Y_ISOLATION_CHI24", &Y_ISOLATION_CHI24_out);
   Int_t Y_ISOLATION_SC4_out;
-  output.Branch("Y_ISOLATION_SC4", Y_ISOLATION_SC4_out);
+  output.Branch("Y_ISOLATION_SC4", &Y_ISOLATION_SC4_out);
   Double_t Y_ISOLATION_BDT4_out;
-  output.Branch("Y_ISOLATION_BDT4", Y_ISOLATION_BDT4_out);
+  output.Branch("Y_ISOLATION_BDT4", &Y_ISOLATION_BDT4_out);
   Double_t Y_ISOLATION_ANGLE4_out;
-  output.Branch("Y_ISOLATION_ANGLE4", Y_ISOLATION_ANGLE4_out);
+  output.Branch("Y_ISOLATION_ANGLE4", &Y_ISOLATION_ANGLE4_out);
   Float_t Y_ISOLATION_CHARGE4_out;
-  output.Branch("Y_ISOLATION_CHARGE4", Y_ISOLATION_CHARGE4_out);
+  output.Branch("Y_ISOLATION_CHARGE4", &Y_ISOLATION_CHARGE4_out);
   Float_t Y_ISOLATION_Type4_out;
-  output.Branch("Y_ISOLATION_Type4", Y_ISOLATION_Type4_out);
+  output.Branch("Y_ISOLATION_Type4", &Y_ISOLATION_Type4_out);
   Float_t Y_ISOLATION_PE4_out;
-  output.Branch("Y_ISOLATION_PE4", Y_ISOLATION_PE4_out);
+  output.Branch("Y_ISOLATION_PE4", &Y_ISOLATION_PE4_out);
   Float_t Y_ISOLATION_PX4_out;
-  output.Branch("Y_ISOLATION_PX4", Y_ISOLATION_PX4_out);
+  output.Branch("Y_ISOLATION_PX4", &Y_ISOLATION_PX4_out);
   Float_t Y_ISOLATION_PY4_out;
-  output.Branch("Y_ISOLATION_PY4", Y_ISOLATION_PY4_out);
+  output.Branch("Y_ISOLATION_PY4", &Y_ISOLATION_PY4_out);
   Float_t Y_ISOLATION_PZ4_out;
-  output.Branch("Y_ISOLATION_PZ4", Y_ISOLATION_PZ4_out);
+  output.Branch("Y_ISOLATION_PZ4", &Y_ISOLATION_PZ4_out);
   Float_t Y_ISOLATION_PIDK4_out;
-  output.Branch("Y_ISOLATION_PIDK4", Y_ISOLATION_PIDK4_out);
+  output.Branch("Y_ISOLATION_PIDK4", &Y_ISOLATION_PIDK4_out);
   Float_t Y_ISOLATION_PIDp4_out;
-  output.Branch("Y_ISOLATION_PIDp4", Y_ISOLATION_PIDp4_out);
+  output.Branch("Y_ISOLATION_PIDp4", &Y_ISOLATION_PIDp4_out);
   Float_t Y_ISOLATION_NNk4_out;
-  output.Branch("Y_ISOLATION_NNk4", Y_ISOLATION_NNk4_out);
+  output.Branch("Y_ISOLATION_NNk4", &Y_ISOLATION_NNk4_out);
   Float_t Y_ISOLATION_NNpi4_out;
-  output.Branch("Y_ISOLATION_NNpi4", Y_ISOLATION_NNpi4_out);
+  output.Branch("Y_ISOLATION_NNpi4", &Y_ISOLATION_NNpi4_out);
   Float_t Y_ISOLATION_NNp4_out;
-  output.Branch("Y_ISOLATION_NNp4", Y_ISOLATION_NNp4_out);
+  output.Branch("Y_ISOLATION_NNp4", &Y_ISOLATION_NNp4_out);
   Float_t Y_ISOLATION_IsMuon4_out;
-  output.Branch("Y_ISOLATION_IsMuon4", Y_ISOLATION_IsMuon4_out);
+  output.Branch("Y_ISOLATION_IsMuon4", &Y_ISOLATION_IsMuon4_out);
   Float_t Y_ISOLATION_NNghost4_out;
-  output.Branch("Y_ISOLATION_NNghost4", Y_ISOLATION_NNghost4_out);
+  output.Branch("Y_ISOLATION_NNghost4", &Y_ISOLATION_NNghost4_out);
   Int_t Y_ISOLATION_TRUEID4_out;
-  output.Branch("Y_ISOLATION_TRUEID4", Y_ISOLATION_TRUEID4_out);
+  output.Branch("Y_ISOLATION_TRUEID4", &Y_ISOLATION_TRUEID4_out);
 
   while (reader.Next()) {
     if ((true)) {
@@ -424,8 +427,7 @@ void generator_YetAnotherTuple(TFile *input_file, TFile *output_file) {
   output_file->Write();
 }
 
-
-int main(int, char** argv) {
+int main(int, char **argv) {
   TFile *input_file = new TFile(argv[1], "read");
   TFile *output_file = new TFile(argv[2], "recreate");
 

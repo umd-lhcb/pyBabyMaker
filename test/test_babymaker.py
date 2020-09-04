@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Sep 05, 2020 at 01:19 AM +0800
+# Last Change: Sat Sep 05, 2020 at 02:19 AM +0800
 
 import pytest
 import os
@@ -256,6 +256,21 @@ def test_BabyConfigParser_match_False_partial_match(default_BabyConfigParser):
 
 def test_BabyConfigParser_match_partial_match(default_BabyConfigParser):
     assert default_BabyConfigParser.match(['quick', 'brown', 'fox'], 'fox2')
+
+
+def test_BabyConfigParser_load_missing_vars(subdirective,
+                                            default_BabyConfigParser):
+    subdirective['known_names'] = ['TempStuff']
+    dumped_tree = {
+        'X_PX': 'float',
+        'X_PY': 'float',
+        'X_PZ': 'float',
+        'Y_PX': 'float',
+    }
+    default_BabyConfigParser.load_missing_vars('X_PX+TempStuff', dumped_tree,
+                                               subdirective)
+
+    assert subdirective['known_names'] == ['TempStuff', 'X_PX']
 
 
 def test_BabyConfigParser_load_var_exist(default_BabyConfigParser):

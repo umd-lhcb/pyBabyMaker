@@ -8,13 +8,15 @@ Usage
 
 .. code-block:: console
 
-   babymaker -i <yaml_file> -d <ntuple_file> -o <output_cpp>
+   babymaker -i <yaml_file> -d <ntuple_file> -o <output_cpp> -t <template_file>
 
 Note that:
 
 * ``<yaml_file>`` contains the instruction for postprocessing.
 * ``<ntuple_file>`` should have the exact tree structure as the n-tuples to be
   processed.
+* ``<template_file>`` refers to the input C++ template with embedded template
+  macros.
 
 By default, ``babymaker`` tries to reformat the generated C++ file with
 ``clang-format``, if it's available in user's ``$PATH``. This can be disabled

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Sep 05, 2020 at 12:50 AM +0800
+# Last Change: Sat Sep 05, 2020 at 12:57 AM +0800
 
 import pytest
 import os
@@ -19,6 +19,10 @@ PARDIR = os.path.join(PWD, os.pardir)
 SAMPLE_YAML = os.path.join(PARDIR, 'samples', 'sample-babymaker.yml')
 SAMPLE_ROOT = os.path.join(PARDIR, 'samples', 'sample.root')
 
+
+##########################
+# Parse YAML config file #
+##########################
 
 @pytest.fixture
 def load_files():
@@ -37,10 +41,6 @@ def default_BabyConfigParser():
 def realistic_BabyConfigParser(load_files):
     return BabyConfigParser(*load_files)
 
-
-##########################
-# Parse YAML config file #
-##########################
 
 def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
     directive = realistic_BabyConfigParser.parse()
@@ -179,7 +179,6 @@ def test_BabyConfigParser_parse_calculation(subdirective,
                                             default_BabyConfigParser):
     config = {
         'calculation': {
-            'Y_PX': '^;LOAD',
             'Y_P_TEMP': '^double;Y_PX+1',
             'Y_P_shift': 'double;Y_P_TEMP',
         }
@@ -199,7 +198,7 @@ def test_BabyConfigParser_parse_calculation(subdirective,
         Variable('double', 'Y_P_TEMP', 'Y_PX+1')]
 
 
-def test_BabyConfigParser_parse_load_missing_variables(
+def test_BabyConfigParser_parse_load_missing_vars(
         subdirective, default_BabyConfigParser):
     expr = '!(Y_PX > 10) && FUNCTOR(Y_PY, Y_PZ) != 10'
     dumped_tree = {
@@ -207,7 +206,7 @@ def test_BabyConfigParser_parse_load_missing_variables(
         'Y_PY': 'float',
         'Y_PZ': 'float',
     }
-    default_BabyConfigParser.load_missing_variables(
+    default_BabyConfigParser.load_missing_vars(
         expr, dumped_tree, subdirective)
     assert subdirective['input_branches'] == [
         Variable('float', 'Y_PX'),
@@ -219,7 +218,7 @@ def test_BabyConfigParser_parse_load_missing_variables(
 def test_BabyConfigParser_parse_selection(subdirective,
                                           default_BabyConfigParser):
     config = {
-        'selection': ['Y_PT > 100000', '&&', 'Y_PE > (100 * pow(10, 3))']
+        'selection': ['Y_PT > 100000', 'Y_PE > (100 * pow(10, 3))']
     }
     dumped_tree = {
         'Y_PX': 'float',

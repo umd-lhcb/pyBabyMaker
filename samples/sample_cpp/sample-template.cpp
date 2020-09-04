@@ -1,3 +1,8 @@
+#include <TFile.h>
+#include <TTree.h>
+#include <TTreeReader.h>
+#include <TBranch.h>
+
 // System headers
 // {% join: (format_list: "#include <{}>", directive.system_headers), "\n" %}
 
@@ -12,8 +17,38 @@ void generator_/* {% output_tree %} */(TFile *input_file, TFile *output_file) {
 
   // Load needed branches from ntuple
   // {% for var in config.input_branches %}
-  // {% format: "TTreeReaderValue<{}> {}(reader, \"{}\");", var.type, var.name, var.name  %}
+  // {% format: "TTreeReaderValue<{}> {}(reader, \"{}\");", var.type, var.name, var.name %}
   // {% endfor %}
+
+  // Define output branches
+  // {% for var in config.output_branches %}
+  // {% format: "{} {}_out;", var.type, var.name %}
+  // {% format: "output.Branch(\"{}\", {}_out);", var.name, var.name %}
+  // {% endfor %}
+
+  while (reader.Next()) {
+    if (/* {% join: (deref_var_list: config.selection, config.loaded_variables), " && " %} */) {
+      output.Fill();
+    }
+  }
+
+  output_file->Write();
 }
 
 // {% endfor %}
+
+int main(int, char** argv) {
+  TFile *input_file = new TFile(argv[1], "read");
+  TFile *output_file = new TFile(argv[2], "recreate");
+
+  // {% for output_tree in directive.trees->keys: %}
+  generator_/* {% output_tree %} */(input_file, output_file);
+  // {% endfor %}
+
+  output_file->Close();
+
+  delete input_file;
+  delete output_file;
+
+  return 0;
+}

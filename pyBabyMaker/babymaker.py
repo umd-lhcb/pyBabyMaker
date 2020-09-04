@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Sep 05, 2020 at 01:49 AM +0800
+# Last Change: Sat Sep 05, 2020 at 02:23 AM +0800
 
 import re
 
@@ -75,15 +75,13 @@ class BabyConfigParser(object):
         """
         Parse ``drop, keep, rename`` sections.
         """
-        branches_to_keep = []
+        branches_to_keep = UniqueList()
         for br_in, datatype in dumped_tree.items():
             if 'drop' in config and self.match(config['drop'], br_in):
                 print('Dropping branch: {}'.format(br_in))
 
-            elif 'keep' in config and self.match(config['keep'], br_in):
-                branches_to_keep.append((datatype, br_in))
-
-            elif 'rename' in config and br_in in config['rename']:
+            elif 'keep' in config and self.match(config['keep'], br_in) or \
+                    'rename' in config and br_in in config['rename']:
                 branches_to_keep.append((datatype, br_in))
 
         for datatype, br_in in branches_to_keep:

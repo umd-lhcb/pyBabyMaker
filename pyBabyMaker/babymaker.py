@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Sep 05, 2020 at 03:53 AM +0800
+# Last Change: Tue Sep 08, 2020 at 01:42 AM +0800
 
 import re
 
@@ -51,6 +51,9 @@ class BabyConfigParser(object):
 
             subdirective['input_branch_names'] = [
                 v.name for v in subdirective['input_branches']]
+            subdirective['output_branches_uniq'] = [
+                v for v in subdirective['output_branches']
+                if v.name not in subdirective['input_branch_names']]
 
             directive['trees'][output_tree] = subdirective
 

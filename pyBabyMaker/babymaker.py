@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 09, 2020 at 02:14 AM +0800
+# Last Change: Wed Sep 09, 2020 at 02:35 AM +0800
 
 import re
 
@@ -43,7 +43,9 @@ class BabyConfigParser(object):
         for output_tree, config in self.parsed_config['output'].items():
             input_tree = config['input']
             dumped_tree = self.dumped_ntuple[input_tree]
-            self.update_config(config, self.parsed_config)
+
+            merge = config['inherit'] if 'inherit' in config else True
+            self.update_config(config, self.parsed_config, merge=merge)
 
             subdirective = self.gen_subdirective(input_tree)
 

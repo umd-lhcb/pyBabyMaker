@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Sep 05, 2020 at 02:35 AM +0800
+# Last Change: Wed Sep 09, 2020 at 02:16 AM +0800
 
 import pytest
 import os
@@ -289,3 +289,25 @@ def test_BabyConfigParser_load_var_not_exist(default_BabyConfigParser):
     }
     with pytest.raises(KeyError):
         default_BabyConfigParser.load_var('Z_PX', dumped_tree)
+
+
+def test_BabyConfigParser_update_config(default_BabyConfigParser):
+    config = {'a': 1, 'b': 2, 'e': [1, 2]}
+    update = {'a': 2, 'c': 3, 'e': [3]}
+    default_BabyConfigParser.update_config(config, update)
+
+    assert config['a'] == 3
+    assert config['b'] == 2
+    assert config['c'] == 3
+    assert config['e'] == [1, 2, 3]
+
+
+def test_BabyConfigParser_update_config_no_merge(default_BabyConfigParser):
+    config = {'a': 1, 'b': 2, 'e': [1, 2]}
+    update = {'a': 2, 'c': 3, 'e': [3]}
+    default_BabyConfigParser.update_config(config, update, merge=False)
+
+    assert config['a'] == 1
+    assert config['b'] == 2
+    assert config['c'] == 3
+    assert config['e'] == [1, 2]

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 08, 2020 at 01:42 AM +0800
+# Last Change: Wed Sep 09, 2020 at 02:14 AM +0800
 
 import re
 
@@ -38,13 +38,15 @@ class BabyConfigParser(object):
             'trees': {},
         }
 
-        for output_tree, config in self.parsed_config.items():
-            input_tree = config['input_tree']
+        self.parse_headers(self.parsed_config, directive)
+
+        for output_tree, config in self.parsed_config['output'].items():
+            input_tree = config['input']
             dumped_tree = self.dumped_ntuple[input_tree]
+            self.update_config(config, self.parsed_config)
 
             subdirective = self.gen_subdirective(input_tree)
 
-            self.parse_headers(config, directive)
             self.parse_drop_keep_rename(config, dumped_tree, subdirective)
             self.parse_calculation(config, dumped_tree, subdirective)
             self.parse_selection(config, dumped_tree, subdirective)
@@ -171,6 +173,21 @@ class BabyConfigParser(object):
             return datatype
         except KeyError:
             raise KeyError('Branch {} not found.'.format(name))
+
+    @staticmethod
+    def update_config(config, update, merge=True):
+        """
+        Update ``config`` directory keys from the ``update`` directory, if the
+        same key is not present in ``config``.
+
+        Else merge the value from two keys if ``merge`` key argument is set to
+        ``True``.
+        """
+        for key, value in update.items():
+            if key not in config:
+                config[key] = value
+            elif merge:
+                config[key] += value
 
 
 #############

@@ -18,25 +18,38 @@ void generator_/* {% output_tree %} */(TFile *input_file, TFile *output_file) {
 
   // Load needed branches from ntuple
   // {% for var in config.input_branches %}
-  // {% format: "TTreeReaderValue<{}> {}(reader, \"{}\");", var.type, var.name, var.name %}
+  //   {% format: "TTreeReaderValue<{}> {}(reader, \"{}\");", var.type, var.name, var.name %}
   // {% endfor %}
 
   // Define output branches
   // {% for var in config.output_branches %}
-  // {% format: "{} {}_out;", var.type, var.name %}
-  // {% format: "output.Branch(\"{}\", &{}_out);", var.name, var.name %}
+  //   {% format: "{} {}_out;", var.type, var.name %}
+  //   {% format: "output.Branch(\"{}\", &{}_out);", var.name, var.name %}
   // {% endfor %}
 
   while (reader.Next()) {
-    if (/* {% join: (deref_var_list: config.selection, config.input_branch_names), " && " %} */) {
-      // Define temp variables
-      // {% for var in config.temp_variables %}
-      // {% format: "{} {} = {};", var.type, var.name, (deref_var: var.rvalue, config.input_branch_names) %}
-      // {% endfor %}
+    // Define all variables in case required by selection
+    //
+    // Input branches
+    //   All input branches are already available via TTreeReaderValue<>
+    //   variables.
+    //
+    // Temporary variables
+    // {% for var in config.temp_variables %}
+    //   {% format: "{} {} = {};", var.type, var.name, (deref_var: var.rvalue, config.input_branch_names) %}
+    // {% endfor %}
+    //
+    // Output branches
+    //   We define them if they don't have a naming clash with the existing
+    //   input branches.
+    // {% for var in config.output_branches_uniq %}
+    //   {% format: "{} {} = {};", var.type, var.name, (deref_var: var.rvalue, config.input_branch_names) %}
+    // {% endfor %}
 
+    if (/* {% join: (deref_var_list: config.selection, config.input_branch_names), " && " %} */) {
       // Assign values for each output branch in this loop
       // {% for var in config.output_branches %}
-      // {% format: "{}_out = {};", var.name, (deref_var: var.rvalue, config.input_branch_names) %}
+      //   {% format: "{}_out = {};", var.name, (deref_var: var.name, config.input_branch_names) %}
       // {% endfor %}
 
       output.Fill();

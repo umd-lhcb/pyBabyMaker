@@ -17,7 +17,7 @@ calculation:
     TempStuff: '^Double_t; D0_P+Y_PT'
     RandStuff: 'Double_t; TempStuff'
     some_var: '^Double_t; y_pt + y_pz'
-    some_other_var: 'Double_t: some_var'
+    some_other_var: 'Double_t; some_var'
 
 output:
     ATuple:

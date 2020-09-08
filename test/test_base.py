@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 01:35 AM +0800
+# Last Change: Wed Sep 09, 2020 at 04:56 AM +0800
 
 import pytest
 import os
@@ -102,7 +102,8 @@ def default_SimpleMaker():
 
 def test_SimpleMaker_read(default_SimpleMaker):
     result = default_SimpleMaker.read(SAMPLE_YAML)
-    assert result['YetAnotherTuple']['drop'] == ['Y_OWNPV_COV_', 'Y_OWNPV_P.*']
+    assert result['output']['YetAnotherTuple']['drop'] == [
+        'Y_OWNPV_COV_', 'Y_OWNPV_P.*']
 
 
 def test_SimpleMaker_dump_scalar(default_SimpleMaker):

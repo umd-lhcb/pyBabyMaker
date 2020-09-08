@@ -1,41 +1,42 @@
-ATuple:
-    input_tree: TupleB0/DecayTree
-    keep:
-        - ^Y_P\w$
-    rename:
-        Y_PT: y_pt
-        Y_PX: y_px
-        Y_PY: y_py
-        Y_PZ: y_pz
-    calculation:
-        TempStuff: '^Double_t;D0_P+Y_PT'
-        RandStuff: 'Double_t;TempStuff'
-    selection:
-        - "Y_PT > 10000"
+headers:
+    system:
+        - cmath
+        - iostream
 
-AnotherTuple:
-    headers:
-        system:
-            - cmath
-            - iostream
-    input_tree: TupleB0/DecayTree
-    keep:
-        - Y_PT
-    # Assume all conditions are concatenated with '&&'.
-    # This is always true because any boolean expression can be
-    # written in conjunctive normal form.
-    selection:
-        - "Y_PT > 10000"
-        - "Y_PE > (100 * pow(10, 3))"
+keep:
+    - ^Y_P\w$
 
-YetAnotherTuple:
-    headers:
-        system:
-            - cmath
-    input_tree: TupleB0WSPi/DecayTree
-    # Drop arrays. We don't support them (yet).
-    drop:
-        !include ./sample-babymaker_subsection.yml
-    keep:
-        - Y_OWNPV_.*
-        - Y_ISOLATION_.*
+rename:
+    Y_PT: y_pt
+    Y_PX: y_px
+    Y_PY: y_py
+    Y_PZ: y_pz
+    b0_PE: b0_pe
+
+calculation:
+    TempStuff: '^Double_t;D0_P+Y_PT'
+    RandStuff: 'Double_t;TempStuff'
+
+output:
+    ATuple:
+        input: TupleB0/DecayTree
+        selection:
+            - "Y_PT > 10000"
+
+    AnotherTuple:
+        input: TupleB0/DecayTree
+        # Assume all conditions are concatenated with '&&'.
+        # This is always true because any boolean expression can be
+        # written in conjunctive normal form.
+        selection:
+            - "Y_PT > 10000"
+            - "Y_PE > (100 * pow(10, 3))"
+
+    YetAnotherTuple:
+        input: TupleB0WSPi/DecayTree
+        # Drop arrays. We don't support them (yet).
+        drop:
+            !include ./sample-babymaker_subsection.yml
+        keep:
+            - Y_OWNPV_.*
+            - Y_ISOLATION_.*

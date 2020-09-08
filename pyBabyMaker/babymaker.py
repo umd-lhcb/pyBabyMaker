@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 09, 2020 at 02:35 AM +0800
+# Last Change: Wed Sep 09, 2020 at 03:06 AM +0800
 
 import re
 
@@ -21,7 +21,7 @@ class BabyConfigParser(object):
     """
     def __init__(self, parsed_config, dumped_ntuple):
         """
-        Initialize the config parser with parsed YAML file and dumped n-tuple
+        Initialize the config parser with parsed YAML file and dumped ntuple
         structure.
         """
         self.parsed_config = parsed_config
@@ -203,7 +203,7 @@ class BabyMaker(BaseMaker):
     def __init__(self, config_filename, ntuple_filename, template_filename,
                  use_reformater=True):
         """
-        Initialize with path to YAML file and n-tuple file.
+        Initialize with path to YAML file and ntuple file.
         """
         self.config_filename = config_filename
         self.ntuple_filename = ntuple_filename

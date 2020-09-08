@@ -2,9 +2,9 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 04:01 AM +0800
+# Last Change: Wed Sep 09, 2020 at 03:06 AM +0800
 """
-This module provides basic infrastructure for n-tuple related C++ code
+This module provides basic infrastructure for ntuple related C++ code
 generation.
 """
 
@@ -98,7 +98,7 @@ class BaseMaker(metaclass=abc.ABCMeta):
     @staticmethod
     def dump(data_filename):
         """
-        Dump ``TTree`` structures inside a n-tuple
+        Dump ``TTree`` structures inside a ntuple
         """
         from pyBabyMaker.io.TupleDump import PyTupleDump
         dumper = PyTupleDump(data_filename)

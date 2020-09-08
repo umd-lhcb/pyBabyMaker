@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Sep 05, 2020 at 03:26 AM +0800
+# Last Change: Wed Sep 09, 2020 at 03:06 AM +0800
 """
 This module defines functions for template macro.
 """
@@ -41,7 +41,7 @@ def func_getattr(val, attr):
 
 def func_deref_var(expr, vars_to_deref):
     """
-    Dereference variables loaded from n-tuple directly. For example:
+    Dereference variables loaded from ntuple directly. For example:
 
     .. code-block:: c++
 

@@ -1,7 +1,7 @@
 ``babymaker``
 -------------
 
-This script generates a C++ file that can be compiled to postprocess n-tuples.
+This script generates a C++ file that can be compiled to postprocess ntuples.
 
 Usage
 ^^^^^
@@ -13,7 +13,7 @@ Usage
 Note that:
 
 * ``<yaml_file>`` contains the instruction for postprocessing.
-* ``<ntuple_file>`` should have the exact tree structure as the n-tuples to be
+* ``<ntuple_file>`` should have the exact tree structure as the ntuples to be
   processed.
 * ``<template_file>`` refers to the input C++ template with embedded template
   macros.

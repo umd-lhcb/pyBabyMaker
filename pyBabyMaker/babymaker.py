@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 09, 2020 at 04:49 PM +0800
+# Last Change: Wed Sep 09, 2020 at 05:43 PM +0800
 
 import re
 
@@ -58,10 +58,12 @@ class BabyConfigParser(object):
             # Figure out the loading sequence of all variables, resolving
             # dependency issues.
             known_names = [v.name for v in subdirective['input_branches']]
-            vars_to_load = config['output_branches'] + config['temp_variables']
+            vars_to_load = subdirective['output_branches'] + \
+                subdirective['temp_variables']
 
             transient_vars = self.var_load_seq(
                 known_names, vars_to_load, dumped_tree, subdirective)
+            subdirective['known_names'] = known_names
 
             self.parse_selection(config, dumped_tree, subdirective)
 

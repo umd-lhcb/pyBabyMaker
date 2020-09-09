@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 09, 2020 at 05:43 PM +0800
+# Last Change: Wed Sep 09, 2020 at 05:52 PM +0800
 
 import re
 
@@ -235,6 +235,8 @@ class BabyConfigParser(object):
             if vars_to_load:
                 cls.var_load_seq(known_names, vars_to_load, dumped_tree,
                                  transient_vars, cur_iter+1, max_iter)
+            else:
+                return transient_vars
         else:
             return transient_vars
 

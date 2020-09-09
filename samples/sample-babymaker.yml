@@ -14,8 +14,8 @@ rename:
     b0_PE: b0_pe
 
 calculation:
-    TempStuff: '^Double_t; D0_P+Y_PT'
     RandStuff: 'Double_t; TempStuff'
+    TempStuff: '^Double_t; D0_P+Y_PT'
     some_var: '^Double_t; y_pt + y_pz'
     some_other_var: 'Double_t; some_var'
 
@@ -34,7 +34,7 @@ output:
         # This is always true because any boolean expression can be
         # written in conjunctive normal form.
         selection:
-            - "Y_PT > 10000"
+            - "b0_pt > 10000"
             - "Y_PE > (100 * pow(10, 3))"
 
     YetAnotherTuple:

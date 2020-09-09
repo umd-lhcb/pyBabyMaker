@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Sep 10, 2020 at 12:52 AM +0800
+# Last Change: Thu Sep 10, 2020 at 02:49 AM +0800
 
 import re
 
@@ -27,6 +27,8 @@ class BabyConfigParser(object):
         self.parsed_config = parsed_config
         self.dumped_ntuple = dumped_ntuple
 
+    # NOTE: A complicated function! I'd like it to be more elegant but not for
+    #       now
     def parse(self):
         """
         Parse the loaded YAML dict (in ``self.parsed_config``) and dumped ntuple
@@ -58,12 +60,21 @@ class BabyConfigParser(object):
             # Figure out the loading sequence of all variables, resolving
             # dependency issues.
             known_names = [v.name for v in subdirective['input_branches']]
+            subdirective['known_names'] += known_names
             vars_to_load = subdirective['output_branches'] + \
                 subdirective['temp_variables']
 
             transient_vars = self.var_load_seq(
-                known_names, vars_to_load, dumped_tree, subdirective)
-            subdirective['known_names'] += known_names
+                vars_to_load, dumped_tree, subdirective)
+
+            # Remove variables that can't be resolved
+            for var in vars_to_load:
+                if var in subdirective['output_branches']:
+                    print("Output branch {} cannot be resolved, deleting...".format(var.name))
+                    subdirective['output_branches'].remove(var)
+                else:
+                    print("Temp variable {} cannot be resolved, deleting...".format(var.name))
+                    subdirective['temp_variables'].remove(var)
 
             self.parse_selection(config, dumped_tree, subdirective)
 
@@ -135,10 +146,16 @@ class BabyConfigParser(object):
         Parse ``selection`` section.
         """
         if 'selection' in config:
-            directive['selection'] = config['selection']
+            selection = []
 
             for expr in config['selection']:
-                self.load_missing_vars(expr, dumped_tree, directive)
+                resolved = self.load_missing_vars(expr, dumped_tree, directive)
+                if resolved:
+                    selection.append(expr)
+                else:
+                    print('Selection {} not resolved, deleting...'.format(expr))
+
+            directive['selection'] = config['selection']
 
     def load_missing_vars(self, expr, dumped_tree, directive):
         """
@@ -146,25 +163,22 @@ class BabyConfigParser(object):
         that the variables are available directly in the ntuple.
         """
         variables = UniqueList(find_all_vars(expr))
-        input_branches_append = []
-        known_names_append = []
+        resolved = True
 
         for v in variables:
             if v not in directive['known_names']:
                 try:
                     datatype = self.load_var(v, dumped_tree)
-                    input_branches_append.append(Variable(datatype, v))
-                    known_names_append.append(v)
+                    directive['input_branches'].append(Variable(datatype, v))
+                    directive['known_names'].append(v)
+
                 except Exception:
                     print('WARNING: {} is not a known branch name.'.format(v))
-                    return False
+                    resolved = False
 
-        directive['input_branches'] += input_branches_append
-        directive['known_names'] += known_names_append
+        return resolved
 
-        return True
-
-    def var_load_seq(self, known_names, vars_to_load, dumped_tree, directive,
+    def var_load_seq(self, vars_to_load, dumped_tree, directive,
                      transient_vars=None,
                      cur_iter=0, max_iter=5):
         """
@@ -172,9 +186,11 @@ class BabyConfigParser(object):
         load later do not depend on variables loaded earlier.
         """
         transient_vars = [] if transient_vars is None else transient_vars
+        known_names = directive['known_names']
 
         if cur_iter < max_iter:
             for var in vars_to_load:
+                print(var)
                 resolved = self.load_missing_vars(var.rvalue,
                                                   dumped_tree, directive)
                 if resolved:
@@ -183,9 +199,8 @@ class BabyConfigParser(object):
                     known_names.append(var.name)
 
             if vars_to_load:
-                return self.var_load_seq(known_names, vars_to_load, dumped_tree,
-                                         directive, transient_vars,
-                                         cur_iter+1, max_iter)
+                return self.var_load_seq(vars_to_load, dumped_tree, directive,
+                                         transient_vars, cur_iter+1, max_iter)
             return transient_vars
         return transient_vars
 

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 09, 2020 at 11:49 PM +0800
+# Last Change: Thu Sep 10, 2020 at 12:42 AM +0800
 
 import re
 
@@ -226,6 +226,7 @@ class BabyConfigParser(object):
                     elif d in dumped_tree:
                         directive['input_branches'].append(
                             Variable(dumped_tree[d], d))
+                        known_names.append(d)
 
                     else:
                         resolved = False

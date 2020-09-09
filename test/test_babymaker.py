@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 09, 2020 at 11:27 PM +0800
+# Last Change: Thu Sep 10, 2020 at 12:40 AM +0800
 
 import pytest
 import os
@@ -323,3 +323,24 @@ def test_BabyConfigParser_update_config_no_merge(default_BabyConfigParser):
     assert config['b'] == 2
     assert config['c'] == 3
     assert config['e'] == [1, 2]
+
+
+def test_BabyConfigParser_var_load_seq_normal(default_BabyConfigParser):
+    known_names = ['a', 'b']
+    vars_to_load = [
+        Variable('int', 'temp3', 'temp1+temp2'),
+        Variable('int', 'temp1', 'a+c'),
+        Variable('int', 'temp2', 'temp1+d'),
+    ]
+    dumped_tree = {'c': 'int', 'd': int}
+    directive = {'input_branches': []}
+    transient_vars = default_BabyConfigParser.var_load_seq(
+        known_names, vars_to_load, dumped_tree, directive)
+
+    assert vars_to_load == []
+    assert transient_vars == [
+        Variable('int', 'temp1', 'a+c'),
+        Variable('int', 'temp2', 'temp1+d'),
+        Variable('int', 'temp3', 'temp1+temp2'),
+    ]
+    assert known_names == ['a', 'b', 'c', 'temp1', 'd', 'temp2', 'temp3']

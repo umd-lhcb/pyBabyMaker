@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Sep 10, 2020 at 03:34 AM +0800
+# Last Change: Thu Sep 10, 2020 at 03:40 AM +0800
 
 import re
 
@@ -199,13 +199,17 @@ class BabyConfigParser(object):
                 else:
                     remain_vars_to_load.append(var)
 
+            print(remain_vars_to_load)
+
             if remain_vars_to_load:
                 return self.var_load_seq(remain_vars_to_load, dumped_tree,
                                          directive, transient_vars,
                                          cur_iter+1, max_iter)
 
             return transient_vars, remain_vars_to_load
-        return transient_vars, remain_vars_to_load
+        # This is only triggered when no more iteration permitted yet we still
+        # have unresolved variables.
+        return transient_vars, vars_to_load
 
     @staticmethod
     def gen_subdirective(input_tree):

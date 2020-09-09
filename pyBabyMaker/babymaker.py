@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 09, 2020 at 05:52 PM +0800
+# Last Change: Wed Sep 09, 2020 at 09:35 PM +0800
 
 import re
 
@@ -44,14 +44,14 @@ class BabyConfigParser(object):
             input_tree = config['input']
             dumped_tree = self.dumped_ntuple[input_tree]
 
-            # Merge raw tree-specific directive with the global one
+            # Merge raw tree-specific directive with the global one.
             merge = config['inherit'] if 'inherit' in config else True
             self.update_config(config, self.parsed_config, merge=merge)
 
-            # Empty parsed tree-specific directive
+            # Empty parsed tree-specific directive.
             subdirective = self.gen_subdirective(input_tree)
 
-            # Find output branches, without resolving dependency
+            # Find output branches, without resolving dependency.
             self.parse_drop_keep_rename(config, dumped_tree, subdirective)
             self.parse_calculation(config, dumped_tree, subdirective)
 
@@ -69,6 +69,9 @@ class BabyConfigParser(object):
 
             subdirective['input_branch_names'] = [
                 v.name for v in subdirective['input_branches']]
+
+            # Consider variable loaded if exactly the same name is in the input
+            # branches.
             subdirective['transient_vars'] = [
                 v for v in transient_vars
                 if v.name not in subdirective['input_branch_names']]
@@ -230,15 +233,14 @@ class BabyConfigParser(object):
                 if resolved:
                     vars_to_load.remove(var)
                     transient_vars.append(var)
-                    known_names.append(var)
+                    known_names.append(var.name)
 
             if vars_to_load:
-                cls.var_load_seq(known_names, vars_to_load, dumped_tree,
-                                 transient_vars, cur_iter+1, max_iter)
-            else:
-                return transient_vars
-        else:
+                return cls.var_load_seq(known_names, vars_to_load, dumped_tree,
+                                        directive, transient_vars,
+                                        cur_iter+1, max_iter)
             return transient_vars
+        return transient_vars
 
 
 #############

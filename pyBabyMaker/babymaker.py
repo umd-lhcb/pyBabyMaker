@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Sep 10, 2020 at 02:52 AM +0800
+# Last Change: Thu Sep 10, 2020 at 03:34 AM +0800
 
 import re
 
@@ -64,7 +64,7 @@ class BabyConfigParser(object):
             vars_to_load = subdirective['output_branches'] + \
                 subdirective['temp_variables']
 
-            transient_vars = self.var_load_seq(
+            transient_vars, vars_to_load = self.var_load_seq(
                 vars_to_load, dumped_tree, subdirective)
 
             # Remove variables that can't be resolved
@@ -187,21 +187,25 @@ class BabyConfigParser(object):
         """
         transient_vars = [] if transient_vars is None else transient_vars
         known_names = directive['known_names']
+        remain_vars_to_load = []
 
         if cur_iter < max_iter:
             for var in vars_to_load:
                 resolved = self.load_missing_vars(var.rvalue,
                                                   dumped_tree, directive)
                 if resolved:
-                    vars_to_load.remove(var)
                     transient_vars.append(var)
                     known_names.append(var.name)
+                else:
+                    remain_vars_to_load.append(var)
 
-            if vars_to_load:
-                return self.var_load_seq(vars_to_load, dumped_tree, directive,
-                                         transient_vars, cur_iter+1, max_iter)
-            return transient_vars
-        return transient_vars
+            if remain_vars_to_load:
+                return self.var_load_seq(remain_vars_to_load, dumped_tree,
+                                         directive, transient_vars,
+                                         cur_iter+1, max_iter)
+
+            return transient_vars, remain_vars_to_load
+        return transient_vars, remain_vars_to_load
 
     @staticmethod
     def gen_subdirective(input_tree):

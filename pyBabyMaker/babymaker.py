@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 09, 2020 at 11:20 PM +0800
+# Last Change: Wed Sep 09, 2020 at 11:49 PM +0800
 
 import re
 
@@ -63,7 +63,7 @@ class BabyConfigParser(object):
 
             transient_vars = self.var_load_seq(
                 known_names, vars_to_load, dumped_tree, subdirective)
-            subdirective['known_names'] = known_names
+            subdirective['known_names'] += known_names
 
             self.parse_selection(config, dumped_tree, subdirective)
 
@@ -163,6 +163,7 @@ class BabyConfigParser(object):
                 'input_branches': UniqueList(),
                 'output_branches': UniqueList(),
                 'temp_variables': UniqueList(),
+                'known_names': UniqueList(),
                 'selection': ['true'],
                 }
 

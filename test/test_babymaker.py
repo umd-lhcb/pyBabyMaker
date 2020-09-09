@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 09, 2020 at 11:22 PM +0800
+# Last Change: Wed Sep 09, 2020 at 11:27 PM +0800
 
 import pytest
 import os
@@ -198,7 +198,7 @@ def test_BabyConfigParser_parse_calculation(subdirective,
     default_BabyConfigParser.parse_calculation(
         config, dumped_tree, subdirective)
 
-    assert subdirective['input_branches'] == [Variable('float', 'Y_PX')]
+    assert subdirective['input_branches'] == []  # Dependency is resolved later
     assert subdirective['output_branches'] == [
         Variable('double', 'Y_P_shift', 'Y_P_TEMP')]
     assert subdirective['temp_variables'] == [

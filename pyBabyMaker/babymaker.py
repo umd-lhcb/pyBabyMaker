@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Sep 10, 2020 at 03:40 AM +0800
+# Last Change: Thu Sep 10, 2020 at 03:44 AM +0800
 
 import re
 
@@ -198,8 +198,6 @@ class BabyConfigParser(object):
                     known_names.append(var.name)
                 else:
                     remain_vars_to_load.append(var)
-
-            print(remain_vars_to_load)
 
             if remain_vars_to_load:
                 return self.var_load_seq(remain_vars_to_load, dumped_tree,

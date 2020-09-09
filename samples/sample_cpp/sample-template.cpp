@@ -1,3 +1,5 @@
+// This naive template doesn't handle any dependency for output branches and
+// temp variables!
 #include <TFile.h>
 #include <TTree.h>
 #include <TTreeReader.h>

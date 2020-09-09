@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Sep 10, 2020 at 02:49 AM +0800
+# Last Change: Thu Sep 10, 2020 at 02:52 AM +0800
 
 import re
 
@@ -190,7 +190,6 @@ class BabyConfigParser(object):
 
         if cur_iter < max_iter:
             for var in vars_to_load:
-                print(var)
                 resolved = self.load_missing_vars(var.rvalue,
                                                   dumped_tree, directive)
                 if resolved:

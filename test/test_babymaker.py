@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Sep 10, 2020 at 02:46 AM +0800
+# Last Change: Thu Sep 10, 2020 at 02:57 AM +0800
 
 import pytest
 import os
@@ -90,7 +90,9 @@ def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
         Variable('Double_t', 'Y_PY', 'Y_PY'),
         Variable('Double_t', 'Y_PZ', 'Y_PZ'),
         Variable('Double_t', 'RandStuff', ' TempStuff'),
-        Variable('Double_t', 'some_other_var', ' some_var'),
+        # NOTE: 'some_other_var' is not resolvable for this tree!
+        #       Because the change in 'rename' selection, 'y_pt' and 'y_pz' are
+        #       not defined!
     ]
     assert directive['system_headers'] == ['cmath', 'iostream']
 
@@ -362,4 +364,6 @@ def test_BabyConfigParser_var_load_seq_circular(default_BabyConfigParser):
         Variable('int', 'temp2', 'temp1+d'),
     ]
     assert transient_vars == []
-    assert known_names == ['a', 'b']
+    # NOTE: Due to my desire to do fewer number of recursions when resolving
+    #       dependency, I pay the price of loading not really needed branches.
+    assert known_names == ['a', 'b', 'd']

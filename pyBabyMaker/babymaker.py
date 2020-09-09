@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Sep 10, 2020 at 12:42 AM +0800
+# Last Change: Thu Sep 10, 2020 at 12:46 AM +0800
 
 import re
 
@@ -146,16 +146,23 @@ class BabyConfigParser(object):
         that the variables are available directly in the ntuple.
         """
         variables = UniqueList(find_all_vars(expr))
+        input_branches_append = []
+        known_names_append = []
 
         for v in variables:
             if v not in directive['known_names']:
                 try:
                     datatype = self.load_var(v, dumped_tree)
-                    directive['input_branches'].append(
-                        Variable(datatype, v))
-                    directive['known_names'].append(v)
+                    input_branches_append.append(Variable(datatype, v))
+                    known_names_append.append(v)
                 except Exception:
                     print('WARNING: {} is not a known branch name.'.format(v))
+                    return False
+
+        directive['input_branches'] += input_branches_append
+        directive['known_names'] += known_names_append
+
+        return True
 
     @staticmethod
     def gen_subdirective(input_tree):

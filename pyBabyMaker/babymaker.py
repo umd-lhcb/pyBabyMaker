@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Sep 10, 2020 at 12:46 AM +0800
+# Last Change: Thu Sep 10, 2020 at 12:52 AM +0800
 
 import re
 
@@ -164,6 +164,31 @@ class BabyConfigParser(object):
 
         return True
 
+    def var_load_seq(self, known_names, vars_to_load, dumped_tree, directive,
+                     transient_vars=None,
+                     cur_iter=0, max_iter=5):
+        """
+        Figure out a load sequence for ``vars_to_load`` such that variables that
+        load later do not depend on variables loaded earlier.
+        """
+        transient_vars = [] if transient_vars is None else transient_vars
+
+        if cur_iter < max_iter:
+            for var in vars_to_load:
+                resolved = self.load_missing_vars(var.rvalue,
+                                                  dumped_tree, directive)
+                if resolved:
+                    vars_to_load.remove(var)
+                    transient_vars.append(var)
+                    known_names.append(var.name)
+
+            if vars_to_load:
+                return self.var_load_seq(known_names, vars_to_load, dumped_tree,
+                                         directive, transient_vars,
+                                         cur_iter+1, max_iter)
+            return transient_vars
+        return transient_vars
+
     @staticmethod
     def gen_subdirective(input_tree):
         return {'input_tree': input_tree,
@@ -210,46 +235,6 @@ class BabyConfigParser(object):
                 config[key] = value
             elif merge:
                 config[key] += value
-
-    @classmethod
-    def var_load_seq(cls, known_names, vars_to_load, dumped_tree, directive,
-                     transient_vars=None,
-                     cur_iter=0, max_iter=5):
-        """
-        Figure out a load sequence for ``vars_to_load`` such that variables that
-        load later do not depend on variables loaded earlier.
-        """
-        transient_vars = [] if transient_vars is None else transient_vars
-
-        if cur_iter < max_iter:
-            for var in vars_to_load:
-                deps = find_all_vars(var.rvalue)
-                resolved = True
-
-                for d in deps:
-                    if d in known_names:
-                        pass
-
-                    elif d in dumped_tree:
-                        directive['input_branches'].append(
-                            Variable(dumped_tree[d], d))
-                        known_names.append(d)
-
-                    else:
-                        resolved = False
-                        break
-
-                if resolved:
-                    vars_to_load.remove(var)
-                    transient_vars.append(var)
-                    known_names.append(var.name)
-
-            if vars_to_load:
-                return cls.var_load_seq(known_names, vars_to_load, dumped_tree,
-                                        directive, transient_vars,
-                                        cur_iter+1, max_iter)
-            return transient_vars
-        return transient_vars
 
 
 #############

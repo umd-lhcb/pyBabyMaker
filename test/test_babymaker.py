@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Sep 10, 2020 at 12:40 AM +0800
+# Last Change: Thu Sep 10, 2020 at 12:54 AM +0800
 
 import pytest
 import os
@@ -333,7 +333,7 @@ def test_BabyConfigParser_var_load_seq_normal(default_BabyConfigParser):
         Variable('int', 'temp2', 'temp1+d'),
     ]
     dumped_tree = {'c': 'int', 'd': int}
-    directive = {'input_branches': []}
+    directive = {'input_branches': [], 'known_names': known_names}
     transient_vars = default_BabyConfigParser.var_load_seq(
         known_names, vars_to_load, dumped_tree, directive)
 

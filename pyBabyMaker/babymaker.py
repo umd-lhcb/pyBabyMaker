@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 09, 2020 at 03:06 AM +0800
+# Last Change: Wed Sep 09, 2020 at 04:49 PM +0800
 
 import re
 
@@ -44,19 +44,31 @@ class BabyConfigParser(object):
             input_tree = config['input']
             dumped_tree = self.dumped_ntuple[input_tree]
 
+            # Merge raw tree-specific directive with the global one
             merge = config['inherit'] if 'inherit' in config else True
             self.update_config(config, self.parsed_config, merge=merge)
 
+            # Empty parsed tree-specific directive
             subdirective = self.gen_subdirective(input_tree)
 
+            # Find output branches, without resolving dependency
             self.parse_drop_keep_rename(config, dumped_tree, subdirective)
             self.parse_calculation(config, dumped_tree, subdirective)
+
+            # Figure out the loading sequence of all variables, resolving
+            # dependency issues.
+            known_names = [v.name for v in subdirective['input_branches']]
+            vars_to_load = config['output_branches'] + config['temp_variables']
+
+            transient_vars = self.var_load_seq(
+                known_names, vars_to_load, dumped_tree, subdirective)
+
             self.parse_selection(config, dumped_tree, subdirective)
 
             subdirective['input_branch_names'] = [
                 v.name for v in subdirective['input_branches']]
-            subdirective['output_branches_uniq'] = [
-                v for v in subdirective['output_branches']
+            subdirective['transient_vars'] = [
+                v for v in transient_vars
                 if v.name not in subdirective['input_branch_names']]
 
             directive['trees'][output_tree] = subdirective
@@ -84,7 +96,6 @@ class BabyConfigParser(object):
             elif 'keep' in config and self.match(config['keep'], br_in) or \
                     'rename' in config and br_in in config['rename']:
                 branches_to_keep.append((datatype, br_in))
-                directive['known_names'].append(br_in)
 
         for datatype, br_in in branches_to_keep:
             directive['input_branches'].append(Variable(datatype, br_in))
@@ -104,18 +115,15 @@ class BabyConfigParser(object):
         if 'calculation' in config:
             for name, code in config['calculation'].items():
                 datatype, rvalue = code.split(';')
-                directive['known_names'].append(name)
 
                 if '^' in datatype:
                     datatype = datatype.strip('^')
                     directive['temp_variables'].append(
                         Variable(datatype, name, rvalue))
-                    self.load_missing_vars(rvalue, dumped_tree, directive)
 
                 else:
                     directive['output_branches'].append(
                         Variable(datatype, name, rvalue))
-                    self.load_missing_vars(rvalue, dumped_tree, directive)
 
     def parse_selection(self, config, dumped_tree, directive):
         """
@@ -151,7 +159,6 @@ class BabyConfigParser(object):
                 'output_branches': UniqueList(),
                 'temp_variables': UniqueList(),
                 'selection': ['true'],
-                'known_names': UniqueList(),
                 }
 
     @staticmethod
@@ -190,6 +197,44 @@ class BabyConfigParser(object):
                 config[key] = value
             elif merge:
                 config[key] += value
+
+    @classmethod
+    def var_load_seq(cls, known_names, vars_to_load, dumped_tree, directive,
+                     transient_vars=None,
+                     cur_iter=0, max_iter=5):
+        """
+        Figure out a load sequence for ``vars_to_load`` such that variables that
+        load later do not depend on variables loaded earlier.
+        """
+        transient_vars = [] if transient_vars is None else transient_vars
+
+        if cur_iter < max_iter:
+            for var in vars_to_load:
+                deps = find_all_vars(var.rvalue)
+                resolved = True
+
+                for d in deps:
+                    if d in known_names:
+                        pass
+
+                    elif d in dumped_tree:
+                        directive['input_branches'].append(
+                            Variable(dumped_tree[d], d))
+
+                    else:
+                        resolved = False
+                        break
+
+                if resolved:
+                    vars_to_load.remove(var)
+                    transient_vars.append(var)
+                    known_names.append(var)
+
+            if vars_to_load:
+                cls.var_load_seq(known_names, vars_to_load, dumped_tree,
+                                 transient_vars, cur_iter+1, max_iter)
+        else:
+            return transient_vars
 
 
 #############

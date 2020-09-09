@@ -29,7 +29,7 @@ output:
         input: TupleB0/DecayTree
         inherit: false
         rename:
-            Y_PT: y_pt
+            Y_PT: b0_pt
         # Assume all conditions are concatenated with '&&'.
         # This is always true because any boolean expression can be
         # written in conjunctive normal form.

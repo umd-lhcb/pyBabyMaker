@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Sep 10, 2020 at 02:57 AM +0800
+# Last Change: Thu Sep 10, 2020 at 03:06 AM +0800
 
 import pytest
 import os
@@ -95,6 +95,25 @@ def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
         #       not defined!
     ]
     assert directive['system_headers'] == ['cmath', 'iostream']
+
+
+def test_BabyConfigParser_parse_YetAnotherTuple(realistic_BabyConfigParser):
+    directive = realistic_BabyConfigParser.parse()
+
+    input_branch_names = \
+        directive['trees']['YetAnotherTuple']['input_branch_names']
+    output_branch_names = [
+        v.name for v in
+        directive['trees']['YetAnotherTuple']['output_branches']]
+
+    assert directive['trees']['YetAnotherTuple']['input_tree'] == \
+        'TupleB0WSPi/DecayTree'
+
+    assert 'Y_ISOLATION_CHI22' in input_branch_names
+    assert 'Y_ISOLATION_NNp3' in input_branch_names
+
+    assert 'Y_ISOLATION_CHI22' in output_branch_names
+    assert 'Y_ISOLATION_NNp3' in output_branch_names
 
 
 ###################################

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 09, 2020 at 02:16 AM +0800
+# Last Change: Wed Sep 09, 2020 at 11:22 PM +0800
 
 import pytest
 import os
@@ -61,10 +61,12 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
         Variable('Double_t', 'y_px', 'Y_PX'),
         Variable('Double_t', 'y_py', 'Y_PY'),
         Variable('Double_t', 'y_pz', 'Y_PZ'),
-        Variable('Double_t', 'RandStuff', 'TempStuff'),
+        Variable('Double_t', 'RandStuff', ' TempStuff'),
+        Variable('Double_t', 'some_other_var', ' some_var'),
     ]
     assert directive['trees']['ATuple']['temp_variables'] == [
-        Variable('Double_t', 'TempStuff', 'D0_P+Y_PT'),
+        Variable('Double_t', 'TempStuff', ' D0_P+Y_PT'),
+        Variable('Double_t', 'some_var', ' y_pt + y_pz'),
     ]
 
 
@@ -76,9 +78,19 @@ def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
     assert directive['trees']['AnotherTuple']['input_branches'] == [
         Variable('Double_t', 'Y_PT'),
         Variable('Double_t', 'Y_PE'),
+        Variable('Double_t', 'Y_PX'),
+        Variable('Double_t', 'Y_PY'),
+        Variable('Double_t', 'Y_PZ'),
+        Variable('Double_t', 'D0_P'),
     ]
     assert directive['trees']['AnotherTuple']['output_branches'] == [
-        Variable('Double_t', 'Y_PT', 'Y_PT'),
+        Variable('Double_t', 'b0_pt', 'Y_PT'),
+        Variable('Double_t', 'Y_PE', 'Y_PE'),
+        Variable('Double_t', 'Y_PX', 'Y_PX'),
+        Variable('Double_t', 'Y_PY', 'Y_PY'),
+        Variable('Double_t', 'Y_PZ', 'Y_PZ'),
+        Variable('Double_t', 'RandStuff', ' TempStuff'),
+        Variable('Double_t', 'some_other_var', ' some_var'),
     ]
     assert directive['system_headers'] == ['cmath', 'iostream']
 

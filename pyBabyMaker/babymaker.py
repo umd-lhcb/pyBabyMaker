@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Sep 10, 2020 at 03:44 AM +0800
+# Last Change: Thu Sep 10, 2020 at 03:48 AM +0800
 
 import re
 
@@ -45,6 +45,7 @@ class BabyConfigParser(object):
         for output_tree, config in self.parsed_config['output'].items():
             input_tree = config['input']
             dumped_tree = self.dumped_ntuple[input_tree]
+            print('=== Handling output tree {} ==='.format(output_tree))
 
             # Merge raw tree-specific directive with the global one.
             merge = config['inherit'] if 'inherit' in config else True

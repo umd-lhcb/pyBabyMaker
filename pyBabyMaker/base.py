@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 09, 2020 at 03:06 AM +0800
+# Last Change: Tue Sep 15, 2020 at 01:18 AM +0800
 """
 This module provides basic infrastructure for ntuple related C++ code
 generation.
@@ -21,6 +21,22 @@ from os import path
 # Helpers #
 ###########
 
+class TermColor:
+    """
+    Color sequences for UNIX terminal.
+    """
+    PURPLE = '\033[95m'
+    CYAN = '\033[96m'
+    DARKCYAN = '\033[36m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    END = '\033[0m'
+
+
 class UniqueList(list):
     """
     An extension to the standard ``list`` class such that every element stored
@@ -38,13 +54,13 @@ class UniqueList(list):
         else:
             super().__init__()
 
-    def append(self, object):
-        if not super().__contains__(object):
-            super().append(object)
+    def append(self, obj):
+        if not super().__contains__(obj):
+            super().append(obj)
 
-    def insert(self, index, object):
-        if not super().__contains__(object):
-            super().insert(index, object)
+    def insert(self, index, obj):
+        if not super().__contains__(obj):
+            super().insert(index, obj)
 
     def __add__(self, value):
         return UniqueList(super().__add__(value))

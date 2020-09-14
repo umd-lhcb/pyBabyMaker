@@ -2,10 +2,11 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Sep 10, 2020 at 03:48 AM +0800
+# Last Change: Tue Sep 15, 2020 at 01:21 AM +0800
 
 import re
 
+from pyBabyMaker.base import TermColor as TC
 from pyBabyMaker.base import UniqueList, BaseMaker, Variable
 from pyBabyMaker.boolean.utils import find_all_vars
 from pyBabyMaker.engine.core import template_transformer, template_evaluator
@@ -45,7 +46,8 @@ class BabyConfigParser(object):
         for output_tree, config in self.parsed_config['output'].items():
             input_tree = config['input']
             dumped_tree = self.dumped_ntuple[input_tree]
-            print('=== Handling output tree {} ==='.format(output_tree))
+            print('{}=== Handling output tree {} ==={}'.format(
+                TC.BOLD+TC.BLUE, output_tree, TC.END))
 
             # Merge raw tree-specific directive with the global one.
             merge = config['inherit'] if 'inherit' in config else True
@@ -71,10 +73,12 @@ class BabyConfigParser(object):
             # Remove variables that can't be resolved
             for var in vars_to_load:
                 if var in subdirective['output_branches']:
-                    print("Output branch {} cannot be resolved, deleting...".format(var.name))
+                    print("{}Output branch {} cannot be resolved, deleting...{}".format(
+                        TC.YELLOW, var.name, TC.END))
                     subdirective['output_branches'].remove(var)
                 else:
-                    print("Temp variable {} cannot be resolved, deleting...".format(var.name))
+                    print("{}Temp variable {} cannot be resolved, deleting...{}".format(
+                        TC.YELLOW, var.name, TC.END))
                     subdirective['temp_variables'].remove(var)
 
             self.parse_selection(config, dumped_tree, subdirective)
@@ -174,7 +178,7 @@ class BabyConfigParser(object):
                     directive['known_names'].append(v)
 
                 except Exception:
-                    print('WARNING: {} is not a known branch name.'.format(v))
+                    print('{} is not a known branch name.'.format(v))
                     resolved = False
 
         return resolved

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 15, 2020 at 01:21 AM +0800
+# Last Change: Tue Sep 15, 2020 at 01:24 AM +0800
 
 import re
 
@@ -16,7 +16,7 @@ from pyBabyMaker.engine.core import template_transformer, template_evaluator
 # Configuration parser #
 ########################
 
-class BabyConfigParser(object):
+class BabyConfigParser:
     """
     Basic parser for YAML C++ code instruction.
     """
@@ -58,7 +58,7 @@ class BabyConfigParser(object):
 
             # Find output branches, without resolving dependency.
             self.parse_drop_keep_rename(config, dumped_tree, subdirective)
-            self.parse_calculation(config, dumped_tree, subdirective)
+            self.parse_calculation(config, subdirective)
 
             # Figure out the loading sequence of all variables, resolving
             # dependency issues.
@@ -129,7 +129,7 @@ class BabyConfigParser(object):
             directive['output_branches'].append(
                 Variable(datatype, br_out, br_in))
 
-    def parse_calculation(self, config, dumped_tree, directive):
+    def parse_calculation(self, config, directive):
         """
         Parse ``calculation`` section.
         """
@@ -280,7 +280,7 @@ class BabyMaker(BaseMaker):
         self.template_filename = template_filename
         self.use_reformater = use_reformater
 
-    def gen(self, filename, **kwargs):
+    def gen(self, filename):
         parsed_config = self.read(self.config_filename)
         dumped_ntuple = self.dump(self.ntuple_filename)
         directive = self.directive_gen(parsed_config, dumped_ntuple)

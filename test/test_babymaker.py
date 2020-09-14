@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Sep 10, 2020 at 03:32 AM +0800
+# Last Change: Tue Sep 15, 2020 at 01:25 AM +0800
 
 import pytest
 import os
@@ -211,13 +211,8 @@ def test_BabyConfigParser_parse_calculation(subdirective,
             'Y_P_shift': 'double;Y_P_TEMP',
         }
     }
-    dumped_tree = {
-        'Y_PX': 'float',
-        'Y_PY': 'float',
-        'Y_PZ': 'float',
-    }
     default_BabyConfigParser.parse_calculation(
-        config, dumped_tree, subdirective)
+        config, subdirective)
 
     assert subdirective['input_branches'] == []  # Dependency is resolved later
     assert subdirective['output_branches'] == [

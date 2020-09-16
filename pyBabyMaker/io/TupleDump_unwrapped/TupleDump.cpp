@@ -1,6 +1,6 @@
 // Author: Yipeng Sun <syp at umd dot edu>
 // License: BSD 2-clause
-// Last Change: Tue Aug 27, 2019 at 03:46 PM -0400
+// Last Change: Thu Sep 17, 2020 at 01:24 AM +0800
 
 #include <TDirectoryFile.h>
 #include <TFile.h>
@@ -56,7 +56,7 @@ std::string TupleDump::datatype(std::string tree, std::string branch) {
 }
 
 std::vector<std::string> TupleDump::traverse(TList *keys) {
-  std::vector<std::string> result;
+  std::vector<std::string> trees;
 
   for (const auto &&obj : *keys) {
     auto key = dynamic_cast<TKey *>(obj);
@@ -64,23 +64,18 @@ std::vector<std::string> TupleDump::traverse(TList *keys) {
     std::string class_name = key->GetClassName();
 
     if (class_name.compare("TDirectoryFile") == 0) {
-      auto sub_obj = dynamic_cast<TDirectoryFile *>(key->ReadObj());
-      std::vector<std::string> sub_result =
-          TupleDump::traverse(sub_obj->GetListOfKeys());
+      auto dir = dynamic_cast<TDirectoryFile *>(key->ReadObj());
+      auto sub_dirs = TupleDump::traverse(dir->GetListOfKeys());
 
-      for (auto &&sub_dir : sub_result) {
-        result.insert(result.end(), name + "/" + sub_dir);
+      for (auto &&sub_obj : sub_dirs) {
+        trees.insert(trees.end(), name + "/" + sub_obj);
       }
 
-    } else if (class_name.compare("TTree") == 0) {
-      result.insert(result.end(), name);
-
-    } else {
-      std::cout << "Unknown datatype: " << class_name << ". Skip." << std::endl;
-    }
+    } else if (class_name.compare("TTree") == 0)
+      trees.insert(trees.end(), name);
   }
 
-  return result;
+  return trees;
 }
 
 }  // namespace pyBabyMaker

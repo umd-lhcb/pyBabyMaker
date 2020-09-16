@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Aug 30, 2020 at 03:54 AM +0800
+# Last Change: Thu Sep 17, 2020 at 01:44 AM +0800
 
 import setuptools
 import subprocess
@@ -72,7 +72,6 @@ root_incdir = get_pipe_output('root-config --incdir')
 cxx_flags = get_pipe_output('root-config --cflags').split()
 
 # Make sure to enable C++ 14 support
-# extra_flags = cxx_flags
 extra_flags = [re.sub(r'std=c\+\+11', 'std=c++14', f) for f in cxx_flags]
 
 TupleDumpExtension = Extension(

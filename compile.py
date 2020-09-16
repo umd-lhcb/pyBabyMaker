@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Jul 06, 2019 at 07:12 PM -0400
+# Last Change: Thu Sep 17, 2020 at 01:35 AM +0800
 
 import subprocess
 
@@ -27,8 +27,6 @@ root_libdir = get_pipe_output('root-config --libdir')
 root_incdir = get_pipe_output('root-config --incdir')
 
 cxx_flags = get_pipe_output('root-config --cflags').split()
-# linker_flags = get_pipe_output('root-config --libs').split()
-extra_flags = cxx_flags
 
 TupleDumpExtension = Extension(
     name="pyBabyMaker.io.TupleDump",
@@ -36,8 +34,7 @@ TupleDumpExtension = Extension(
     libraries=["RIO", "Tree"],
     library_dirs=[root_libdir],
     include_dirs=[root_incdir],
-    extra_compile_args=extra_flags,
-    # extra_compile_args=['-std=c++17'],
+    extra_compile_args=cxx_flags,
     language='c++',
 )
 

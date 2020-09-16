@@ -1,6 +1,6 @@
 // Author: Yipeng Sun <syp at umd dot edu>
 // License: BSD 2-clause
-// Last Change: Thu Sep 17, 2020 at 01:24 AM +0800
+// Last Change: Thu Sep 17, 2020 at 01:37 AM +0800
 
 #include <TDirectoryFile.h>
 #include <TFile.h>
@@ -28,14 +28,13 @@ std::vector<std::string> TupleDump::trees() {
   return TupleDump::traverse(keys);
 }
 
-std::vector<std::string> TupleDump::branches(std::string tree) {
+std::vector<std::string> TupleDump::branches(std::string tree_name) {
   std::vector<std::string> result;
-  auto t = dynamic_cast<TTree *>(this->ntuple->Get(tree.c_str()));
-  auto b_objs = t->GetListOfBranches();
+  auto tree = dynamic_cast<TTree *>(this->ntuple->Get(tree_name.c_str()));
+  auto branches = tree->GetListOfBranches();
 
-  for (const auto &&b : *b_objs) {
-    const std::string branch = b->GetName();
-    result.insert(result.end(), branch);
+  for (const auto &&b : *branches) {
+    result.insert(result.end(), b->GetName());
   }
 
   return result;

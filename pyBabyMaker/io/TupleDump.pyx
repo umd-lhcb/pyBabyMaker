@@ -1,12 +1,12 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD-clause
-# Last Change: Sat Jul 06, 2019 at 04:24 PM -0400
+# Last Change: Thu Sep 17, 2020 at 01:43 AM +0800
 
 # cython: language_level=3
 
 from libcpp.string cimport string
 
-from TupleDump cimport TupleDump
+from .TupleDump cimport TupleDump
 
 
 cdef class PyTupleDump:

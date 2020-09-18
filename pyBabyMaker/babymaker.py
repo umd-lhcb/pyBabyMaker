@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 15, 2020 at 01:24 AM +0800
+# Last Change: Fri Sep 18, 2020 at 07:21 PM +0800
 
 import re
 
@@ -160,7 +160,7 @@ class BabyConfigParser:
                 else:
                     print('Selection {} not resolved, deleting...'.format(expr))
 
-            directive['selection'] = config['selection']
+            directive['selection'] = selection
 
     def load_missing_vars(self, expr, dumped_tree, directive):
         """

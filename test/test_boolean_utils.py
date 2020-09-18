@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Sep 03, 2020 at 11:54 PM +0800
+# Last Change: Fri Sep 18, 2020 at 05:44 PM +0800
 
 from pyBabyMaker.boolean.utils import find_all_args, find_all_vars
 
@@ -32,3 +32,9 @@ def test_find_all_vars():
         'FUNC6(arg7, arg8, arg9*FUNC7(arg10+arg11))'
     ) == ['arg3', 'arg4', 'arg10', 'arg11', 'arg6', 'arg1', 'arg2', 'arg9',
           'arg7', 'arg8']
+
+
+def test_find_all_vars_with_method_calls():
+    assert find_all_vars(
+        'arg1->test(arg2, arg3) && arg4->call() && arg5.call(arg6) || arg7.arg8'
+    ) == ['arg2', 'arg3', 'arg1', 'arg4', 'arg6', 'arg5', 'arg7']

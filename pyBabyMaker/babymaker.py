@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 18, 2020 at 07:21 PM +0800
+# Last Change: Fri Sep 18, 2020 at 07:39 PM +0800
 
 import re
 
@@ -92,6 +92,9 @@ class BabyConfigParser:
                 v for v in transient_vars
                 if v.name not in subdirective['input_branch_names']]
 
+            # Merge parsed config with raw input
+            self.update_config(subdirective, config, merge=False)
+
             directive['trees'][output_tree] = subdirective
 
         return directive
@@ -158,7 +161,8 @@ class BabyConfigParser:
                 if resolved:
                     selection.append(expr)
                 else:
-                    print('Selection {} not resolved, deleting...'.format(expr))
+                    print('{}Selection {} not resolved, deleting...{}'.format(
+                        TC.YELLOW, expr, TC.END))
 
             directive['selection'] = selection
 

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 18, 2020 at 07:39 PM +0800
+# Last Change: Fri Sep 18, 2020 at 08:37 PM +0800
 
 import re
 
@@ -138,7 +138,12 @@ class BabyConfigParser:
         """
         if 'calculation' in config:
             for name, code in config['calculation'].items():
-                datatype, rvalue = code.split(';')
+                try:
+                    datatype, rvalue = code.split(';')
+                except ValueError:
+                    raise ValueError('Illegal specification for {}: {}.'.format(
+                        name, code
+                    ))
 
                 if '^' in datatype:
                     datatype = datatype.strip('^')

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 22, 2020 at 02:22 AM +0800
+# Last Change: Tue Sep 22, 2020 at 02:36 AM +0800
 
 import pytest
 import os
@@ -32,6 +32,17 @@ def test_BabyConfigParser_update_config():
     assert config['b'] == 2
     assert config['c'] == 3
     assert config['e'] == [1, 2, 3]
+
+
+def test_BabyConfigParser_update_config_merge_dict():
+    config = {'a': 1, 'b': 2, 'e': {1: 2, 3: 4}}
+    update = {'a': 2, 'c': 3, 'e': {1: 3, 2: 4}}
+    update_config(config, update)
+
+    assert config['a'] == 3
+    assert config['b'] == 2
+    assert config['c'] == 3
+    assert config['e'] == {1: 3, 2: 4, 3: 4}
 
 
 def test_BabyConfigParser_update_config_no_merge():

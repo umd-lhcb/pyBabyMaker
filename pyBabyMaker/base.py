@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 22, 2020 at 02:20 AM +0800
+# Last Change: Tue Sep 22, 2020 at 02:34 AM +0800
 """
 This module provides basic infrastructure for ntuple related C++ code
 generation.
@@ -94,7 +94,10 @@ def update_config(config, update, merge=True):
         if key not in config:
             config[key] = value
         elif merge:
-            config[key] += value
+            if isinstance(value, dict):
+                config[key].update(value)
+            else:
+                config[key] += value
 
 
 Variable = namedtuple('Variable', 'type name rvalue', defaults=(None,))

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 18, 2020 at 08:37 PM +0800
+# Last Change: Mon Sep 21, 2020 at 03:21 PM +0800
 
 import re
 
@@ -54,7 +54,11 @@ class BabyConfigParser:
             self.update_config(config, self.parsed_config, merge=merge)
 
             # Empty parsed tree-specific directive.
-            subdirective = self.gen_subdirective(input_tree)
+            if 'known_names' in config:
+                subdirective = self.gen_subdirective(
+                    input_tree, config['known_names'])
+            else:
+                subdirective = self.gen_subdirective(input_tree)
 
             # Find output branches, without resolving dependency.
             self.parse_drop_keep_rename(config, dumped_tree, subdirective)
@@ -62,8 +66,8 @@ class BabyConfigParser:
 
             # Figure out the loading sequence of all variables, resolving
             # dependency issues.
-            known_names = [v.name for v in subdirective['input_branches']]
-            subdirective['known_names'] += known_names
+            subdirective['known_names'] += [
+                v.name for v in subdirective['input_branches']]
             vars_to_load = subdirective['output_branches'] + \
                 subdirective['temp_variables']
 
@@ -224,12 +228,12 @@ class BabyConfigParser:
         return transient_vars, vars_to_load
 
     @staticmethod
-    def gen_subdirective(input_tree):
+    def gen_subdirective(input_tree, known_names=[]):
         return {'input_tree': input_tree,
                 'input_branches': UniqueList(),
                 'output_branches': UniqueList(),
                 'temp_variables': UniqueList(),
-                'known_names': UniqueList(),
+                'known_names': UniqueList(known_names),
                 'selection': ['true'],
                 }
 

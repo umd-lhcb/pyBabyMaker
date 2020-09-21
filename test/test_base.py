@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 09, 2020 at 04:56 AM +0800
+# Last Change: Tue Sep 22, 2020 at 02:22 AM +0800
 
 import pytest
 import os
@@ -11,11 +11,38 @@ from unittest.mock import patch
 
 from pyBabyMaker.base import UniqueList
 from pyBabyMaker.base import BaseMaker
+from pyBabyMaker.base import update_config
 
 PWD = os.path.dirname(os.path.realpath(__file__))
 PARDIR = os.path.join(PWD, os.pardir)
 SAMPLE_YAML = os.path.join(PARDIR, 'samples', 'sample-babymaker.yml')
 SAMPLE_ROOT = os.path.join(PARDIR, 'samples', 'sample.root')
+
+
+###########
+# Helpers #
+###########
+
+def test_BabyConfigParser_update_config():
+    config = {'a': 1, 'b': 2, 'e': [1, 2]}
+    update = {'a': 2, 'c': 3, 'e': [3]}
+    update_config(config, update)
+
+    assert config['a'] == 3
+    assert config['b'] == 2
+    assert config['c'] == 3
+    assert config['e'] == [1, 2, 3]
+
+
+def test_BabyConfigParser_update_config_no_merge():
+    config = {'a': 1, 'b': 2, 'e': [1, 2]}
+    update = {'a': 2, 'c': 3, 'e': [3]}
+    update_config(config, update, merge=False)
+
+    assert config['a'] == 1
+    assert config['b'] == 2
+    assert config['c'] == 3
+    assert config['e'] == [1, 2]
 
 
 ##################

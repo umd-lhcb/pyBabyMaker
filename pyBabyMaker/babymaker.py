@@ -2,12 +2,13 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Sep 21, 2020 at 03:21 PM +0800
+# Last Change: Tue Sep 22, 2020 at 02:20 AM +0800
 
 import re
 
 from pyBabyMaker.base import TermColor as TC
 from pyBabyMaker.base import UniqueList, BaseMaker, Variable
+from pyBabyMaker.base import update_config
 from pyBabyMaker.boolean.utils import find_all_vars
 from pyBabyMaker.engine.core import template_transformer, template_evaluator
 
@@ -51,14 +52,10 @@ class BabyConfigParser:
 
             # Merge raw tree-specific directive with the global one.
             merge = config['inherit'] if 'inherit' in config else True
-            self.update_config(config, self.parsed_config, merge=merge)
+            update_config(config, self.parsed_config, merge=merge)
 
-            # Empty parsed tree-specific directive.
-            if 'known_names' in config:
-                subdirective = self.gen_subdirective(
-                    input_tree, config['known_names'])
-            else:
-                subdirective = self.gen_subdirective(input_tree)
+            subdirective = self.gen_subdirective(input_tree)
+            update_config(subdirective, config, merge=False)
 
             # Find output branches, without resolving dependency.
             self.parse_drop_keep_rename(config, dumped_tree, subdirective)
@@ -95,9 +92,6 @@ class BabyConfigParser:
             subdirective['transient_vars'] = [
                 v for v in transient_vars
                 if v.name not in subdirective['input_branch_names']]
-
-            # Merge parsed config with raw input
-            self.update_config(subdirective, config, merge=False)
 
             directive['trees'][output_tree] = subdirective
 
@@ -228,12 +222,12 @@ class BabyConfigParser:
         return transient_vars, vars_to_load
 
     @staticmethod
-    def gen_subdirective(input_tree, known_names=[]):
+    def gen_subdirective(input_tree):
         return {'input_tree': input_tree,
                 'input_branches': UniqueList(),
                 'output_branches': UniqueList(),
                 'temp_variables': UniqueList(),
-                'known_names': UniqueList(known_names),
+                'known_names': UniqueList(),
                 'selection': ['true'],
                 }
 
@@ -258,21 +252,6 @@ class BabyConfigParser:
             return datatype
         except KeyError:
             raise KeyError('Branch {} not found.'.format(name))
-
-    @staticmethod
-    def update_config(config, update, merge=True):
-        """
-        Update ``config`` directory keys from the ``update`` directory, if the
-        same key is not present in ``config``.
-
-        Else merge the value from two keys if ``merge`` key argument is set to
-        ``True``.
-        """
-        for key, value in update.items():
-            if key not in config:
-                config[key] = value
-            elif merge:
-                config[key] += value
 
 
 #############

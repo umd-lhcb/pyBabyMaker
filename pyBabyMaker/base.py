@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 15, 2020 at 01:18 AM +0800
+# Last Change: Tue Sep 22, 2020 at 02:20 AM +0800
 """
 This module provides basic infrastructure for ntuple related C++ code
 generation.
@@ -80,6 +80,21 @@ def load_file(filepath, current_file_path=__file__):
                          filepath)
     else:
         return filepath
+
+
+def update_config(config, update, merge=True):
+    """
+    Update ``config`` directory keys from the ``update`` directory, if the
+    same key is not present in ``config``.
+
+    Else merge the value from two keys if ``merge`` key argument is set to
+    ``True``.
+    """
+    for key, value in update.items():
+        if key not in config:
+            config[key] = value
+        elif merge:
+            config[key] += value
 
 
 Variable = namedtuple('Variable', 'type name rvalue', defaults=(None,))

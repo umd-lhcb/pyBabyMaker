@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 22, 2020 at 02:33 AM +0800
+# Last Change: Sun Oct 04, 2020 at 12:23 AM +0800
 
 import re
 
@@ -52,10 +52,10 @@ class BabyConfigParser:
 
             # Merge raw tree-specific directive with the global one.
             merge = config['inherit'] if 'inherit' in config else True
-            update_config(config, self.parsed_config, merge=merge)
+            config = update_config(self.parsed_config, config, merge=merge)
 
-            subdirective = self.gen_subdirective(input_tree)
-            update_config(subdirective, config, merge=merge)
+            subdirective = update_config(
+                self.gen_subdirective(input_tree), config, merge=merge)
 
             # Find output branches, without resolving dependency.
             self.parse_drop_keep_rename(config, dumped_tree, subdirective)

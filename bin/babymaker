@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 04:01 AM +0800
+# Last Change: Mon Oct 05, 2020 at 02:45 AM +0800
 
 from argparse import ArgumentParser
 from pyBabyMaker.babymaker import BabyMaker
@@ -40,6 +40,11 @@ path to data ntuple file.''')
                         help='''
 disable C++ code reformatter.''')
 
+    parser.add_argument('--debug',
+                        action='store_true',
+                        help='''
+enable additional debug messages.''')
+
     parser.add_argument('-t', '--template-path',
                         nargs='?',
                         default='!:cpp_templates/babymaker.cpp',
@@ -57,4 +62,4 @@ if __name__ == '__main__':
     args = parse_input()
     template = load_file(args.template_path)
     maker = BabyMaker(args.input, args.data, template, args.no_format)
-    maker.gen(args.output)
+    maker.gen(args.output, args.debug)

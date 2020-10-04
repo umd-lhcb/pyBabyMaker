@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Oct 05, 2020 at 02:20 AM +0800
+# Last Change: Mon Oct 05, 2020 at 02:44 AM +0800
 
 import re
 
@@ -21,13 +21,14 @@ class BabyConfigParser:
     """
     Basic parser for YAML C++ code instruction.
     """
-    def __init__(self, parsed_config, dumped_ntuple):
+    def __init__(self, parsed_config, dumped_ntuple, debug=False):
         """
         Initialize the config parser with parsed YAML file and dumped ntuple
         structure.
         """
         self.parsed_config = parsed_config
         self.dumped_ntuple = dumped_ntuple
+        self.debug = debug
 
     # NOTE: A complicated function! I'd like it to be more elegant but not for
     #       now
@@ -193,7 +194,8 @@ class BabyConfigParser:
                     directive['known_names'].append(v)
 
                 except Exception:
-                    print('{} is not a known branch name.'.format(v))
+                    if self.debug:
+                        print('{} is not a known branch name.'.format(v))
                     resolved = False
 
         return resolved
@@ -280,10 +282,10 @@ class BabyMaker(BaseMaker):
         self.template_filename = template_filename
         self.use_reformater = use_reformater
 
-    def gen(self, filename):
+    def gen(self, filename, debug=False):
         parsed_config = self.read(self.config_filename)
         dumped_ntuple = self.dump(self.ntuple_filename)
-        directive = self.directive_gen(parsed_config, dumped_ntuple)
+        directive = self.directive_gen(parsed_config, dumped_ntuple, debug)
 
         with open(self.template_filename) as tmpl:
             macros = template_transformer(tmpl, directive)
@@ -296,6 +298,6 @@ class BabyMaker(BaseMaker):
             self.reformat(filename)
 
     @staticmethod
-    def directive_gen(parsed_config, dumped_ntuple):
-        parser = BabyConfigParser(parsed_config, dumped_ntuple)
+    def directive_gen(parsed_config, dumped_ntuple, debug=False):
+        parser = BabyConfigParser(parsed_config, dumped_ntuple, debug)
         return parser.parse()

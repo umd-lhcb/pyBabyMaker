@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Oct 04, 2020 at 12:23 AM +0800
+# Last Change: Mon Oct 05, 2020 at 02:20 AM +0800
 
 import re
 
@@ -46,7 +46,15 @@ class BabyConfigParser:
 
         for output_tree, config in self.parsed_config['output'].items():
             input_tree = config['input']
-            dumped_tree = self.dumped_ntuple[input_tree]
+
+            try:
+                dumped_tree = self.dumped_ntuple[input_tree]
+            except KeyError:
+                print('{}Input tree {} not found, skipping {}...{}'.format(
+                    TC.BOLD+TC.YELLOW, input_tree, output_tree, TC.END
+                ))
+                continue
+
             print('{}=== Handling output tree {} ==={}'.format(
                 TC.BOLD+TC.BLUE, output_tree, TC.END))
 

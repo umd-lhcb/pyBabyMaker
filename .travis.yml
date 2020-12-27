@@ -15,6 +15,7 @@ install:
 script:
     - export VERSION=$(git describe --tags --abbrev=0)
     - sed -i "s/0.0.1/${VERSION}/" ./pyBabyMaker/__init__.py
+    - make install
     - make integrationtest
     - cd ./test
     - pytest --cov pyBabyMaker .

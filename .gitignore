@@ -1,7 +1,4 @@
-.python-version
 .lvimrc
-.ccls
-.envrc
 .pytest_cache
 __pycache__
 

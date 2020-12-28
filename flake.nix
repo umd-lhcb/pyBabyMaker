@@ -24,7 +24,7 @@
       rec {
         packages = {
           pyBabyMakerEnv = pkgs.python3.withPackages (ps: with ps; [
-            pkgs.pythonPackages.pyBabyMaker
+            pyBabyMaker
 
             # Testing
             pytest
@@ -34,7 +34,6 @@
           ]);
         };
 
-        defaultPackage = packages.pyBabyMakerEnv;
         devShell = packages.pyBabyMakerEnv.env;
       });
 }

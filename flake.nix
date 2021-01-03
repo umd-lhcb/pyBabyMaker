@@ -31,6 +31,11 @@
 
             # C++ wrapper generation
             cython
+
+            # Dev tools
+            jedi
+            flake8
+            pylint
           ]);
         };
 

@@ -26,12 +26,6 @@
           buildInputs = with pythonPackages; [
             pkgs.root
 
-            # Testing
-            pytest
-
-            # C++ wrapper generation
-            cython
-
             # Dev tools
             jedi
             flake8

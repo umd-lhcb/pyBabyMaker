@@ -25,6 +25,7 @@
           name = "pyBabyMaker-dev";
           buildInputs = with pythonPackages; [
             pkgs.root
+            pytest
 
             # Dev tools
             jedi

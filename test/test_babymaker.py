@@ -2,11 +2,13 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 04, 2021 at 04:55 PM +0100
+# Last Change: Mon Jan 04, 2021 at 10:12 PM +0100
 
 import pytest
 import os
 import yaml
+
+from collections import defaultdict
 
 from pyBabyMaker.babymaker import Variable, BabyConfigParser
 from pyBabyMaker.base import UniqueList
@@ -144,8 +146,8 @@ def directive():
 @pytest.fixture
 def subdirective():
     return {
-        'input_tree': input_tree,
-        'namespace': namespace,
+        'input_tree': 'sample_tree',
+        'namespace': defaultdict(dict),
         'loaded_vars': [],
         'input_branches': [],
         'output_branches': [],
@@ -187,35 +189,34 @@ def test_BabyConfigParser_parse_headers_user_only(directive,
     assert directive['user_headers'] == ['include/dummy.h']
 
 
-# def test_BabyConfigParser_parse_drop_keep_rename(subdirective,
-                                                 # default_BabyConfigParser):
-    # config = {
-        # 'drop': ['Y_P.*'],
-        # 'keep': ['Y_P.*', 'Z_PX', 'X_P.*'],
-        # 'rename': {'Z_PY': 'z_py'}
-    # }
-    # dumped_tree = {
-        # 'X_PX': 'float',
-        # 'X_PY': 'float',
-        # 'X_PZ': 'float',
-        # 'Y_PX': 'float',
-        # 'Y_PY': 'float',
-        # 'Y_PZ': 'float',
-        # 'Z_PX': 'float',
-        # 'Z_PY': 'float',
-        # 'Z_PZ': 'float',
-    # }
-    # default_BabyConfigParser.parse_drop_keep_rename(
-        # config, dumped_tree, subdirective)
+def test_BabyConfigParser_parse_drop_keep_rename(subdirective,
+                                                 default_BabyConfigParser):
+    config = {
+        'drop': ['Y_P.*'],
+        'keep': ['Y_P.*', 'Z_PX', 'X_P.*'],
+        'rename': {'Z_PY': 'z_py'}
+    }
+    dumped_tree = {
+        'X_PX': 'float',
+        'X_PY': 'float',
+        'X_PZ': 'float',
+        'Y_PX': 'float',
+        'Y_PY': 'float',
+        'Y_PZ': 'float',
+        'Z_PX': 'float',
+        'Z_PY': 'float',
+        'Z_PZ': 'float',
+    }
+    subdirective['namespace']['raw'] = {n: Variable(t, n)
+                                        for n, t in dumped_tree.items()}
+    default_BabyConfigParser.parse_drop_keep_rename(config, subdirective)
 
-    # assert subdirective['input_branches'] == [
-        # Variable('float', 'X_PX'),
-        # Variable('float', 'X_PY'),
-        # Variable('float', 'X_PZ'),
-        # Variable('float', 'Z_PX'),
-        # Variable('float', 'Z_PY'),
-    # ]
-    # assert subdirective['output_branches'] == [
+    assert subdirective['namespace']['keep'] == {
+        n: Variable('float', n) for n in dumped_tree.keys()
+        if not n.startswith('Y') and n != 'Z_PZ' and n != 'Z_PY'}
+    # assert subdirective['output_branches'] == {
+        # 'X_PX': Variable('float')
+    # }
         # Variable('float', 'X_PX', 'X_PX'),
         # Variable('float', 'X_PY', 'X_PY'),
         # Variable('float', 'X_PZ', 'X_PZ'),

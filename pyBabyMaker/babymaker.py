@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 04, 2021 at 04:51 PM +0100
+# Last Change: Mon Jan 04, 2021 at 10:08 PM +0100
 
 import re
 
@@ -61,6 +61,15 @@ class Variable(object):
         for orig, resolved in self.resolved_vars.items():
             expr = re.sub(r'\b'+orig+r'\b', resolved, expr)
         return expr
+
+    def __eq__(self, other):
+        if isinstance(other, Variable):
+            return (self.type == other.type and self.name == other.name and
+                    self.rvalue == other.rvalue and
+                    self.rvalue_alt == other.rvalue_alt and
+                    self.transient == other.transient and
+                    self.output == other.output)
+        return False
 
 
 VariableResolved = namedtuple('VariableResolved',
@@ -180,7 +189,7 @@ class BabyConfigParser:
         """
         Parse ``drop, keep, rename`` sections.
         """
-        for var in subdirective['namespace']['raw']:
+        for var in subdirective['namespace']['raw'].values():
             if 'drop' in config and cls.match(config['drop'], var.name):
                 print('Dropping branch: {}'.format(var.name))
                 continue

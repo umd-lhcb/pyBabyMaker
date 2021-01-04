@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 04, 2021 at 11:08 PM +0100
+# Last Change: Mon Jan 04, 2021 at 11:10 PM +0100
 
 import pytest
 import os
@@ -231,6 +231,20 @@ def test_BabyConfigParser_parse_calculation(subdirective,
         'Y_P_TEMP': Variable(
             'double', 'Y_P_TEMP', 'Y_PX+1', transient=True, output=False),
         'Y_P_shift': Variable('double', 'Y_P_shift', 'Y_P_TEMP', transient=True)
+    }
+
+
+def test_BabyConfigParser_parse_calculation_alt(subdirective,
+                                                default_BabyConfigParser):
+    config = {'calculation': {
+        'Y_P_TEMP': '^double;Y_PX+1;FUNC(Y_PX, 1)',
+    }}
+    default_BabyConfigParser.parse_calculation(config, subdirective)
+
+    assert subdirective['namespace']['calculation'] == {
+        'Y_P_TEMP': Variable(
+            'double', 'Y_P_TEMP', 'Y_PX+1', 'FUNC(Y_PX, 1)',
+            transient=True, output=False)
     }
 
 

@@ -19,12 +19,12 @@
         };
         python = pkgs.python3;
         pythonPackages = python.pkgs;
-        root = pkgs.root;
       in
-      rec {
-        packages = {
-          pyBabyMakerEnv = pkgs.python3.withPackages (ps: with ps; [
-            pyBabyMaker
+      {
+        devShell = pkgs.mkShell rec {
+          name = "pyBabyMaker-dev";
+          buildInputs = with pythonPackages; [
+            pkgs.root
 
             # Testing
             pytest
@@ -36,9 +36,30 @@
             jedi
             flake8
             pylint
-          ]);
-        };
+            virtualenvwrapper
+          ];
 
-        devShell = packages.pyBabyMakerEnv.env;
+          shellHook = ''
+            # Allow the use of wheels.
+            SOURCE_DATE_EPOCH=$(date +%s)
+
+            if test -d $HOME/build/python-venv; then
+              VENV=$HOME/build/python-venv/${name}
+            else
+              VENV=./.virtualenv
+            fi
+
+            if test ! -d $VENV; then
+              virtualenv $VENV
+            fi
+            source $VENV/bin/activate
+
+            # allow for the environment to pick up packages installed with virtualenv
+            export PYTHONPATH=$VENV/${python.sitePackages}/:$PYTHONPATH
+
+            # fix libstdc++.so not found error
+            export LD_LIBRARY_PATH=${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH
+          '';
+        };
       });
 }

@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Dec 27, 2020 at 11:45 PM +0100
+# Last Change: Mon Jan 04, 2021 at 04:05 PM +0100
 
 include ./samples/sample.mk
 
@@ -36,7 +36,7 @@ test: unittest
 # Unit tests #
 ##############
 
-unittest:
+unittest: install
 	@pytest ./test
 
 #####################

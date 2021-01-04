@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Oct 04, 2020 at 12:15 AM +0800
+# Last Change: Mon Jan 04, 2021 at 01:52 AM +0100
 """
 This module provides basic infrastructure for ntuple related C++ code
 generation.
@@ -113,7 +113,8 @@ def update_config(config, update, merge=True):
     return result
 
 
-Variable = namedtuple('Variable', 'type name rvalue', defaults=(None,))
+Variable = namedtuple('Variable', 'type name rvalue rvalue_alt transient',
+                      defaults=(None, None, False))
 
 
 ##############

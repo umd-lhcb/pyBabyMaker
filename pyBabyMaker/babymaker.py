@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Oct 05, 2020 at 02:44 AM +0800
+# Last Change: Mon Jan 04, 2021 at 01:54 AM +0100
 
 import re
 
@@ -11,6 +11,28 @@ from pyBabyMaker.base import UniqueList, BaseMaker, Variable
 from pyBabyMaker.base import update_config
 from pyBabyMaker.boolean.utils import find_all_vars
 from pyBabyMaker.engine.core import template_transformer, template_evaluator
+
+
+###########
+# Helpers #
+###########
+
+# We need some global thing to track all variable names to avoid name collision
+
+# We need to load the calculation stuff first given that we have only one
+# tracker for their name
+
+# For other output branch, we can rename them on the fly
+
+# Variables
+
+# Just use dictionary as namespaces man! Don't try to resolve them!
+
+# So we need to keep an record on the name of output branches!
+
+
+class ParsedExpr:
+    pass
 
 
 ########################
@@ -62,9 +84,7 @@ class BabyConfigParser:
             # Merge raw tree-specific directive with the global one.
             merge = config['inherit'] if 'inherit' in config else True
             config = update_config(self.parsed_config, config, merge=merge)
-
-            subdirective = update_config(
-                self.gen_subdirective(input_tree), config, merge=merge)
+            subdirective = {'input_tree': input_tree, 'namespace': {}}
 
             # Find output branches, without resolving dependency.
             self.parse_drop_keep_rename(config, dumped_tree, subdirective)
@@ -106,7 +126,8 @@ class BabyConfigParser:
 
         return directive
 
-    def parse_headers(self, config, directive):
+    @staticmethod
+    def parse_headers(config, directive):
         """
         Parse ``headers`` section.
         """
@@ -115,51 +136,46 @@ class BabyConfigParser:
                 directive['{}_headers'.format(header_type)] += \
                     config['headers'][header_type]
 
-    def parse_drop_keep_rename(self, config, dumped_tree, directive):
+    @classmethod
+    def parse_drop_keep_rename(cls, config, dumped_tree, subdirective):
         """
         Parse ``drop, keep, rename`` sections.
         """
-        branches_to_keep = UniqueList()
-        for br_in, datatype in dumped_tree.items():
-            if 'drop' in config and self.match(config['drop'], br_in):
-                print('Dropping branch: {}'.format(br_in))
+        for br, datatype in dumped_tree.items():
+            if 'drop' in config and cls.match(config['drop'], br):
+                print('Dropping branch: {}'.format(br))
+                continue
 
-            elif 'keep' in config and self.match(config['keep'], br_in) or \
-                    'rename' in config and br_in in config['rename']:
-                branches_to_keep.append((datatype, br_in))
+            for section in ('keep', 'rename'):
+                if section in config and cls.match(config[section], br):
+                    subdirective['namespace'][section][br] = \
+                        Variable(datatype, br)
 
-        for datatype, br_in in branches_to_keep:
-            directive['input_branches'].append(Variable(datatype, br_in))
-            try:
-                # Handle possible branch rename here
-                br_out = config['rename'][br_in]
-            except KeyError:
-                br_out = br_in
-
-            directive['output_branches'].append(
-                Variable(datatype, br_out, br_in))
-
-    def parse_calculation(self, config, directive):
+    @classmethod
+    def parse_calculation(cls, config, subdirective):
         """
         Parse ``calculation`` section.
         """
         if 'calculation' in config:
             for name, code in config['calculation'].items():
+                splitted = code.split(';')
                 try:
-                    datatype, rvalue = code.split(';')
+                    datatype, rvalue, rvalue_alt = splitted
                 except ValueError:
-                    raise ValueError('Illegal specification for {}: {}.'.format(
-                        name, code
-                    ))
+                    try:
+                        datatype, rvalue = code.splitted
+                        rvalue_alt = None
+                    except ValueError:
+                        raise ValueError('Illegal specification for {}: {}.'.format(
+                            name, code
+                        ))
 
                 if '^' in datatype:
-                    datatype = datatype.strip('^')
-                    directive['temp_variables'].append(
-                        Variable(datatype, name, rvalue))
-
+                    subdirective['calculation'].append(Variable(
+                        datatype.strip('^'), name, rvalue, rvalue_alt, True))
                 else:
-                    directive['output_branches'].append(
-                        Variable(datatype, name, rvalue))
+                    subdirective['calculation'].append(Variable(
+                        datatype, name, rvalue, rvalue_alt))
 
     def parse_selection(self, config, dumped_tree, directive):
         """
@@ -232,20 +248,12 @@ class BabyConfigParser:
         return transient_vars, vars_to_load
 
     @staticmethod
-    def gen_subdirective(input_tree):
-        return {'input_tree': input_tree,
-                'input_branches': UniqueList(),
-                'output_branches': UniqueList(),
-                'temp_variables': UniqueList(),
-                'known_names': UniqueList(),
-                'selection': ['true'],
-                }
-
-    @staticmethod
     def match(patterns, string, return_value=True):
         """
-        Test if ``string`` (a regular expression) matches at least one element
-        in the ``patterns``. If there's a match, return ``return_value``.
+        Test if ``string`` matches at least one element in the ``patterns`` (a
+        list of regular expression).
+
+        If there's a match, return ``return_value``.
         """
         for p in patterns:
             if bool(re.search(r'{}'.format(p), string)):

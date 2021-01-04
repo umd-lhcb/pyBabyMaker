@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 04, 2021 at 11:10 PM +0100
+# Last Change: Tue Jan 05, 2021 at 12:31 AM +0100
 
 import pytest
 import os
@@ -248,23 +248,6 @@ def test_BabyConfigParser_parse_calculation_alt(subdirective,
     }
 
 
-# def test_BabyConfigParser_parse_load_missing_vars(
-        # subdirective, default_BabyConfigParser):
-    # expr = '!(Y_PX > 10) && FUNCTOR(Y_PY, Y_PZ) != 10'
-    # dumped_tree = {
-        # 'Y_PX': 'float',
-        # 'Y_PY': 'float',
-        # 'Y_PZ': 'float',
-    # }
-    # default_BabyConfigParser.load_missing_vars(
-        # expr, dumped_tree, subdirective)
-    # assert subdirective['input_branches'] == [
-        # Variable('float', 'Y_PY'),
-        # Variable('float', 'Y_PZ'),
-        # Variable('float', 'Y_PX'),
-    # ]
-
-
 # def test_BabyConfigParser_parse_selection(subdirective,
                                           # default_BabyConfigParser):
     # config = {
@@ -283,29 +266,29 @@ def test_BabyConfigParser_parse_calculation_alt(subdirective,
     # assert subdirective['selection'] == config['selection']
 
 
-# ##################
-# # Helper methods #
-# ##################
+##################
+# Helper methods #
+##################
 
-# def test_BabyConfigParser_match_True(default_BabyConfigParser):
-    # assert default_BabyConfigParser.match(['quick', 'brown', 'fox'], 'fox')
-
-
-# def test_BabyConfigParser_match_False(default_BabyConfigParser):
-    # assert not default_BabyConfigParser.match(['quick', 'brown', 'fox'], 'Fox')
+def test_BabyConfigParser_match_True(default_BabyConfigParser):
+    assert default_BabyConfigParser.match(['quick', 'brown', 'fox'], 'fox')
 
 
-# def test_BabyConfigParser_match_True_inverse(default_BabyConfigParser):
-    # assert not default_BabyConfigParser.match(['quick', 'brown', 'fox'], 'fox',
-                                              # False)
+def test_BabyConfigParser_match_False(default_BabyConfigParser):
+    assert not default_BabyConfigParser.match(['quick', 'brown', 'fox'], 'Fox')
 
 
-# def test_BabyConfigParser_match_False_partial_match(default_BabyConfigParser):
-    # assert not default_BabyConfigParser.match(['quick', 'brown', 'fox2'], 'fox')
+def test_BabyConfigParser_match_True_inverse(default_BabyConfigParser):
+    assert not default_BabyConfigParser.match(['quick', 'brown', 'fox'], 'fox',
+                                              False)
 
 
-# def test_BabyConfigParser_match_partial_match(default_BabyConfigParser):
-    # assert default_BabyConfigParser.match(['quick', 'brown', 'fox'], 'fox2')
+def test_BabyConfigParser_match_False_partial_match(default_BabyConfigParser):
+    assert not default_BabyConfigParser.match(['quick', 'brown', 'fox2'], 'fox')
+
+
+def test_BabyConfigParser_match_partial_match(default_BabyConfigParser):
+    assert default_BabyConfigParser.match(['quick', 'brown', 'fox'], 'fox2')
 
 
 # def test_BabyConfigParser_load_missing_vars(subdirective,

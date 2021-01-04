@@ -2,11 +2,11 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 04, 2021 at 03:38 PM +0100
+# Last Change: Mon Jan 04, 2021 at 03:48 PM +0100
 
 import re
 
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 
 from pyBabyMaker.base import TermColor as TC
 from pyBabyMaker.base import UniqueList, BaseMaker
@@ -117,11 +117,11 @@ class BabyConfigParser:
             # Merge raw tree-specific directive with the global one.
             merge = config['inherit'] if 'inherit' in config else True
             config = update_config(self.parsed_config, config, merge=merge)
+            namespace = defaultdict(dict)
+            namespace['raw'] = {Variable(t, n) for n, t in dumped_tree.items()}
             subdirective = {
                 'input_tree': input_tree,
-                'namespace': {
-                    'raw': {Variable(t, n) for n, t in dumped_tree.items()}
-                },
+                'namespace': namespace,
                 'loaded_vars': [],
                 'input_branches': [],
                 'output_branches': [],
@@ -131,7 +131,7 @@ class BabyConfigParser:
             }
 
             # Put all variables in separate namespaces
-            self.parse_drop_keep_rename(config, dumped_tree, subdirective)
+            self.parse_drop_keep_rename(config, subdirective)
             self.parse_calculation(config, subdirective)
 
             # Now resolve variable names for simple 'keep' and 'rename' actions
@@ -175,21 +175,21 @@ class BabyConfigParser:
                     config['headers'][header_type]
 
     @classmethod
-    def parse_drop_keep_rename(cls, config, dumped_tree, subdirective):
+    def parse_drop_keep_rename(cls, config, subdirective):
         """
         Parse ``drop, keep, rename`` sections.
         """
-        for br, datatype in dumped_tree.items():
-            if 'drop' in config and cls.match(config['drop'], br):
-                print('Dropping branch: {}'.format(br))
+        for var in subdirective['namespace']['raw']:
+            if 'drop' in config and cls.match(config['drop'], var.name):
+                print('Dropping branch: {}'.format(var.name))
                 continue
 
-            elif 'keep' in config and cls.match(config['keep'], br):
-                subdirective['namespace']['keep'][br] = Variable(datatype, br)
+            elif 'keep' in config and cls.match(config['keep'], var.name):
+                subdirective['namespace']['keep'][var.name] = var
 
-            elif 'rename' in config and cls.match(config['rename'], br):
-                subdirective['namespace']['rename'][br] = Variable(
-                    datatype, br, transient=True)
+            elif 'rename' in config and cls.match(config['rename'], var.name):
+                subdirective['namespace']['rename'][var.name] = Variable(
+                    var.type, var.name, transient=True)
 
     @staticmethod
     def parse_calculation(config, subdirective):
@@ -236,23 +236,22 @@ class BabyConfigParser:
         #     directive['selection'] = selection
 
     @classmethod
-    def resolve_vars_in_scope(cls, scope, variables, dumped_tree, subdirective,
+    def resolve_vars_in_scope(cls, scope, variables, subdirective,
                               allowed_scopes=[], max_counter=5):
         unresolved = []
         for var in variables:
-            if not cls.resolve_var(scope, var, dumped_tree, subdirective,
+            if not cls.resolve_var(scope, var, subdirective,
                                    allowed_scopes):
                 unresolved.append(var)
 
         if len(unresolved) > 0 and unresolved[0].counter <= max_counter:
             return cls.resolve_vars_in_scope(
-                scope, unresolved, dumped_tree, subdirective, allowed_scopes,
-                max_counter)
+                scope, unresolved, subdirective, allowed_scopes, max_counter)
 
         return unresolved
 
     @staticmethod
-    def resolve_var(scope, var, dumped_tree, subdirective, allowed_scopes):
+    def resolve_var(scope, var, subdirective, allowed_scopes):
         """
         Resolve variable names within allowed scoped or vanilla ntuple trees.
         """
@@ -285,7 +284,7 @@ class BabyConfigParser:
         resolve_in_scope(scope, same_scope=True)
 
         # As a last resort, load from ntuple trees
-        resolve_in_scope('raw', {'raw': dumped_tree}, lambda x: True, True)
+        resolve_in_scope('raw', loaded=lambda x: True, terminal=True)
 
         if not len(var.to_resolve_deps):
             if var.transient:

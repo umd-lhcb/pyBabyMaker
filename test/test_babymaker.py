@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 04, 2021 at 10:12 PM +0100
+# Last Change: Mon Jan 04, 2021 at 10:53 PM +0100
 
 import pytest
 import os
@@ -214,15 +214,9 @@ def test_BabyConfigParser_parse_drop_keep_rename(subdirective,
     assert subdirective['namespace']['keep'] == {
         n: Variable('float', n) for n in dumped_tree.keys()
         if not n.startswith('Y') and n != 'Z_PZ' and n != 'Z_PY'}
-    # assert subdirective['output_branches'] == {
-        # 'X_PX': Variable('float')
-    # }
-        # Variable('float', 'X_PX', 'X_PX'),
-        # Variable('float', 'X_PY', 'X_PY'),
-        # Variable('float', 'X_PZ', 'X_PZ'),
-        # Variable('float', 'Z_PX', 'Z_PX'),
-        # Variable('float', 'z_py', 'Z_PY'),
-    # ]
+    assert subdirective['namespace']['rename'] == {
+        'z_py': Variable('float', 'z_py', 'Z_PY', transient=True)
+    }
 
 
 # def test_BabyConfigParser_parse_calculation(subdirective,

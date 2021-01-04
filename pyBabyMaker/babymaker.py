@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 04, 2021 at 10:08 PM +0100
+# Last Change: Mon Jan 04, 2021 at 10:42 PM +0100
 
 import re
 
@@ -189,6 +189,10 @@ class BabyConfigParser:
         """
         Parse ``drop, keep, rename`` sections.
         """
+        if 'rename' in config:
+            rename_dict = config['rename']
+            rename_vars = list(rename_dict.keys())
+
         for var in subdirective['namespace']['raw'].values():
             if 'drop' in config and cls.match(config['drop'], var.name):
                 print('Dropping branch: {}'.format(var.name))
@@ -197,9 +201,10 @@ class BabyConfigParser:
             elif 'keep' in config and cls.match(config['keep'], var.name):
                 subdirective['namespace']['keep'][var.name] = var
 
-            elif 'rename' in config and cls.match(config['rename'], var.name):
-                subdirective['namespace']['rename'][var.name] = Variable(
-                    var.type, var.name, transient=True)
+            elif 'rename' in config and cls.match(rename_vars, var.name):
+                renamed_var = rename_dict[var.name]
+                subdirective['namespace']['rename'][renamed_var] = Variable(
+                    var.type, renamed_var, var.name, transient=True)
 
     @staticmethod
     def parse_calculation(config, subdirective):

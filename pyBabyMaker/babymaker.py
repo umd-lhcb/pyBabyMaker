@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 04, 2021 at 10:42 PM +0100
+# Last Change: Mon Jan 04, 2021 at 11:07 PM +0100
 
 import re
 
@@ -224,11 +224,10 @@ class BabyConfigParser:
                         name, code
                     ))
 
+                output = True
                 if '^' in datatype:
                     datatype = datatype.strip('^')
                     output = False
-                else:
-                    output = True
 
                 subdirective['namespace']['calculation'][name] = Variable(
                     datatype, name, rvalue, rvalue_alt, True, output)

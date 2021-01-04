@@ -2,12 +2,14 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 04, 2021 at 01:54 AM +0100
+# Last Change: Mon Jan 04, 2021 at 03:38 PM +0100
 
 import re
 
+from collections import namedtuple
+
 from pyBabyMaker.base import TermColor as TC
-from pyBabyMaker.base import UniqueList, BaseMaker, Variable
+from pyBabyMaker.base import UniqueList, BaseMaker
 from pyBabyMaker.base import update_config
 from pyBabyMaker.boolean.utils import find_all_vars
 from pyBabyMaker.engine.core import template_transformer, template_evaluator
@@ -17,22 +19,53 @@ from pyBabyMaker.engine.core import template_transformer, template_evaluator
 # Helpers #
 ###########
 
-# We need some global thing to track all variable names to avoid name collision
+class Variable(object):
+    """
+    Store input/output/transient variable to be resolved.
 
-# We need to load the calculation stuff first given that we have only one
-# tracker for their name
+    **Note**: ``transient`` here means the variable **DOES NOT** exist in the
+    input ntuple tree and thus went through some more complex transformation (
+    i.e. renaming or calculation).
+    """
+    def __init__(self, type, name,
+                 rvalue=None, rvalue_alt=None, transient=False, output=True):
+        self.type = type
+        self.name = name
+        self.rvalue = rvalue
+        self.rvalue_alt = rvalue_alt
+        self.transient = transient
+        self.output = output
 
-# For other output branch, we can rename them on the fly
+        self.resolved_vars = {}
+        self.counter = 0  # This holds counters to attempts to resolve this
 
-# Variables
+        self.dep_vars = UniqueList(find_all_vars(rvalue)) \
+            if rvalue is not None else []
+        self.dep_vars_alt = UniqueList(find_all_vars(rvalue_alt)) \
+            if rvalue_alt is not None else []
 
-# Just use dictionary as namespaces man! Don't try to resolve them!
+        self.to_resolve_expr = rvalue
+        self.to_resolve_deps = self.dep_vars
 
-# So we need to keep an record on the name of output branches!
+    def use_alt(self):
+        self.reset_counter()
+        self.to_resolve_expr = self.rvalue_alt
+        self.to_resolve_deps = self.dep_vars_alt
+        return self
+
+    def reset_counter(self):
+        self.counter = 0
+
+    def expr(self):
+        expr = self.to_resolve_expr
+        for orig, resolved in self.resolved_vars:
+            expr = re.sub(r'\b'+orig+r'\b', resolved, expr)
+        return expr
 
 
-class ParsedExpr:
-    pass
+VariableResolved = namedtuple('VariableResolved',
+                              'type name rvalue, branch_name',
+                              defaults=(None, None))
 
 
 ########################
@@ -84,43 +117,48 @@ class BabyConfigParser:
             # Merge raw tree-specific directive with the global one.
             merge = config['inherit'] if 'inherit' in config else True
             config = update_config(self.parsed_config, config, merge=merge)
-            subdirective = {'input_tree': input_tree, 'namespace': {}}
+            subdirective = {
+                'input_tree': input_tree,
+                'namespace': {
+                    'raw': {Variable(t, n) for n, t in dumped_tree.items()}
+                },
+                'loaded_vars': [],
+                'input_branches': [],
+                'output_branches': [],
+                'transient_vars': [],
+                'input_branch_names': [],
+                'output_branch_names': []
+            }
 
-            # Find output branches, without resolving dependency.
+            # Put all variables in separate namespaces
             self.parse_drop_keep_rename(config, dumped_tree, subdirective)
             self.parse_calculation(config, subdirective)
 
+            # Now resolve variable names for simple 'keep' and 'rename' actions
+            self.resolve_vars_in_scope(
+                'keep', subdirective['namespace']['keep'], dumped_tree, subdirective)
+            self.resolve_vars_in_scope(
+                'rename', subdirective['namespace']['rename'], dumped_tree, subdirective)
+
             # Figure out the loading sequence of all variables, resolving
             # dependency issues.
-            subdirective['known_names'] += [
-                v.name for v in subdirective['input_branches']]
-            vars_to_load = subdirective['output_branches'] + \
-                subdirective['temp_variables']
-
-            transient_vars, vars_to_load = self.var_load_seq(
-                vars_to_load, dumped_tree, subdirective)
+            unresolved = self.resolve_vars_in_scope(
+                'calculation', subdirective['namespace']['calculation'],
+                dumped_tree, subdirective, ['keep', 'rename'])
 
             # Remove variables that can't be resolved
-            for var in vars_to_load:
-                if var in subdirective['output_branches']:
-                    print("{}Output branch {} cannot be resolved, deleting...{}".format(
+            for var in unresolved:
+                if var.output:
+                    print("{}Output branch {} cannot be resolved...{}".format(
                         TC.YELLOW, var.name, TC.END))
-                    subdirective['output_branches'].remove(var)
                 else:
-                    print("{}Temp variable {} cannot be resolved, deleting...{}".format(
+                    print("{}Temp variable {} cannot be resolved...{}".format(
                         TC.YELLOW, var.name, TC.END))
-                    subdirective['temp_variables'].remove(var)
 
-            self.parse_selection(config, dumped_tree, subdirective)
+            # self.parse_selection(config, dumped_tree, subdirective)
 
             subdirective['input_branch_names'] = [
                 v.name for v in subdirective['input_branches']]
-
-            # Consider variable loaded if exactly the same name is in the input
-            # branches.
-            subdirective['transient_vars'] = [
-                v for v in transient_vars
-                if v.name not in subdirective['input_branch_names']]
 
             directive['trees'][output_tree] = subdirective
 
@@ -146,106 +184,126 @@ class BabyConfigParser:
                 print('Dropping branch: {}'.format(br))
                 continue
 
-            for section in ('keep', 'rename'):
-                if section in config and cls.match(config[section], br):
-                    subdirective['namespace'][section][br] = \
-                        Variable(datatype, br)
+            elif 'keep' in config and cls.match(config['keep'], br):
+                subdirective['namespace']['keep'][br] = Variable(datatype, br)
 
-    @classmethod
-    def parse_calculation(cls, config, subdirective):
+            elif 'rename' in config and cls.match(config['rename'], br):
+                subdirective['namespace']['rename'][br] = Variable(
+                    datatype, br, transient=True)
+
+    @staticmethod
+    def parse_calculation(config, subdirective):
         """
         Parse ``calculation`` section.
         """
         if 'calculation' in config:
             for name, code in config['calculation'].items():
                 splitted = code.split(';')
-                try:
+                if len(splitted) == 3:
                     datatype, rvalue, rvalue_alt = splitted
-                except ValueError:
-                    try:
-                        datatype, rvalue = code.splitted
-                        rvalue_alt = None
-                    except ValueError:
-                        raise ValueError('Illegal specification for {}: {}.'.format(
-                            name, code
-                        ))
+                elif len(splitted) == 2:
+                    datatype, rvalue = code.splitted
+                    rvalue_alt = None
+                else:
+                    raise ValueError('Illegal specification for {}: {}.'.format(
+                        name, code
+                    ))
 
                 if '^' in datatype:
-                    subdirective['calculation'].append(Variable(
-                        datatype.strip('^'), name, rvalue, rvalue_alt, True))
+                    datatype = datatype.strip('^')
+                    output = False
                 else:
-                    subdirective['calculation'].append(Variable(
-                        datatype, name, rvalue, rvalue_alt))
+                    output = True
+
+                subdirective['namespace']['calculation'].append(Variable(
+                    datatype, name, rvalue, rvalue_alt, True, output))
 
     def parse_selection(self, config, dumped_tree, directive):
         """
         Parse ``selection`` section.
         """
-        if 'selection' in config:
-            selection = []
+        # if 'selection' in config:
+        #     selection = []
 
-            for expr in config['selection']:
-                resolved = self.load_missing_vars(expr, dumped_tree, directive)
-                if resolved:
-                    selection.append(expr)
+        #     for expr in config['selection']:
+        #         resolved = self.load_missing_vars(expr, dumped_tree, directive)
+        #         if resolved:
+        #             selection.append(expr)
+        #         else:
+        #             print('{}Selection {} not resolved, deleting...{}'.format(
+        #                 TC.YELLOW, expr, TC.END))
+
+        #     directive['selection'] = selection
+
+    @classmethod
+    def resolve_vars_in_scope(cls, scope, variables, dumped_tree, subdirective,
+                              allowed_scopes=[], max_counter=5):
+        unresolved = []
+        for var in variables:
+            if not cls.resolve_var(scope, var, dumped_tree, subdirective,
+                                   allowed_scopes):
+                unresolved.append(var)
+
+        if len(unresolved) > 0 and unresolved[0].counter <= max_counter:
+            return cls.resolve_vars_in_scope(
+                scope, unresolved, dumped_tree, subdirective, allowed_scopes,
+                max_counter)
+
+        return unresolved
+
+    @staticmethod
+    def resolve_var(scope, var, dumped_tree, subdirective, allowed_scopes):
+        """
+        Resolve variable names within allowed scoped or vanilla ntuple trees.
+        """
+        def resolve_in_scope(
+            s, namespace=subdirective['namespace'],
+            loaded=lambda x: x in subdirective['loaded_vars'],
+            terminal=False, same_scope=False
+        ):
+            remainder = []
+            for v in var.to_resolve_deps:
+                if same_scope and v == var.name:
+                    continue  # No self-referencing allowed!
+
+                if v in namespace[s] and loaded(v):
+                    v_resolved = s + '_' + v
+                    var.resolved_vars[v] = v_resolved
+                    if terminal:
+                        subdirective['input_branches'].append(
+                            VariableResolved(namespace[s][v], v_resolved))
+                        subdirective['loaded_vars'].append(v_resolved)
+
                 else:
-                    print('{}Selection {} not resolved, deleting...{}'.format(
-                        TC.YELLOW, expr, TC.END))
+                    remainder.append(v)
+            var.to_resolve_deps = remainder
 
-            directive['selection'] = selection
+        for s in allowed_scopes:
+            resolve_in_scope(s)
 
-    def load_missing_vars(self, expr, dumped_tree, directive):
-        """
-        Load missing variables required for calculation or comparison, provided
-        that the variables are available directly in the ntuple.
-        """
-        variables = UniqueList(find_all_vars(expr))
-        resolved = True
+        # Need to be careful when resolving in its own scope
+        resolve_in_scope(scope, same_scope=True)
 
-        for v in variables:
-            if v not in directive['known_names']:
-                try:
-                    datatype = self.load_var(v, dumped_tree)
-                    directive['input_branches'].append(Variable(datatype, v))
-                    directive['known_names'].append(v)
+        # As a last resort, load from ntuple trees
+        resolve_in_scope('raw', {'raw': dumped_tree}, lambda x: True, True)
 
-                except Exception:
-                    if self.debug:
-                        print('{} is not a known branch name.'.format(v))
-                    resolved = False
-
-        return resolved
-
-    def var_load_seq(self, vars_to_load, dumped_tree, directive,
-                     transient_vars=None,
-                     cur_iter=0, max_iter=5):
-        """
-        Figure out a load sequence for ``vars_to_load`` such that variables that
-        load later do not depend on variables loaded earlier.
-        """
-        transient_vars = [] if transient_vars is None else transient_vars
-        known_names = directive['known_names']
-        remain_vars_to_load = []
-
-        if cur_iter < max_iter:
-            for var in vars_to_load:
-                resolved = self.load_missing_vars(var.rvalue,
-                                                  dumped_tree, directive)
-                if resolved:
-                    transient_vars.append(var)
-                    known_names.append(var.name)
+        if not len(var.to_resolve_deps):
+            if var.transient:
+                subdirective['transient_vars'].append(VariableResolved(
+                    var.type, scope+'_'+var.name, var.expr()))
+            if var.output:
+                subdirective['output_branches'].append(VariableResolved(
+                    var.type, scope+'_'+var.name, var.expr(), var.name))
+                # Check if we have duplicated output branch name
+                if var.name in subdirective['output_branch_names']:
+                    raise ValueError('{}Redefinition of output branch {} in scope {}!{}'.format(
+                        TC.BOLD+TC.RED, var.name, scope, TC.END
+                    ))
                 else:
-                    remain_vars_to_load.append(var)
+                    subdirective['output_branch_names'].append(var.name)
 
-            if remain_vars_to_load:
-                return self.var_load_seq(remain_vars_to_load, dumped_tree,
-                                         directive, transient_vars,
-                                         cur_iter+1, max_iter)
-
-            return transient_vars, remain_vars_to_load
-        # This is only triggered when no more iteration permitted yet we still
-        # have unresolved variables.
-        return transient_vars, vars_to_load
+        var.counter += 1
+        return bool(len(var.to_resolve_deps))
 
     @staticmethod
     def match(patterns, string, return_value=True):

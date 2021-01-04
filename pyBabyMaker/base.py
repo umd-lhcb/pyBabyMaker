@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 04, 2021 at 01:52 AM +0100
+# Last Change: Mon Jan 04, 2021 at 03:05 AM +0100
 """
 This module provides basic infrastructure for ntuple related C++ code
 generation.
@@ -12,7 +12,6 @@ import abc
 import yaml
 import subprocess
 
-from collections import namedtuple
 from shutil import which
 from os import path
 
@@ -111,10 +110,6 @@ def update_config(config, update, merge=True):
             result[key] = value
 
     return result
-
-
-Variable = namedtuple('Variable', 'type name rvalue rvalue_alt transient',
-                      defaults=(None, None, False))
 
 
 ##############

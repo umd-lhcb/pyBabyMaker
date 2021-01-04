@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 04, 2021 at 03:49 PM +0100
+# Last Change: Mon Jan 04, 2021 at 04:51 PM +0100
 
 import re
 
@@ -58,7 +58,7 @@ class Variable(object):
 
     def expr(self):
         expr = self.to_resolve_expr
-        for orig, resolved in self.resolved_vars:
+        for orig, resolved in self.resolved_vars.items():
             expr = re.sub(r'\b'+orig+r'\b', resolved, expr)
         return expr
 
@@ -118,7 +118,8 @@ class BabyConfigParser:
             merge = config['inherit'] if 'inherit' in config else True
             config = update_config(self.parsed_config, config, merge=merge)
             namespace = defaultdict(dict)
-            namespace['raw'] = {Variable(t, n) for n, t in dumped_tree.items()}
+            namespace['raw'] = {n: Variable(t, n)
+                                for n, t in dumped_tree.items()}
             subdirective = {
                 'input_tree': input_tree,
                 'namespace': namespace,
@@ -136,15 +137,15 @@ class BabyConfigParser:
 
             # Now resolve variable names for simple 'keep' and 'rename' actions
             self.resolve_vars_in_scope(
-                'keep', subdirective['namespace']['keep'], dumped_tree, subdirective)
+                'keep', subdirective['namespace']['keep'], subdirective)
             self.resolve_vars_in_scope(
-                'rename', subdirective['namespace']['rename'], dumped_tree, subdirective)
+                'rename', subdirective['namespace']['rename'], subdirective)
 
             # Figure out the loading sequence of all variables, resolving
             # dependency issues.
             unresolved = self.resolve_vars_in_scope(
                 'calculation', subdirective['namespace']['calculation'],
-                dumped_tree, subdirective, ['keep', 'rename'])
+                subdirective, ['keep', 'rename'])
 
             # Remove variables that can't be resolved
             for var in unresolved:
@@ -202,7 +203,7 @@ class BabyConfigParser:
                 if len(splitted) == 3:
                     datatype, rvalue, rvalue_alt = splitted
                 elif len(splitted) == 2:
-                    datatype, rvalue = code.splitted
+                    datatype, rvalue = splitted
                     rvalue_alt = None
                 else:
                     raise ValueError('Illegal specification for {}: {}.'.format(
@@ -215,8 +216,8 @@ class BabyConfigParser:
                 else:
                     output = True
 
-                subdirective['namespace']['calculation'].append(Variable(
-                    datatype, name, rvalue, rvalue_alt, True, output))
+                subdirective['namespace']['calculation'][name] = Variable(
+                    datatype, name, rvalue, rvalue_alt, True, output)
 
     def parse_selection(self, config, dumped_tree, directive):
         """
@@ -238,11 +239,12 @@ class BabyConfigParser:
     @classmethod
     def resolve_vars_in_scope(cls, scope, variables, subdirective,
                               allowed_scopes=[], max_counter=5):
-        unresolved = []
-        for var in variables:
+        unresolved = {}
+        print(variables)
+        for var in variables.values:
             if not cls.resolve_var(scope, var, subdirective,
                                    allowed_scopes):
-                unresolved.append(var)
+                unresolved[var.name] = var
 
         if len(unresolved) > 0 and unresolved[0].counter <= max_counter:
             return cls.resolve_vars_in_scope(

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 04, 2021 at 03:48 PM +0100
+# Last Change: Mon Jan 04, 2021 at 03:49 PM +0100
 
 import re
 
@@ -316,17 +316,6 @@ class BabyConfigParser:
             if bool(re.search(r'{}'.format(p), string)):
                 return return_value
         return not return_value
-
-    @staticmethod
-    def load_var(name, dumped_tree):
-        """
-        Load variable ``name`` from ntuple, if it's available.
-        """
-        try:
-            datatype = dumped_tree[name]
-            return datatype
-        except KeyError:
-            raise KeyError('Branch {} not found.'.format(name))
 
 
 #############

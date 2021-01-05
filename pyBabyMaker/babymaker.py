@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 01:51 AM +0100
+# Last Change: Tue Jan 05, 2021 at 02:02 AM +0100
 
 import re
 
@@ -199,7 +199,8 @@ class BabyConfigParser:
                 continue
 
             elif 'keep' in config and cls.match(config['keep'], var.name):
-                subdirective['namespace']['keep'][var.name] = var
+                subdirective['namespace']['keep'][var.name] = Variable(
+                    var.type, var.name, var.name)
 
             elif 'rename' in config and cls.match(rename_vars, var.name):
                 renamed_var = rename_dict[var.name]

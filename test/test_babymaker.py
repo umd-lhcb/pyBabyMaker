@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 12:31 AM +0100
+# Last Change: Tue Jan 05, 2021 at 01:21 AM +0100
 
 import pytest
 import os
@@ -10,7 +10,7 @@ import yaml
 
 from collections import defaultdict
 
-from pyBabyMaker.babymaker import Variable, BabyConfigParser
+from pyBabyMaker.babymaker import Variable, VariableResolved, BabyConfigParser
 from pyBabyMaker.base import UniqueList
 
 from pyBabyMaker.io.NestedYAMLLoader import NestedYAMLLoader
@@ -248,22 +248,28 @@ def test_BabyConfigParser_parse_calculation_alt(subdirective,
     }
 
 
-# def test_BabyConfigParser_parse_selection(subdirective,
-                                          # default_BabyConfigParser):
-    # config = {
-        # 'selection': ['Y_PT > 100000', 'Y_PE > (100 * pow(10, 3))']
-    # }
-    # dumped_tree = {
-        # 'Y_PX': 'float',
-        # 'Y_PY': 'float',
-        # 'Y_PZ': 'float',
-        # 'Y_PT': 'float',
-        # 'Y_PE': 'float',
-    # }
-    # default_BabyConfigParser.parse_selection(
-        # config, dumped_tree, subdirective)
+############################
+# Test variable resolution #
+############################
 
-    # assert subdirective['selection'] == config['selection']
+def test_BabyConfigParser_resolve_var_simple(subdirective,
+                                             default_BabyConfigParser):
+    dumped_tree = {
+        'Y_PX': 'float',
+        'Y_PY': 'float',
+        'Y_PZ': 'float',
+        'Y_PT': 'float',
+        'Y_PE': 'float',
+    }
+    p_sum = Variable('float', 'p_sum', 'Y_PX+Y_PY', transient=True)
+    subdirective['namespace']['s'] = {v: Variable(t, v)
+                                      for v, t in dumped_tree.items()}
+    subdirective['loaded_vars'] = ['s_'+v for v in dumped_tree]
+    default_BabyConfigParser.resolve_var('test', p_sum, subdirective, ['s'])
+
+    assert subdirective['transient_vars'] == [
+        VariableResolved('float', 'test_p_sum', 's_Y_PX+s_Y_PY')
+    ]
 
 
 ##################
@@ -289,83 +295,3 @@ def test_BabyConfigParser_match_False_partial_match(default_BabyConfigParser):
 
 def test_BabyConfigParser_match_partial_match(default_BabyConfigParser):
     assert default_BabyConfigParser.match(['quick', 'brown', 'fox'], 'fox2')
-
-
-# def test_BabyConfigParser_load_missing_vars(subdirective,
-                                            # default_BabyConfigParser):
-    # subdirective['known_names'] = ['TempStuff']
-    # dumped_tree = {
-        # 'X_PX': 'float',
-        # 'X_PY': 'float',
-        # 'X_PZ': 'float',
-        # 'Y_PX': 'float',
-    # }
-    # default_BabyConfigParser.load_missing_vars('X_PX+TempStuff', dumped_tree,
-                                               # subdirective)
-
-    # assert subdirective['known_names'] == ['TempStuff', 'X_PX']
-
-
-# def test_BabyConfigParser_load_var_exist(default_BabyConfigParser):
-    # dumped_tree = {
-        # 'X_PX': 'float',
-        # 'X_PY': 'float',
-        # 'X_PZ': 'float',
-        # 'Y_PX': 'float',
-    # }
-    # result = default_BabyConfigParser.load_var('X_PX', dumped_tree)
-
-    # assert result == 'float'
-
-
-# def test_BabyConfigParser_load_var_not_exist(default_BabyConfigParser):
-    # dumped_tree = {
-        # 'X_PX': 'float',
-        # 'X_PY': 'float',
-        # 'X_PZ': 'float',
-        # 'Y_PX': 'float',
-    # }
-    # with pytest.raises(KeyError):
-        # default_BabyConfigParser.load_var('Z_PX', dumped_tree)
-
-
-# def test_BabyConfigParser_var_load_seq_normal(default_BabyConfigParser):
-    # known_names = ['a', 'b']
-    # vars_to_load = [
-        # Variable('int', 'temp3', 'temp1+temp2'),
-        # Variable('int', 'temp1', 'a+c'),
-        # Variable('int', 'temp2', 'temp1+d'),
-    # ]
-    # dumped_tree = {'c': 'int', 'd': int}
-    # directive = {'input_branches': [], 'known_names': known_names}
-    # transient_vars, vars_to_load = default_BabyConfigParser.var_load_seq(
-        # vars_to_load, dumped_tree, directive)
-
-    # assert vars_to_load == []
-    # assert transient_vars == [
-        # Variable('int', 'temp1', 'a+c'),
-        # Variable('int', 'temp2', 'temp1+d'),
-        # Variable('int', 'temp3', 'temp1+temp2'),
-    # ]
-    # assert known_names == ['a', 'b', 'c', 'temp1', 'd', 'temp2', 'temp3']
-
-
-# def test_BabyConfigParser_var_load_seq_circular(default_BabyConfigParser):
-    # known_names = ['a', 'b']
-    # vars_to_load = [
-        # Variable('int', 'temp1', 'temp2'),
-        # Variable('int', 'temp2', 'temp1+d'),
-    # ]
-    # dumped_tree = {'c': 'int', 'd': int}
-    # directive = {'input_branches': [], 'known_names': known_names}
-    # transient_vars, vars_to_load = default_BabyConfigParser.var_load_seq(
-        # vars_to_load, dumped_tree, directive)
-
-    # assert vars_to_load == [
-        # Variable('int', 'temp1', 'temp2'),
-        # Variable('int', 'temp2', 'temp1+d'),
-    # ]
-    # assert transient_vars == []
-    # # NOTE: Due to my desire to do fewer number of recursions when resolving
-    # #       dependency, I pay the price of loading not really needed branches.
-    # assert known_names == ['a', 'b', 'd']

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 04, 2021 at 11:07 PM +0100
+# Last Change: Tue Jan 05, 2021 at 01:25 AM +0100
 
 import re
 
@@ -272,16 +272,16 @@ class BabyConfigParser:
         """
         def resolve_in_scope(
             s, namespace=subdirective['namespace'],
-            loaded=lambda x: x in subdirective['loaded_vars'],
-            terminal=False, same_scope=False
+            loaded=lambda x: x in subdirective['loaded_vars'], terminal=False
         ):
             remainder = []
             for v in var.to_resolve_deps:
-                if same_scope and v == var.name:
+                if s == scope and v == var.name:
+                    remainder.append(v)
                     continue  # No self-referencing allowed!
 
-                if v in namespace[s] and loaded(v):
-                    v_resolved = s + '_' + v
+                v_resolved = s + '_' + v
+                if v in namespace[s] and loaded(v_resolved):
                     var.resolved_vars[v] = v_resolved
                     if terminal:
                         subdirective['input_branches'].append(
@@ -292,22 +292,20 @@ class BabyConfigParser:
                     remainder.append(v)
             var.to_resolve_deps = remainder
 
-        for s in allowed_scopes:
+        for s in allowed_scopes+[scope]:
             resolve_in_scope(s)
-
-        # Need to be careful when resolving in its own scope
-        resolve_in_scope(scope, same_scope=True)
 
         # As a last resort, load from ntuple trees
         resolve_in_scope('raw', loaded=lambda x: True, terminal=True)
 
         if not len(var.to_resolve_deps):
+            var_resolved = scope + '_' + var.name
             if var.transient:
                 subdirective['transient_vars'].append(VariableResolved(
-                    var.type, scope+'_'+var.name, var.expr()))
+                    var.type, var_resolved, var.expr()))
             if var.output:
                 subdirective['output_branches'].append(VariableResolved(
-                    var.type, scope+'_'+var.name, var.expr(), var.name))
+                    var.type, var_resolved, var.expr(), var.name))
                 # Check if we have duplicated output branch name
                 if var.name in subdirective['output_branch_names']:
                     raise ValueError('{}Redefinition of output branch {} in scope {}!{}'.format(

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 03:02 AM +0100
+# Last Change: Tue Jan 05, 2021 at 03:44 AM +0100
 
 import re
 
@@ -94,8 +94,6 @@ class BabyConfigParser:
         self.dumped_ntuple = dumped_ntuple
         self.debug = debug
 
-    # NOTE: A complicated function! I'd like it to be more elegant but not for
-    #       now
     def parse(self):
         """
         Parse the loaded YAML dict (in ``self.parsed_config``) and dumped ntuple
@@ -150,11 +148,10 @@ class BabyConfigParser:
             self.resolve_vars_in_scope(
                 'rename', subdirective['namespace']['rename'], subdirective)
 
-            # Figure out the loading sequence of all variables, resolving
-            # dependency issues.
+            # Resolve variables in 'calculation'
             unresolved = self.resolve_vars_in_scope(
                 'calculation', subdirective['namespace']['calculation'],
-                subdirective, ['keep', 'rename'])
+                subdirective, ['rename'])
 
             # Remove variables that can't be resolved
             for var in unresolved.values():
@@ -198,11 +195,11 @@ class BabyConfigParser:
                 print('Dropping branch: {}'.format(var.name))
                 continue
 
-            elif 'keep' in config and cls.match(config['keep'], var.name):
+            if 'keep' in config and cls.match(config['keep'], var.name):
                 subdirective['namespace']['keep'][var.name] = Variable(
                     var.type, var.name, var.name)
 
-            elif 'rename' in config and cls.match(rename_vars, var.name):
+            if 'rename' in config and cls.match(rename_vars, var.name):
                 renamed_var = rename_dict[var.name]
                 subdirective['namespace']['rename'][renamed_var] = Variable(
                     var.type, renamed_var, var.name, transient=True)
@@ -214,7 +211,7 @@ class BabyConfigParser:
         """
         if 'calculation' in config:
             for name, code in config['calculation'].items():
-                splitted = code.split(';')
+                splitted = [i.strip() for i in code.split(';')]
                 if len(splitted) == 3:
                     datatype, rvalue, rvalue_alt = splitted
                 elif len(splitted) == 2:

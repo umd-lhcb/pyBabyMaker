@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 03:24 PM +0100
+# Last Change: Tue Jan 05, 2021 at 04:33 PM +0100
 
 import re
 
@@ -134,6 +134,8 @@ class BabyConfigParser:
                 'input_branches': [],
                 'output_branches': [],
                 'transient_vars': [],
+                'temp_vars': [],
+                'simple_vars': [],
                 'input_branch_names': [],
                 'output_branch_names': [],
                 'selection': ['true'],
@@ -309,12 +311,17 @@ class BabyConfigParser:
         if not len(var.to_resolve_deps):
             var_resolved = scope + '_' + var.name
             subdirective['loaded_vars'].append(var_resolved)
+
             if var.transient:
-                subdirective['transient_vars'].append(VariableResolved(
-                    var.type, var_resolved, var.expr()))
+                _var = VariableResolved(var.type, var_resolved, var.expr())
+                subdirective['transient_vars'].append(_var)
+                if not var.output:
+                    subdirective['temp_vars'].append(_var)
+
             if var.output:
-                subdirective['output_branches'].append(VariableResolved(
-                    var.type, var_resolved, var.expr(), var.name))
+                _var = VariableResolved(
+                    var.type, var_resolved, var.expr(), var.name)
+                subdirective['output_branches'].append(_var)
                 # Check if we have duplicated output branch name
                 if var.name in subdirective['output_branch_names']:
                     raise ValueError('{}Redefinition of output branch {} in scope {}!{}'.format(
@@ -322,6 +329,8 @@ class BabyConfigParser:
                     ))
                 else:
                     subdirective['output_branch_names'].append(var.name)
+                if not var.transient:
+                    subdirective['simple_vars'].append(_var)
 
         var.counter += 1
         return not bool(len(var.to_resolve_deps))

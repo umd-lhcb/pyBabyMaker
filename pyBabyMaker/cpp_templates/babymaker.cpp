@@ -1,10 +1,10 @@
 // {% gendate: %}
+// NOTE: This implementation is very naive.
+
 #include <TFile.h>
 #include <TTree.h>
 #include <TTreeReader.h>
 #include <TBranch.h>
-
-// NOTE: This implementation is very naive.
 
 // System headers
 // {% join: (format_list: "#include <{}>", directive.system_headers), "\n" %}
@@ -29,6 +29,11 @@ void generator_/* {% output_tree %} */(TFile *input_file, TFile *output_file) {
   //   {% format: "output.Branch(\"{}\", &{});", var.branch_name, var.name %}
   // {% endfor %}
 
+  // Define temporary variables
+  // {% for var in config.temp_vars %}
+  //   {% format: "{} {};", var.type, var.name %}
+  // {% endfor %}
+
   while (reader.Next()) {
     // Define all variables in case required by selection
     //
@@ -38,12 +43,12 @@ void generator_/* {% output_tree %} */(TFile *input_file, TFile *output_file) {
     //
     // Transient variables (renamed output branches and temp variables)
     // {% for var in config.transient_vars %}
-    //   {% format: "{} {} = {};", var.type, var.name, (deref_var: var.rvalue, config.input_branch_names) %}
+    //   {% format: "{} = {};", var.name, (deref_var: var.rvalue, config.input_branch_names) %}
     // {% endfor %}
 
     if (/* {% join: (deref_var_list: config.selection, config.input_branch_names), " && " %} */) {
       // Assign values for each output branch in this loop
-      // {% for var in config.output_branches %}
+      // {% for var in config.simple_vars %}
       //   {% format: "{} = {};", var.name, (deref_var: var.rvalue, config.input_branch_names) %}
       // {% endfor %}
 

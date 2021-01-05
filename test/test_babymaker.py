@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 03:17 PM +0100
+# Last Change: Tue Jan 05, 2021 at 04:30 PM +0100
 
 import pytest
 import os
@@ -177,6 +177,8 @@ def subdirective():
         'input_branches': [],
         'output_branches': [],
         'transient_vars': [],
+        'temp_vars': [],
+        'simple_vars': [],
         'input_branch_names': [],
         'output_branch_names': []
     }

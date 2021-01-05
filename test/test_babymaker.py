@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 02:48 AM +0100
+# Last Change: Tue Jan 05, 2021 at 03:18 AM +0100
 
 import pytest
 import os
@@ -54,34 +54,40 @@ def realistic_BabyConfigParser(load_files):
     return BabyConfigParser(*load_files)
 
 
-# def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
-    # directive = realistic_BabyConfigParser.parse()
+def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
+    directive = realistic_BabyConfigParser.parse()
 
-    # assert directive['trees']['ATuple']['input_tree'] == \
-        # 'TupleB0/DecayTree'
-    # assert directive['trees']['ATuple']['input_branches'] == [
-        # Variable('Double_t', 'Y_PT'),
-        # Variable('Double_t', 'Y_PE'),
-        # Variable('Double_t', 'Y_PX'),
-        # Variable('Double_t', 'Y_PY'),
-        # Variable('Double_t', 'Y_PZ'),
-        # Variable('Double_t', 'D0_P'),
-    # ]
-    # assert directive['trees']['ATuple']['output_branches'] == [
-        # Variable('Double_t', 'y_pt', 'Y_PT'),
-        # Variable('Double_t', 'Y_PE', 'Y_PE'),
-        # Variable('Double_t', 'y_px', 'Y_PX'),
-        # Variable('Double_t', 'y_py', 'Y_PY'),
-        # Variable('Double_t', 'y_pz', 'Y_PZ'),
-        # Variable('Double_t', 'RandStuff', ' TempStuff', True),
-        # Variable('Double_t', 'some_other_var', ' some_var', True),
-    # ]
-    # assert directive['trees']['ATuple']['transient_vars'] == [
-        # Variable('Double_t', 'TempStuff', ' D0_P+Y_PT', True, False),
-        # Variable('Double_t', 'RandStuff', ' D0_P+Y_PT', True),
-        # Variable('Double_t', 'some_var', ' y_pt + y_pz', True, False),
-        # Variable('Double_t', 'some_other_var', ' y_pt + y_pz', True),
-    # ]
+    assert directive['trees']['ATuple']['input_tree'] == \
+        'TupleB0/DecayTree'
+    assert directive['trees']['ATuple']['input_branches'] == [
+        VariableResolved('Double_t', 'raw_Y_PT'),
+        VariableResolved('Double_t', 'raw_Y_PE'),
+        VariableResolved('Double_t', 'raw_Y_PX'),
+        VariableResolved('Double_t', 'raw_Y_PY'),
+        VariableResolved('Double_t', 'raw_Y_PZ'),
+        VariableResolved('Double_t', 'raw_D0_P'),
+    ]
+    assert directive['trees']['ATuple']['output_branches'] == [
+        VariableResolved('Double_t', 'keep_Y_PE', 'raw_Y_PE'),
+        VariableResolved('Double_t', 'rename_y_pt', 'raw_Y_PT'),
+        VariableResolved('Double_t', 'rename_y_px', 'raw_Y_PX'),
+        VariableResolved('Double_t', 'rename_y_py', 'raw_Y_PY'),
+        VariableResolved('Double_t', 'rename_y_pz', 'raw_Y_PZ'),
+        VariableResolved('Double_t', 'calculation_RandStuff',
+                         'calculation_TempStuff', True),
+        VariableResolved('Double_t', 'calculation_some_other_var',
+                         'calculation_some_var', True),
+    ]
+    assert directive['trees']['ATuple']['transient_vars'] == [
+        VariableResolved('Double_t', 'calculation_TempStuff',
+                         'raw_D0_P+raw_Y_PT', True, False),
+        VariableResolved('Double_t', 'calculation_RandStuff',
+                         'raw_D0_P+raw_Y_PT', True),
+        VariableResolved('Double_t', 'calculation_some_var',
+                         'rename_y_pt + rename_y_pz', True, False),
+        VariableResolved('Double_t', 'calculation_some_other_var',
+                         'rename_y_pt + rename_y_pz', True),
+    ]
 
 
 # def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
@@ -433,9 +439,6 @@ def test_BabyConfigParser_resolve_vars_in_scope_calculation_complex(
         subdirective, default_BabyConfigParser):
     dumped_tree = {
         'q2': 'float',
-        'Y_PX': 'float',
-        'Y_PY': 'float',
-        'Y_PZ': 'float'
     }
     subdirective['namespace']['raw'] = {v: Variable(t, v)
                                         for v, t in dumped_tree.items()}
@@ -464,6 +467,58 @@ def test_BabyConfigParser_resolve_vars_in_scope_calculation_complex(
     assert unresolved == {}
     assert subdirective['namespace']['calculation']['q2_diff'].counter == 2
     assert subdirective['namespace']['calculation']['q2_temp'].counter == 1
+
+
+def test_BabyConfigParser_resolve_vars_in_scope_calculation_more_complex(
+        subdirective, default_BabyConfigParser):
+    dumped_tree = {
+        'Y_PX': 'float',
+        'Y_PY': 'float',
+        'Y_PZ': 'float'
+    }
+    subdirective['namespace']['raw'] = {v: Variable(t, v)
+                                        for v, t in dumped_tree.items()}
+    subdirective['namespace']['rename'] = {
+        'y_px': Variable('float', 'y_px', 'Y_PX', transient=True),
+        'y_py': Variable('float', 'y_py', 'Y_PY', transient=True),
+    }
+    subdirective['namespace']['calculation'] = {
+        'y_p_sum': Variable('float', 'y_p_sum', 'y_p_temp', transient=True),
+        'y_p_temp': Variable('float', 'y_p_temp', 'y_px + y_py', transient=True,
+                             output=False)
+    }
+
+    assert default_BabyConfigParser.resolve_vars_in_scope(
+        'rename', subdirective['namespace']['rename'], subdirective) == {}
+
+    unresolved = default_BabyConfigParser.resolve_vars_in_scope(
+        'calculation', subdirective['namespace']['calculation'], subdirective,
+        ['rename']
+    )
+
+    assert subdirective['transient_vars'] == [
+        VariableResolved('float', 'rename_y_px', 'raw_Y_PX'),
+        VariableResolved('float', 'rename_y_py', 'raw_Y_PY'),
+        VariableResolved('float', 'calculation_y_p_temp',
+                         'rename_y_px + rename_y_py'),
+        VariableResolved('float', 'calculation_y_p_sum',
+                         'calculation_y_p_temp'),
+    ]
+    assert subdirective['output_branches'] == [
+        VariableResolved('float', 'rename_y_px', 'raw_Y_PX', 'y_px'),
+        VariableResolved('float', 'rename_y_py', 'raw_Y_PY', 'y_py'),
+        VariableResolved('float', 'calculation_y_p_sum',
+                         'calculation_y_p_temp', 'y_p_sum'),
+    ]
+    assert subdirective['loaded_vars'] == [
+        'raw_Y_PX',
+        'rename_y_px',
+        'raw_Y_PY',
+        'rename_y_py',
+        'calculation_y_p_temp',
+        'calculation_y_p_sum',
+    ]
+    assert unresolved == {}
 
 
 ##################

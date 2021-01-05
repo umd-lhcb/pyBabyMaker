@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 01:25 AM +0100
+# Last Change: Tue Jan 05, 2021 at 01:51 AM +0100
 
 import re
 
@@ -315,7 +315,7 @@ class BabyConfigParser:
                     subdirective['output_branch_names'].append(var.name)
 
         var.counter += 1
-        return bool(len(var.to_resolve_deps))
+        return not bool(len(var.to_resolve_deps))
 
     @staticmethod
     def match(patterns, string, return_value=True):

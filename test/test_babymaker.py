@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 02:16 AM +0100
+# Last Change: Tue Jan 05, 2021 at 02:20 AM +0100
 
 import pytest
 import os
@@ -329,7 +329,7 @@ def test_BabyConfigParser_resolve_var_self_no_resolve(
         'test', q2, subdirective, [])
 
 
-def test_BabyConfigParser_resolve_vars_in_scope(
+def test_BabyConfigParser_resolve_vars_in_scope_keep(
         subdirective, default_BabyConfigParser):
     dumped_tree = {
         'q2': 'float',
@@ -357,6 +357,38 @@ def test_BabyConfigParser_resolve_vars_in_scope(
         'keep_Y_PX',
         'raw_q2',
         'keep_q2',
+    ]
+    assert unresolved == {}
+
+
+def test_BabyConfigParser_resolve_vars_in_scope_rename(
+        subdirective, default_BabyConfigParser):
+    dumped_tree = {
+        'q2': 'float',
+        'Y_PX': 'float',
+        'Y_PY': 'float',
+        'Y_PZ': 'float'
+    }
+    subdirective['namespace']['raw'] = {v: Variable(t, v)
+                                        for v, t in dumped_tree.items()}
+    subdirective['namespace']['rename'] = {
+        'y_px': Variable('float', 'y_px', 'Y_PX'),
+        'Q2': Variable('float', 'Q2', 'q2')
+    }
+
+    unresolved = default_BabyConfigParser.resolve_vars_in_scope(
+        'rename', subdirective['namespace']['rename'], subdirective)
+
+    assert subdirective['transient_vars'] == []
+    assert subdirective['output_branches'] == [
+        VariableResolved('float', 'rename_y_px', 'raw_Y_PX', 'y_px'),
+        VariableResolved('float', 'rename_Q2', 'raw_q2', 'Q2'),
+    ]
+    assert subdirective['loaded_vars'] == [
+        'raw_Y_PX',
+        'rename_y_px',
+        'raw_q2',
+        'rename_Q2',
     ]
     assert unresolved == {}
 

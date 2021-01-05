@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 01:45 PM +0100
+# Last Change: Tue Jan 05, 2021 at 02:25 PM +0100
 
 import re
 
@@ -285,7 +285,8 @@ class BabyConfigParser:
                 elif v in namespace[s] and terminal:
                     var.resolved_vars[v] = v_resolved
                     subdirective['input_branches'].append(
-                        VariableResolved(namespace[s][v].type, v_resolved))
+                        VariableResolved(
+                            namespace[s][v].type, v_resolved, None, v))
                     subdirective['loaded_vars'].append(v_resolved)
                 else:
                     remainder.append(v)

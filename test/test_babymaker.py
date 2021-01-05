@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 03:18 AM +0100
+# Last Change: Tue Jan 05, 2021 at 01:52 PM +0100
 
 import pytest
 import os
@@ -60,33 +60,37 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
     assert directive['trees']['ATuple']['input_tree'] == \
         'TupleB0/DecayTree'
     assert directive['trees']['ATuple']['input_branches'] == [
-        VariableResolved('Double_t', 'raw_Y_PT'),
         VariableResolved('Double_t', 'raw_Y_PE'),
+        VariableResolved('Double_t', 'raw_Y_PT'),
         VariableResolved('Double_t', 'raw_Y_PX'),
         VariableResolved('Double_t', 'raw_Y_PY'),
         VariableResolved('Double_t', 'raw_Y_PZ'),
         VariableResolved('Double_t', 'raw_D0_P'),
     ]
     assert directive['trees']['ATuple']['output_branches'] == [
-        VariableResolved('Double_t', 'keep_Y_PE', 'raw_Y_PE'),
+        VariableResolved('Double_t', 'keep_Y_PE', 'raw_Y_PE', 'Y_PE'),
+        VariableResolved('Double_t', 'rename_y_pt', 'raw_Y_PT', 'y_pt'),
+        VariableResolved('Double_t', 'rename_y_px', 'raw_Y_PX', 'y_px'),
+        VariableResolved('Double_t', 'rename_y_py', 'raw_Y_PY', 'y_py'),
+        VariableResolved('Double_t', 'rename_y_pz', 'raw_Y_PZ', 'y_pz'),
+        VariableResolved('Double_t', 'calculation_some_other_var',
+                         'calculation_some_var', 'some_other_var'),
+        VariableResolved('Double_t', 'calculation_RandStuff',
+                         'calculation_TempStuff', 'RandStuff'),
+    ]
+    assert directive['trees']['ATuple']['transient_vars'] == [
         VariableResolved('Double_t', 'rename_y_pt', 'raw_Y_PT'),
         VariableResolved('Double_t', 'rename_y_px', 'raw_Y_PX'),
         VariableResolved('Double_t', 'rename_y_py', 'raw_Y_PY'),
         VariableResolved('Double_t', 'rename_y_pz', 'raw_Y_PZ'),
-        VariableResolved('Double_t', 'calculation_RandStuff',
-                         'calculation_TempStuff', True),
-        VariableResolved('Double_t', 'calculation_some_other_var',
-                         'calculation_some_var', True),
-    ]
-    assert directive['trees']['ATuple']['transient_vars'] == [
         VariableResolved('Double_t', 'calculation_TempStuff',
-                         'raw_D0_P+raw_Y_PT', True, False),
-        VariableResolved('Double_t', 'calculation_RandStuff',
-                         'raw_D0_P+raw_Y_PT', True),
+                         'raw_D0_P+raw_Y_PT'),
         VariableResolved('Double_t', 'calculation_some_var',
-                         'rename_y_pt + rename_y_pz', True, False),
+                         'rename_y_pt + rename_y_pz',),
         VariableResolved('Double_t', 'calculation_some_other_var',
-                         'rename_y_pt + rename_y_pz', True),
+                         'calculation_some_var'),
+        VariableResolved('Double_t', 'calculation_RandStuff',
+                         'calculation_TempStuff'),
     ]
 
 

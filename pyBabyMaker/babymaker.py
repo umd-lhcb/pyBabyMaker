@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 03:50 AM +0100
+# Last Change: Tue Jan 05, 2021 at 01:35 PM +0100
 
 import re
 
@@ -281,11 +281,11 @@ class BabyConfigParser:
                 v_resolved = s + '_' + v
                 if v in namespace[s] and loaded(v_resolved):
                     var.resolved_vars[v] = v_resolved
-                    if terminal:
-                        subdirective['input_branches'].append(
-                            VariableResolved(namespace[s][v].type, v_resolved))
-                        subdirective['loaded_vars'].append(v_resolved)
-
+                elif v in namespace[s] and terminal:
+                    var.resolved_vars[v] = v_resolved
+                    subdirective['input_branches'].append(
+                        VariableResolved(namespace[s][v].type, v_resolved))
+                    subdirective['loaded_vars'].append(v_resolved)
                 else:
                     remainder.append(v)
             var.to_resolve_deps = remainder
@@ -294,7 +294,7 @@ class BabyConfigParser:
             resolve_in_scope(s)
 
         # As a last resort, load from ntuple trees
-        resolve_in_scope('raw', loaded=lambda x: True, terminal=True)
+        resolve_in_scope('raw', terminal=True)
 
         if not len(var.to_resolve_deps):
             var_resolved = scope + '_' + var.name

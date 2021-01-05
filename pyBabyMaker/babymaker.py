@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 02:02 AM +0100
+# Last Change: Tue Jan 05, 2021 at 02:15 AM +0100
 
 import re
 
@@ -254,8 +254,7 @@ class BabyConfigParser:
     def resolve_vars_in_scope(cls, scope, variables, subdirective,
                               allowed_scopes=[], max_counter=5):
         unresolved = {}
-        print(variables)
-        for var in variables.values:
+        for var in variables.values():
             if not cls.resolve_var(scope, var, subdirective,
                                    allowed_scopes):
                 unresolved[var.name] = var
@@ -301,6 +300,7 @@ class BabyConfigParser:
 
         if not len(var.to_resolve_deps):
             var_resolved = scope + '_' + var.name
+            subdirective['loaded_vars'].append(var_resolved)
             if var.transient:
                 subdirective['transient_vars'].append(VariableResolved(
                     var.type, var_resolved, var.expr()))

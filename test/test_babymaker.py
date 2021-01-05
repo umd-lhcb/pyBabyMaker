@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 01:56 AM +0100
+# Last Change: Tue Jan 05, 2021 at 02:16 AM +0100
 
 import pytest
 import os
@@ -212,7 +212,7 @@ def test_BabyConfigParser_parse_drop_keep_rename(subdirective,
     default_BabyConfigParser.parse_drop_keep_rename(config, subdirective)
 
     assert subdirective['namespace']['keep'] == {
-        n: Variable('float', n) for n in dumped_tree.keys()
+        n: Variable('float', n, n) for n in dumped_tree.keys()
         if not n.startswith('Y') and n != 'Z_PZ' and n != 'Z_PY'}
     assert subdirective['namespace']['rename'] == {
         'z_py': Variable('float', 'z_py', 'Z_PY', transient=True)
@@ -327,6 +327,38 @@ def test_BabyConfigParser_resolve_var_self_no_resolve(
 
     assert not default_BabyConfigParser.resolve_var(
         'test', q2, subdirective, [])
+
+
+def test_BabyConfigParser_resolve_vars_in_scope(
+        subdirective, default_BabyConfigParser):
+    dumped_tree = {
+        'q2': 'float',
+        'Y_PX': 'float',
+        'Y_PY': 'float',
+        'Y_PZ': 'float'
+    }
+    subdirective['namespace']['raw'] = {v: Variable(t, v)
+                                        for v, t in dumped_tree.items()}
+    subdirective['namespace']['keep'] = {
+        'Y_PX': Variable('float', 'Y_PX', 'Y_PX'),
+        'q2': Variable('float', 'q2', 'q2')
+    }
+
+    unresolved = default_BabyConfigParser.resolve_vars_in_scope(
+        'keep', subdirective['namespace']['keep'], subdirective)
+
+    assert subdirective['transient_vars'] == []
+    assert subdirective['output_branches'] == [
+        VariableResolved('float', 'keep_Y_PX', 'raw_Y_PX', 'Y_PX'),
+        VariableResolved('float', 'keep_q2', 'raw_q2', 'q2'),
+    ]
+    assert subdirective['loaded_vars'] == [
+        'raw_Y_PX',
+        'keep_Y_PX',
+        'raw_q2',
+        'keep_q2',
+    ]
+    assert unresolved == {}
 
 
 ##################

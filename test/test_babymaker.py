@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 03:08 PM +0100
+# Last Change: Tue Jan 05, 2021 at 03:17 PM +0100
 
 import pytest
 import os
@@ -77,6 +77,8 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
                          'calculation_some_var', 'some_other_var'),
         VariableResolved('Double_t', 'calculation_RandStuff',
                          'calculation_TempStuff', 'RandStuff'),
+        VariableResolved('Double_t', 'calculation_alt_def',
+                         'raw_Y_PE', 'alt_def'),
     ]
     assert directive['trees']['ATuple']['transient_vars'] == [
         VariableResolved('Double_t', 'rename_y_pt', 'raw_Y_PT'),
@@ -91,6 +93,7 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
                          'calculation_some_var'),
         VariableResolved('Double_t', 'calculation_RandStuff',
                          'calculation_TempStuff'),
+        VariableResolved('Double_t', 'calculation_alt_def', 'raw_Y_PE'),
     ]
 
 
@@ -118,6 +121,8 @@ def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
         # NOTE: 'some_other_var' is not resolvable for this tree!
         #       Because the change in 'rename' selection, 'y_pt' and 'y_pz' are
         #       not defined!
+        VariableResolved('Double_t', 'calculation_alt_def',
+                         'raw_Y_PE', 'alt_def'),
     ]
     assert directive['system_headers'] == ['cmath', 'iostream']
     assert directive['trees']['AnotherTuple']['selection'] == [

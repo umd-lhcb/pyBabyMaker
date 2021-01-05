@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 03:06 PM +0100
+# Last Change: Tue Jan 05, 2021 at 03:24 PM +0100
 
 import re
 
@@ -42,7 +42,7 @@ class Variable(object):
         self.dep_vars = UniqueList(find_all_vars(rvalue)) \
             if rvalue is not None else []
         self.dep_vars_alt = UniqueList(find_all_vars(rvalue_alt)) \
-            if rvalue_alt is not None else []
+            if rvalue_alt is not None else False
 
         self.to_resolve_expr = rvalue
         self.to_resolve_deps = self.dep_vars
@@ -154,6 +154,11 @@ class BabyConfigParser:
                 'calculation', subdirective['namespace']['calculation'],
                 subdirective, ['rename'])
 
+            # Try to switch to alternative expression for unresolved variables
+            [v.use_alt() for v in unresolved.values()]
+            unresolved = self.resolve_vars_in_scope(
+                'calculation', unresolved, subdirective, ['rename'])
+
             # Remove variables that can't be resolved
             for var in unresolved.values():
                 if var.output:
@@ -230,14 +235,15 @@ class BabyConfigParser:
                 subdirective['namespace']['calculation'][name] = Variable(
                     datatype, name, rvalue, rvalue_alt, True, output)
 
-    def parse_selection(self, config, subdirective):
+    @classmethod
+    def parse_selection(cls, config, subdirective):
         """
         Parse ``selection`` section.
         """
         if 'selection' in config:
             for expr in config['selection']:
                 virtual_var = Variable(None, 'sel', expr, output=False)
-                resolved = self.resolve_var(
+                resolved = cls.resolve_var(
                     'selection', virtual_var, subdirective,
                     ['calculation', 'rename'])
                 if resolved:
@@ -289,6 +295,10 @@ class BabyConfigParser:
                 else:
                     remainder.append(v)
             var.to_resolve_deps = remainder
+
+        if var.to_resolve_deps is False:  # Don't resolve if dependency is nil
+            var.counter += 1
+            return False
 
         for s in allowed_scopes+[scope]:
             resolve_in_scope(s)

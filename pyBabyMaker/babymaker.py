@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 02:15 AM +0100
+# Last Change: Tue Jan 05, 2021 at 02:46 AM +0100
 
 import re
 
@@ -259,7 +259,8 @@ class BabyConfigParser:
                                    allowed_scopes):
                 unresolved[var.name] = var
 
-        if len(unresolved) > 0 and unresolved[0].counter <= max_counter:
+        if len(unresolved) > 0 and \
+                next(iter(unresolved.values())).counter <= max_counter:
             return cls.resolve_vars_in_scope(
                 scope, unresolved, subdirective, allowed_scopes, max_counter)
 

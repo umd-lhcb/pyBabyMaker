@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 02:29 PM +0100
+# Last Change: Tue Jan 05, 2021 at 02:42 PM +0100
 
 import pytest
 import os
@@ -94,50 +94,50 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
     ]
 
 
-# def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
-    # directive = realistic_BabyConfigParser.parse()
+def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
+    directive = realistic_BabyConfigParser.parse()
 
-    # assert directive['trees']['AnotherTuple']['input_tree'] == \
-        # 'TupleB0/DecayTree'
-    # assert directive['trees']['AnotherTuple']['input_branches'] == [
-        # Variable('Double_t', 'Y_PT'),
-        # Variable('Double_t', 'Y_PE'),
-        # Variable('Double_t', 'Y_PX'),
-        # Variable('Double_t', 'Y_PY'),
-        # Variable('Double_t', 'Y_PZ'),
-        # Variable('Double_t', 'D0_P'),
-    # ]
-    # assert directive['trees']['AnotherTuple']['output_branches'] == [
-        # Variable('Double_t', 'b0_pt', 'Y_PT'),
-        # Variable('Double_t', 'Y_PE', 'Y_PE'),
-        # Variable('Double_t', 'Y_PX', 'Y_PX'),
-        # Variable('Double_t', 'Y_PY', 'Y_PY'),
-        # Variable('Double_t', 'Y_PZ', 'Y_PZ'),
-        # Variable('Double_t', 'RandStuff', ' TempStuff', True),
-        # # NOTE: 'some_other_var' is not resolvable for this tree!
-        # #       Because the change in 'rename' selection, 'y_pt' and 'y_pz' are
-        # #       not defined!
-    # ]
-    # assert directive['system_headers'] == ['cmath', 'iostream']
+    assert directive['trees']['AnotherTuple']['input_tree'] == \
+        'TupleB0/DecayTree'
+    assert directive['trees']['AnotherTuple']['input_branches'] == [
+        VariableResolved('Double_t', 'raw_Y_PE', None, 'Y_PE'),
+        VariableResolved('Double_t', 'raw_Y_PX', None, 'Y_PX'),
+        VariableResolved('Double_t', 'raw_Y_PY', None, 'Y_PY'),
+        VariableResolved('Double_t', 'raw_Y_PZ', None, 'Y_PZ'),
+        VariableResolved('Double_t', 'raw_Y_PT', None, 'Y_PT'),
+        VariableResolved('Double_t', 'raw_D0_P', None, 'D0_P'),
+    ]
+    assert directive['trees']['AnotherTuple']['output_branches'] == [
+        VariableResolved('Double_t', 'keep_Y_PE', 'raw_Y_PE', 'Y_PE'),
+        VariableResolved('Double_t', 'keep_Y_PX', 'raw_Y_PX', 'Y_PX'),
+        VariableResolved('Double_t', 'keep_Y_PY', 'raw_Y_PY', 'Y_PY'),
+        VariableResolved('Double_t', 'keep_Y_PZ', 'raw_Y_PZ', 'Y_PZ'),
+        VariableResolved('Double_t', 'rename_b0_pt', 'raw_Y_PT', 'b0_pt'),
+        VariableResolved('Double_t', 'calculation_RandStuff',
+                         'calculation_TempStuff', 'RandStuff'),
+        # NOTE: 'some_other_var' is not resolvable for this tree!
+        #       Because the change in 'rename' selection, 'y_pt' and 'y_pz' are
+        #       not defined!
+    ]
+    assert directive['system_headers'] == ['cmath', 'iostream']
 
 
-# def test_BabyConfigParser_parse_YetAnotherTuple(realistic_BabyConfigParser):
-    # directive = realistic_BabyConfigParser.parse()
+def test_BabyConfigParser_parse_YetAnotherTuple(realistic_BabyConfigParser):
+    directive = realistic_BabyConfigParser.parse()
 
-    # input_branch_names = \
-        # directive['trees']['YetAnotherTuple']['input_branch_names']
-    # output_branch_names = [
-        # v.name for v in
-        # directive['trees']['YetAnotherTuple']['output_branches']]
+    input_branch_names = \
+        directive['trees']['YetAnotherTuple']['input_branch_names']
+    output_branch_names = \
+        directive['trees']['YetAnotherTuple']['output_branch_names']
 
-    # assert directive['trees']['YetAnotherTuple']['input_tree'] == \
-        # 'TupleB0WSPi/DecayTree'
+    assert directive['trees']['YetAnotherTuple']['input_tree'] == \
+        'TupleB0WSPi/DecayTree'
 
-    # assert 'Y_ISOLATION_CHI22' in input_branch_names
-    # assert 'Y_ISOLATION_NNp3' in input_branch_names
+    assert 'raw_Y_ISOLATION_CHI22' in input_branch_names
+    assert 'raw_Y_ISOLATION_NNp3' in input_branch_names
 
-    # assert 'Y_ISOLATION_CHI22' in output_branch_names
-    # assert 'Y_ISOLATION_NNp3' in output_branch_names
+    assert 'Y_ISOLATION_CHI22' in output_branch_names
+    assert 'Y_ISOLATION_NNp3' in output_branch_names
 
 
 ###################################

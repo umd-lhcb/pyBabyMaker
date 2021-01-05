@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 02:46 AM +0100
+# Last Change: Tue Jan 05, 2021 at 03:02 AM +0100
 
 import re
 
@@ -157,7 +157,7 @@ class BabyConfigParser:
                 subdirective, ['keep', 'rename'])
 
             # Remove variables that can't be resolved
-            for var in unresolved:
+            for var in unresolved.values():
                 if var.output:
                     print("{}Output branch {} cannot be resolved...{}".format(
                         TC.YELLOW, var.name, TC.END))

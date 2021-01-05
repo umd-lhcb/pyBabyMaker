@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 01:21 AM +0100
+# Last Change: Tue Jan 05, 2021 at 01:56 AM +0100
 
 import pytest
 import os
@@ -265,11 +265,68 @@ def test_BabyConfigParser_resolve_var_simple(subdirective,
     subdirective['namespace']['s'] = {v: Variable(t, v)
                                       for v, t in dumped_tree.items()}
     subdirective['loaded_vars'] = ['s_'+v for v in dumped_tree]
-    default_BabyConfigParser.resolve_var('test', p_sum, subdirective, ['s'])
+
+    assert default_BabyConfigParser.resolve_var(
+        'test', p_sum, subdirective, ['s'])
 
     assert subdirective['transient_vars'] == [
-        VariableResolved('float', 'test_p_sum', 's_Y_PX+s_Y_PY')
-    ]
+        VariableResolved('float', 'test_p_sum', 's_Y_PX+s_Y_PY')]
+    assert subdirective['output_branches'] == [
+        VariableResolved('float', 'test_p_sum', 's_Y_PX+s_Y_PY', 'p_sum')]
+    assert 'p_sum' in subdirective['output_branch_names']
+
+
+def test_BabyConfigParser_resolve_var_raw(subdirective,
+                                          default_BabyConfigParser):
+    dumped_tree = {
+        'Y_PX': 'float',
+        'Y_PY': 'float',
+        'Y_PZ': 'float',
+        'Y_PT': 'float',
+        'Y_PE': 'float',
+    }
+    p_sum = Variable('float', 'p_sum', 'Y_PX+Y_PY', transient=True)
+    subdirective['namespace']['raw'] = {v: Variable(t, v)
+                                        for v, t in dumped_tree.items()}
+    subdirective['loaded_vars'] = ['raw_'+v for v in dumped_tree]
+
+    assert default_BabyConfigParser.resolve_var(
+        'test', p_sum, subdirective, [])
+
+    assert subdirective['transient_vars'] == [
+        VariableResolved('float', 'test_p_sum', 'raw_Y_PX+raw_Y_PY')]
+    assert subdirective['output_branches'] == [
+        VariableResolved('float', 'test_p_sum', 'raw_Y_PX+raw_Y_PY', 'p_sum')]
+    assert 'p_sum' in subdirective['output_branch_names']
+
+
+def test_BabyConfigParser_resolve_var_self(subdirective,
+                                           default_BabyConfigParser):
+    dumped_tree = {
+        'q2': 'float',
+    }
+    q2 = Variable('float', 'q2', 'GEV2(q2)', transient=True)
+    subdirective['namespace']['raw'] = {v: Variable(t, v)
+                                        for v, t in dumped_tree.items()}
+    subdirective['loaded_vars'] = ['raw_'+v for v in dumped_tree]
+
+    assert default_BabyConfigParser.resolve_var(
+        'test', q2, subdirective, [])
+
+    assert subdirective['transient_vars'] == [
+        VariableResolved('float', 'test_q2', 'GEV2(raw_q2)')]
+    assert subdirective['output_branches'] == [
+        VariableResolved('float', 'test_q2', 'GEV2(raw_q2)', 'q2')]
+    assert 'q2' in subdirective['output_branch_names']
+
+
+def test_BabyConfigParser_resolve_var_self_no_resolve(
+        subdirective, default_BabyConfigParser):
+    q2 = Variable('float', 'q2', 'GEV2(q2)', transient=True)
+    subdirective['namespace']['test']['q2'] = q2
+
+    assert not default_BabyConfigParser.resolve_var(
+        'test', q2, subdirective, [])
 
 
 ##################

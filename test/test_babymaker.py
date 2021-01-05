@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 02:42 PM +0100
+# Last Change: Tue Jan 05, 2021 at 03:08 PM +0100
 
 import pytest
 import os
@@ -120,6 +120,11 @@ def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
         #       not defined!
     ]
     assert directive['system_headers'] == ['cmath', 'iostream']
+    assert directive['trees']['AnotherTuple']['selection'] == [
+        'true',
+        'rename_b0_pt > 10000',
+        'raw_Y_PE > (100 * pow(10, 3))'
+    ]
 
 
 def test_BabyConfigParser_parse_YetAnotherTuple(realistic_BabyConfigParser):
@@ -138,6 +143,11 @@ def test_BabyConfigParser_parse_YetAnotherTuple(realistic_BabyConfigParser):
 
     assert 'Y_ISOLATION_CHI22' in output_branch_names
     assert 'Y_ISOLATION_NNp3' in output_branch_names
+
+    assert directive['trees']['YetAnotherTuple']['selection'] == [
+        'true',
+        'raw_piminus_isMuon'
+    ]
 
 
 ###################################

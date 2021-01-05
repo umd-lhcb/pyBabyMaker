@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 02:25 PM +0100
+# Last Change: Tue Jan 05, 2021 at 03:06 PM +0100
 
 import re
 
@@ -135,7 +135,8 @@ class BabyConfigParser:
                 'output_branches': [],
                 'transient_vars': [],
                 'input_branch_names': [],
-                'output_branch_names': []
+                'output_branch_names': [],
+                'selection': ['true'],
             }
 
             # Put all variables in separate namespaces
@@ -162,13 +163,11 @@ class BabyConfigParser:
                     print("{}Temp variable {} cannot be resolved...{}".format(
                         TC.YELLOW, var.name, TC.END))
 
-            # self.parse_selection(config, dumped_tree, subdirective)
+            self.parse_selection(config, subdirective)
 
             subdirective['input_branch_names'] = [
                 v.name for v in subdirective['input_branches']]
-
             directive['trees'][output_tree] = subdirective
-
         return directive
 
     @staticmethod
@@ -231,22 +230,21 @@ class BabyConfigParser:
                 subdirective['namespace']['calculation'][name] = Variable(
                     datatype, name, rvalue, rvalue_alt, True, output)
 
-    def parse_selection(self, config, dumped_tree, directive):
+    def parse_selection(self, config, subdirective):
         """
         Parse ``selection`` section.
         """
-        # if 'selection' in config:
-        #     selection = []
-
-        #     for expr in config['selection']:
-        #         resolved = self.load_missing_vars(expr, dumped_tree, directive)
-        #         if resolved:
-        #             selection.append(expr)
-        #         else:
-        #             print('{}Selection {} not resolved, deleting...{}'.format(
-        #                 TC.YELLOW, expr, TC.END))
-
-        #     directive['selection'] = selection
+        if 'selection' in config:
+            for expr in config['selection']:
+                virtual_var = Variable(None, 'sel', expr, output=False)
+                resolved = self.resolve_var(
+                    'selection', virtual_var, subdirective,
+                    ['calculation', 'rename'])
+                if resolved:
+                    subdirective['selection'].append(virtual_var.expr())
+                else:
+                    print('{}Selection {} not resolved, deleting...{}'.format(
+                        TC.YELLOW, expr, TC.END))
 
     @classmethod
     def resolve_vars_in_scope(cls, scope, variables, subdirective,

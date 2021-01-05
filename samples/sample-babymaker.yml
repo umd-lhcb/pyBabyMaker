@@ -45,3 +45,5 @@ output:
         keep:
             - Y_OWNPV_.*
             - Y_ISOLATION_.*
+        selection:
+            - "piminus_isMuon"

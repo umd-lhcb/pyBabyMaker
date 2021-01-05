@@ -4,6 +4,8 @@
 #include <TTreeReader.h>
 #include <TBranch.h>
 
+// NOTE: This implementation is very naive.
+
 // System headers
 // {% join: (format_list: "#include <{}>", directive.system_headers), "\n" %}
 
@@ -18,13 +20,13 @@ void generator_/* {% output_tree %} */(TFile *input_file, TFile *output_file) {
 
   // Load needed branches from ntuple
   // {% for var in config.input_branches %}
-  //   {% format: "TTreeReaderValue<{}> {}(reader, \"{}\");", var.type, var.name, var.name %}
+  //   {% format: "TTreeReaderValue<{}> {}(reader, \"{}\");", var.type, var.name, var.branch_name %}
   // {% endfor %}
 
   // Define output branches
   // {% for var in config.output_branches %}
-  //   {% format: "{} {}_out;", var.type, var.name %}
-  //   {% format: "output.Branch(\"{}\", &{}_out);", var.name, var.name %}
+  //   {% format: "{} {};", var.type, var.name %}
+  //   {% format: "output.Branch(\"{}\", &{});", var.branch_name, var.name %}
   // {% endfor %}
 
   while (reader.Next()) {
@@ -42,7 +44,7 @@ void generator_/* {% output_tree %} */(TFile *input_file, TFile *output_file) {
     if (/* {% join: (deref_var_list: config.selection, config.input_branch_names), " && " %} */) {
       // Assign values for each output branch in this loop
       // {% for var in config.output_branches %}
-      //   {% format: "{}_out = {};", var.name, (deref_var: var.name, config.input_branch_names) %}
+      //   {% format: "{} = {};", var.name, (deref_var: var.rvalue, config.input_branch_names) %}
       // {% endfor %}
 
       output.Fill();

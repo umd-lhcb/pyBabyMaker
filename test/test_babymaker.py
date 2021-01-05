@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 02:20 AM +0100
+# Last Change: Tue Jan 05, 2021 at 02:40 AM +0100
 
 import pytest
 import os
@@ -389,6 +389,42 @@ def test_BabyConfigParser_resolve_vars_in_scope_rename(
         'rename_y_px',
         'raw_q2',
         'rename_Q2',
+    ]
+    assert unresolved == {}
+
+
+def test_BabyConfigParser_resolve_vars_in_scope_calculation(
+        subdirective, default_BabyConfigParser):
+    dumped_tree = {
+        'q2': 'float',
+        'Y_PX': 'float',
+        'Y_PY': 'float',
+        'Y_PZ': 'float'
+    }
+    subdirective['namespace']['raw'] = {v: Variable(t, v)
+                                        for v, t in dumped_tree.items()}
+    subdirective['namespace']['calculation'] = {
+        'y_p_sum': Variable('float', 'y_p_sum', 'Y_PX+Y_PY', transient=True,
+                            output=False),
+        'q2': Variable('float', 'q2', 'q2 / 1000', transient=True)
+    }
+
+    unresolved = default_BabyConfigParser.resolve_vars_in_scope(
+        'calculation', subdirective['namespace']['calculation'], subdirective)
+
+    assert subdirective['transient_vars'] == [
+        VariableResolved('float', 'calculation_y_p_sum', 'raw_Y_PX+raw_Y_PY'),
+        VariableResolved('float', 'calculation_q2', 'raw_q2 / 1000'),
+    ]
+    assert subdirective['output_branches'] == [
+        VariableResolved('float', 'calculation_q2', 'raw_q2 / 1000', 'q2'),
+    ]
+    assert subdirective['loaded_vars'] == [
+        'raw_Y_PX',
+        'raw_Y_PY',
+        'calculation_y_p_sum',
+        'raw_q2',
+        'calculation_q2',
     ]
     assert unresolved == {}
 

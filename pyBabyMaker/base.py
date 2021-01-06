@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 04, 2021 at 03:05 AM +0100
+# Last Change: Wed Jan 06, 2021 at 11:16 PM +0100
 """
 This module provides basic infrastructure for ntuple related C++ code
 generation.
@@ -74,11 +74,9 @@ def load_file(filepath, current_file_path=__file__):
     with ``!:``.
     """
     if filepath.startswith('!:'):
-        filepath = filepath[2:]
         return path.join(path.abspath(path.dirname(current_file_path)),
-                         filepath)
-    else:
-        return filepath
+                         filepath[2:])
+    return filepath
 
 
 def update_config(config, update, merge=True):

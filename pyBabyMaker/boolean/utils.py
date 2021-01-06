@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Jan 06, 2021 at 11:20 PM +0100
+# Last Change: Wed Jan 06, 2021 at 11:23 PM +0100
 """
 This module provides simple parsed boolean tree info extraction
 """
@@ -34,4 +34,4 @@ def find_all_vars(expr):
     :param str expr: Expression to be parsed
     """
     tree = cpp.parse(expr)
-    return UniqueList([t.children[0].value for t in tree.find_data('var')])
+    return [t.children[0].value for t in tree.find_data('var')]

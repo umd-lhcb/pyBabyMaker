@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Jan 06, 2021 at 11:41 PM +0100
+# Last Change: Thu Jan 07, 2021 at 11:54 PM +0100
 
 import re
 
@@ -17,8 +17,8 @@ class Variable(object):
     """
     Store raw variable to be resolved.
     """
-    type: str
     name: str
+    type: str = 'nil'
     deps: Dict[str, list(str)] = field(
         default=[],
         default_factory=lambda x: {x: [find_all_vars(i) for i in x]})

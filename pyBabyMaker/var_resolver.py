@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Jan 07, 2021 at 11:54 PM +0100
+# Last Change: Fri Jan 08, 2021 at 03:58 AM +0100
 
 import re
 
@@ -20,15 +20,31 @@ class Variable(object):
     name: str
     type: str = 'nil'
     deps: Dict[str, list(str)] = field(
-        default=[],
         default_factory=lambda x: {x: [find_all_vars(i) for i in x]})
-    resolved: Dict[str, str] = []
+    resolved: Dict[str, str] = {}
     idx: int = 0
 
 
 class VariableResolver(object):
-    def __init__(self, ):
-        pass
+    def __init__(self, namespace, ordering):
+        self.namespace = namespace
+        self.ordering = ordering
+        self.resolved_vars = []
+
+    def resolve(self, scope, variables):
+        # Since the resolution may fail, we shouldn't add temporarily resolve
+        # variables to global list yet.
+        resolved_local = []
+        for name, var in variables:
+            # Always resolve name in its own scope first
+            pass
+
+            # Now resolve in the namespace, with different scopes
+            # ...and we follow a defined ordering
+
+    @staticmethod
+    def exhausted(var):
+        return True if var.idx > len(var.deps) else False
 
     @staticmethod
     def sub(expr, vars_to_replace):

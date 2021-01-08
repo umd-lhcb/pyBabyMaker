@@ -2,27 +2,29 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Jan 08, 2021 at 03:58 AM +0100
+# Last Change: Fri Jan 08, 2021 at 04:21 AM +0100
 
 import re
 
-from dataclasses import dataclass, field
-from typing import Dict
+from dataclasses import dataclass, InitVar
+from typing import List
 
 from pyBabyMaker.boolean.utils import find_all_vars
 
 
 @dataclass
-class Variable(object):
+class Variable:
     """
     Store raw variable to be resolved.
     """
     name: str
     type: str = 'nil'
-    deps: Dict[str, list(str)] = field(
-        default_factory=lambda x: {x: [find_all_vars(i) for i in x]})
-    resolved: Dict[str, str] = {}
-    idx: int = 0
+    rvalues: InitVar[List[str]] = []
+
+    def __post_init__(self, rvalues):
+        self.resolved = {}
+        self.idx = 0
+        self.deps = {v: find_all_vars(v) for v in rvalues}
 
 
 class VariableResolver(object):
@@ -35,7 +37,7 @@ class VariableResolver(object):
         # Since the resolution may fail, we shouldn't add temporarily resolve
         # variables to global list yet.
         resolved_local = []
-        for name, var in variables:
+        for name, var in variables.items():
             # Always resolve name in its own scope first
             pass
 

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 05:55 AM +0100
+# Last Change: Sun Jan 10, 2021 at 06:00 AM +0100
 
 from collections import defaultdict
 
@@ -107,18 +107,9 @@ def test_VariableResolver_simple():
     )
     assert resolver._resolved_names == []
 
-    # Do it again and the result should be the same
-    assert resolver.resolve_var('keep', Variable('a', rvalues=['a'])) == (
-        True,
-        [
-            ('raw', Variable('a')),
-            ('keep', Variable('a', rvalues=['a']))
-        ],
-        [
-            'raw_a',
-            'keep_a'
-        ]
-    )
+    # Do it again (and again) and the result should be the same
+    assert resolver.resolve_var('keep', Variable('a', rvalues=['a'])) == \
+        resolver.resolve_var('keep', Variable('a', rvalues=['a']))
     assert resolver._resolved_names == []
 
 

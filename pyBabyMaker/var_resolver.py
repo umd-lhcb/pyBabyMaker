@@ -2,14 +2,17 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 10:22 PM +0100
+# Last Change: Sun Jan 10, 2021 at 11:14 PM +0100
 
 import re
+import logging
 
 from dataclasses import dataclass, field
 from typing import List, Dict
 
 from pyBabyMaker.boolean.utils import find_all_vars
+
+DEBUG = logging.debug
 
 
 @dataclass
@@ -102,39 +105,51 @@ class VariableResolver(object):
         load_seq = []
         known_names = [] if known_names is None else known_names
         var_name_resolved = scope+'_'+var.name
+        DEBUG('Start resolving: {} {}.{}'.format(var.type, scope, var.name))
 
-        # If it's already loaded somewhere else, just use it
         if var_name_resolved in self._resolved_names or \
                 var_name_resolved in known_names:
+            DEBUG('Variable {} already resolved. Return right away.'.format(var.name))
             return True, load_seq, known_names
 
         for idx, other_scope in enumerate(ordering):
-            for dep_var_name in list(var.deps.values())[var.idx]:
+            deps = list(var.deps.values())[var.idx]
+            DEBUG('Resolving dependencies ({}) in {} of variable {}.{}.'.format(
+                ','.join(deps), other_scope, scope, var.name))
+            for dep_var_name in deps:
                 dep_var_name_resolved = other_scope+'_'+dep_var_name
 
                 if dep_var_name in self.namespace[other_scope]:
                     dep_var = self.namespace[other_scope][dep_var_name]
                     if scope == other_scope and dep_var_name == var.name:
-                        continue  # Don't do circular resolution
+                        DEBUG("Don't do circular resolution for dep {} in {}.".format(
+                            dep_var_name, other_scope
+                        ))
+                        continue
 
                     if idx+1 == len(ordering):
-                        # We assume we can always load variables from the last
-                        # scope
+                        DEBUG('Resolved dep {} in {}, a terminal scope'.format(
+                            dep_var_name, other_scope))
                         var.resolved[dep_var_name] = dep_var_name_resolved
                         known_names.append(dep_var_name_resolved)
                         load_seq.append(self.format_resolved(
                             other_scope, dep_var))
 
                     else:
+                        DEBUG('Try to resolve dep {} in scope {}.'.format(
+                            dep_var_name, other_scope))
                         dep_load_status, dep_load_seq, _ = self.resolve_var(
                             other_scope, dep_var, ordering[idx:], known_names)
                         if dep_load_status:
+                            DEBUG('Resolved dep {} in {}.'.format(
+                                dep_var_name, other_scope))
                             var.resolved[dep_var_name] = dep_var_name_resolved
                             load_seq += dep_load_seq
                         else:
-                            break  # No point continue if a dep can't load
+                            break  # No point to continue if a dep can't load
 
         if var.ok:
+            DEBUG('Fully resolved: {} {}.{}.'.format(var.type, scope, var.name))
             known_names.append(var_name_resolved)
             load_seq.append(self.format_resolved(scope, var))
             return True, load_seq, known_names  # Resolution successful

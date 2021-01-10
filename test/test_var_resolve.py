@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 09:47 PM +0100
+# Last Change: Sun Jan 10, 2021 at 10:03 PM +0100
 
 from collections import defaultdict
 
@@ -254,3 +254,37 @@ def test_VariableResolver_full_fail():
     )
     assert var.idx == 0
     assert not var.ok
+
+
+################################################
+# Resolve multiple variables in a single scope #
+################################################
+
+def test_VariableResolver_vars_simple():
+    namespace = {
+        'calc': {
+            'a': Variable('a', rvalues=['b/c']),
+            'b': Variable('b', rvalues=['GEV2(b)']),
+        },
+        'rename': {
+            'c': Variable('c', rvalues=['x'])
+        },
+        'raw': {
+            'b': Variable('b'),
+            'x': Variable('x')
+        }
+    }
+    resolver = VariableResolver(namespace)
+
+    assert resolver.resolve_vars_in_scope(
+        'calc', namespace['calc'].values(),
+        ordering=['calc', 'rename', 'raw']) == (
+        [
+            ('raw', Variable('b')),
+            ('calc', Variable('b', rvalues=['GEV2(b)'])),
+            ('raw', Variable('x')),
+            ('rename', Variable('c', rvalues=['x'])),
+            ('calc', Variable('a', rvalues=['b/c']))
+        ],
+        []
+    )

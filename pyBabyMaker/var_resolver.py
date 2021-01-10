@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 04:55 PM +0100
+# Last Change: Sun Jan 10, 2021 at 10:12 PM +0100
 
 import re
 
@@ -69,6 +69,29 @@ class VariableResolver(object):
         self.namespace = namespace
         self._resolved_names = []
 
+    def resolve_scope(self, scope):
+        """
+        Resolve all variables in a single scope.
+        """
+
+    def resolve_vars_in_scope(self, scope, variables, ordering=['raw']):
+        """
+        Resolve multiple variables in namespaces following an ordering.
+        """
+        load_seq = []
+        unresolved = []
+
+        for var in variables:
+            status, var_load_seq, var_known_name = self.resolve_var(
+                scope, var, ordering)
+            if status:
+                load_seq += var_load_seq
+                self._resolved_names += var_known_name
+            else:
+                unresolved.append(var)
+
+        return load_seq, unresolved
+
     def resolve_var(self, scope, var, ordering=['raw'], known_names=None):
         """
         Resolve a single variable in namespaces following an ordering.
@@ -76,6 +99,10 @@ class VariableResolver(object):
         load_seq = []
         known_names = [] if known_names is None else known_names
         var_name_resolved = scope+'_'+var.name
+        print('----')
+        print(scope, var)
+        print(known_names)
+        print('----')
 
         # If it's already loaded somewhere else, just use it
         if var_name_resolved in self._resolved_names or \

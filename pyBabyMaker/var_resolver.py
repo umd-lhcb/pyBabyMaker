@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 11:14 PM +0100
+# Last Change: Sun Jan 10, 2021 at 11:57 PM +0100
 
 import re
 import logging
@@ -109,24 +109,22 @@ class VariableResolver(object):
 
         if var_name_resolved in self._resolved_names or \
                 var_name_resolved in known_names:
-            DEBUG('Variable {} already resolved. Return right away.'.format(var.name))
+            DEBUG('Variable {} already resolved. Return right away.'.format(
+                var.name))
             return True, load_seq, known_names
 
         for idx, other_scope in enumerate(ordering):
-            deps = list(var.deps.values())[var.idx]
+            deps = [i for i in list(var.deps.values())[var.idx]
+                    if i not in var.resolved and
+                    (other_scope != scope or i != var.name)]
             DEBUG('Resolving dependencies ({}) in {} of variable {}.{}.'.format(
                 ','.join(deps), other_scope, scope, var.name))
+            # Here we already remove self-referential cases in the same scope
             for dep_var_name in deps:
                 dep_var_name_resolved = other_scope+'_'+dep_var_name
 
                 if dep_var_name in self.namespace[other_scope]:
                     dep_var = self.namespace[other_scope][dep_var_name]
-                    if scope == other_scope and dep_var_name == var.name:
-                        DEBUG("Don't do circular resolution for dep {} in {}.".format(
-                            dep_var_name, other_scope
-                        ))
-                        continue
-
                     if idx+1 == len(ordering):
                         DEBUG('Resolved dep {} in {}, a terminal scope'.format(
                             dep_var_name, other_scope))
@@ -145,8 +143,6 @@ class VariableResolver(object):
                                 dep_var_name, other_scope))
                             var.resolved[dep_var_name] = dep_var_name_resolved
                             load_seq += dep_load_seq
-                        else:
-                            break  # No point to continue if a dep can't load
 
         if var.ok:
             DEBUG('Fully resolved: {} {}.{}.'.format(var.type, scope, var.name))

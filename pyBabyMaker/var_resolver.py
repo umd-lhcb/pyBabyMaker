@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 06:42 AM +0100
+# Last Change: Sun Jan 10, 2021 at 04:55 PM +0100
 
 import re
 
@@ -62,11 +62,17 @@ class Variable:
 
 
 class VariableResolver(object):
+    """
+    General variable resolver.
+    """
     def __init__(self, namespace):
         self.namespace = namespace
         self._resolved_names = []
 
     def resolve_var(self, scope, var, ordering=['raw'], known_names=None):
+        """
+        Resolve a single variable in namespaces following an ordering.
+        """
         load_seq = []
         known_names = [] if known_names is None else known_names
         var_name_resolved = scope+'_'+var.name
@@ -115,4 +121,7 @@ class VariableResolver(object):
 
     @staticmethod
     def format_resolved(scope, var):
+        """
+        Format resolved variable.
+        """
         return (scope, var)

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 05:04 AM +0100
+# Last Change: Sun Jan 10, 2021 at 05:18 AM +0100
 
 import re
 
@@ -19,8 +19,8 @@ class Variable:
     """
     name: str
     type: str = 'nil'
-    deps: Dict[str, List[str]] = None
     rvalues: InitVar[List[str]] = ['']
+    deps: Dict[str, List[str]] = None
 
     def __post_init__(self, rvalues):
         self.resolved = {}
@@ -41,6 +41,7 @@ class Variable:
         self.resolved = {}
         return True
 
+    @property
     def ok(self):
         """
         Return if current rvalue is fully resolved.
@@ -49,6 +50,7 @@ class Variable:
             return True
         return False
 
+    @property
     def sub(self):
         """
         Substitute variables in an expression with the resolved variable names.
@@ -99,7 +101,7 @@ class VariableResolver(object):
                         else:
                             break  # No point continue if a dep can't load
 
-        if len(var.resolved) == len(deps):
+        if var.ok:
             self._resolved_vars.append(scope+'_'+var.name)
             load_seq.append(self.format_resolved(scope, var))
             return True, load_seq  # Resolution successful

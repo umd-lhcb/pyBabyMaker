@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 05:00 AM +0100
+# Last Change: Sun Jan 10, 2021 at 05:08 AM +0100
 
 from collections import defaultdict
 
@@ -62,6 +62,16 @@ def test_Variable_sub():
     }
 
     assert var.sub() == 'scope1_a+scope2_b'
+
+
+def test_Variable_eq():
+    var1 = Variable('test', rvalues=['a+b', 'c+d'])
+    var2 = Variable('test', rvalues=['a+b', 'c+d'])
+    var1.next()
+
+    assert var1 == var2
+    assert var1.idx == 1
+    assert var2.idx == 0
 
 
 #####################

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 05:34 PM +0100
+# Last Change: Sun Jan 10, 2021 at 09:47 PM +0100
 
 from collections import defaultdict
 
@@ -74,9 +74,9 @@ def test_Variable_eq():
     assert var2.idx == 0
 
 
-#####################
-# Variable resolver #
-#####################
+#############################
+# Resolve a single variable #
+#############################
 
 def test_VariableResolver_trivial():
     namespace = defaultdict(dict)
@@ -243,10 +243,13 @@ def test_VariableResolver_circular():
 
 
 def test_VariableResolver_full_fail():
-    resolver = VariableResolver({'raw': {}, 'rename': {'a': Variable('x')}})
+    resolver = VariableResolver({
+        'raw': {},
+        'rename': {'a': Variable('x', rvalues=['c'])}
+    })
     var = Variable('x', rvalues=['a+b'])
 
-    assert resolver.resolve_var('calc', var) == (
+    assert resolver.resolve_var('calc', var, ordering=['rename', 'raw']) == (
         False, [], []
     )
     assert var.idx == 0

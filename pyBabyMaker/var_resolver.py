@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 05:58 AM +0100
+# Last Change: Sun Jan 10, 2021 at 06:13 AM +0100
 
 import re
 
@@ -110,7 +110,7 @@ class VariableResolver(object):
 
         # See if we tried all possible rvalues for this variable
         if var.next():  # this variable has more rvalues, try resolve it again
-            return self.resolve_var(scope, var, ordering, known_names)
+            return self.resolve_var(scope, var, ordering)
 
         return False, load_seq, known_names  # Failed to load
 

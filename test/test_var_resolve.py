@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 05:08 AM +0100
+# Last Change: Sun Jan 10, 2021 at 05:24 AM +0100
 
 from collections import defaultdict
 
@@ -46,12 +46,12 @@ def test_Variable_ok():
     var1 = Variable('test')
     var2 = Variable('test', rvalues=['a'])
 
-    assert var1.ok() is True
-    assert var2.ok() is False
+    assert var1.ok is True
+    assert var2.ok is False
 
     var2.resolved = {'a': 'test_a'}
 
-    assert var2.ok() is True
+    assert var2.ok is True
 
 
 def test_Variable_sub():
@@ -61,7 +61,7 @@ def test_Variable_sub():
         'b': 'scope2_b',
     }
 
-    assert var.sub() == 'scope1_a+scope2_b'
+    assert var.sub == 'scope1_a+scope2_b'
 
 
 def test_Variable_eq():
@@ -79,9 +79,27 @@ def test_Variable_eq():
 #####################
 
 def test_VariableResolver_trivial():
-    namespace = defaultdict(list)
+    namespace = defaultdict(dict)
     resolver = VariableResolver(namespace)
 
     assert resolver.resolve_var('id', Variable('id')) == (True, [
         ('id', Variable('id'))
     ])
+    assert resolver._resolved_vars == [
+        'id_id'
+    ]
+
+
+def test_VariableResolver_simple():
+    namespace = {'raw': {'a': Variable('a')}}
+    resolver = VariableResolver(namespace)
+
+    assert resolver.resolve_var('keep', Variable('a', rvalues=['a'])) == \
+        (True, [
+            ('raw', Variable('a')),
+            ('keep', Variable('a', rvalues=['a']))
+        ])
+    assert resolver._resolved_vars == [
+        'raw_a',
+        'keep_a'
+    ]

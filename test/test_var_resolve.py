@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 05:24 AM +0100
+# Last Change: Sun Jan 10, 2021 at 05:35 AM +0100
 
 from collections import defaultdict
 
@@ -102,4 +102,41 @@ def test_VariableResolver_simple():
     assert resolver._resolved_vars == [
         'raw_a',
         'keep_a'
+    ]
+
+
+def test_VariableResolver_simple_fail():
+    namespace = {'raw': {'a': Variable('a')}}
+    resolver = VariableResolver(namespace)
+
+    assert resolver.resolve_var('keep', Variable('a', rvalues=['b'])) == \
+        (False, [])
+    assert resolver._resolved_vars == []
+
+
+def test_VariableResolver_multi_scope():
+    namespace = {
+        'rename': {
+            'x': Variable('x', rvalues=['a'])
+        },
+        'raw': {
+            'a': Variable('a'),
+            'b': Variable('b')
+        }
+    }
+    resolver = VariableResolver(namespace)
+
+    assert resolver.resolve_var('calc', Variable('a', rvalues=['x+b']),
+                                ordering=['rename', 'raw']) == \
+        (True, [
+            ('raw', Variable('a')),
+            ('rename', Variable('x', rvalues=['a'])),
+            ('raw', Variable('b')),
+            ('calc', Variable('a', rvalues=['x+b']))
+        ])
+    assert resolver._resolved_vars == [
+        'raw_a',
+        'rename_x',
+        'raw_b',
+        'calc_a'
     ]

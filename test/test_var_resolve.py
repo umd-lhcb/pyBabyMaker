@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 05:35 AM +0100
+# Last Change: Sun Jan 10, 2021 at 05:55 AM +0100
 
 from collections import defaultdict
 
@@ -82,27 +82,44 @@ def test_VariableResolver_trivial():
     namespace = defaultdict(dict)
     resolver = VariableResolver(namespace)
 
-    assert resolver.resolve_var('id', Variable('id')) == (True, [
-        ('id', Variable('id'))
-    ])
-    assert resolver._resolved_vars == [
-        'id_id'
-    ]
+    assert resolver.resolve_var('id', Variable('id')) == (
+        True,
+        [('id', Variable('id'))],
+        ['id_id']
+    )
+    assert resolver._resolved_names == []
 
 
 def test_VariableResolver_simple():
     namespace = {'raw': {'a': Variable('a')}}
     resolver = VariableResolver(namespace)
 
-    assert resolver.resolve_var('keep', Variable('a', rvalues=['a'])) == \
-        (True, [
+    assert resolver.resolve_var('keep', Variable('a', rvalues=['a'])) == (
+        True,
+        [
             ('raw', Variable('a')),
             ('keep', Variable('a', rvalues=['a']))
-        ])
-    assert resolver._resolved_vars == [
-        'raw_a',
-        'keep_a'
-    ]
+        ],
+        [
+            'raw_a',
+            'keep_a'
+        ]
+    )
+    assert resolver._resolved_names == []
+
+    # Do it again and the result should be the same
+    assert resolver.resolve_var('keep', Variable('a', rvalues=['a'])) == (
+        True,
+        [
+            ('raw', Variable('a')),
+            ('keep', Variable('a', rvalues=['a']))
+        ],
+        [
+            'raw_a',
+            'keep_a'
+        ]
+    )
+    assert resolver._resolved_names == []
 
 
 def test_VariableResolver_simple_fail():
@@ -110,8 +127,8 @@ def test_VariableResolver_simple_fail():
     resolver = VariableResolver(namespace)
 
     assert resolver.resolve_var('keep', Variable('a', rvalues=['b'])) == \
-        (False, [])
-    assert resolver._resolved_vars == []
+        (False, [], [])
+    assert resolver._resolved_names == []
 
 
 def test_VariableResolver_multi_scope():
@@ -127,16 +144,18 @@ def test_VariableResolver_multi_scope():
     resolver = VariableResolver(namespace)
 
     assert resolver.resolve_var('calc', Variable('a', rvalues=['x+b']),
-                                ordering=['rename', 'raw']) == \
-        (True, [
+                                ordering=['rename', 'raw']) == (
+        True,
+        [
             ('raw', Variable('a')),
             ('rename', Variable('x', rvalues=['a'])),
             ('raw', Variable('b')),
             ('calc', Variable('a', rvalues=['x+b']))
-        ])
-    assert resolver._resolved_vars == [
-        'raw_a',
-        'rename_x',
-        'raw_b',
-        'calc_a'
-    ]
+        ],
+        [
+            'raw_a',
+            'rename_x',
+            'raw_b',
+            'calc_a'
+        ]
+    )

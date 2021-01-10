@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 05:18 AM +0100
+# Last Change: Sun Jan 10, 2021 at 05:58 AM +0100
 
 import re
 
@@ -64,17 +64,19 @@ class Variable:
 class VariableResolver(object):
     def __init__(self, namespace):
         self.namespace = namespace
-        self._resolved_vars = []
+        self._resolved_names = []
 
-    def resolve_var(self, scope, var, ordering=['raw']):
+    def resolve_var(self, scope, var, ordering=['raw'], known_names=None):
         load_seq = []
+        known_names = [] if known_names is None else known_names
         num_of_scopes = len(ordering)
         deps = list(var.deps.values())[var.idx]
 
         for idx, other_scope in enumerate(ordering):
             for dep_var_name in deps:
                 dep_var_name_resolved = other_scope+'_'+dep_var_name
-                if dep_var_name_resolved in self._resolved_vars:
+                if dep_var_name_resolved in self._resolved_names or \
+                        dep_var_name_resolved in known_names:
                     # If it's already loaded somewhere else, just use it
                     var.resolved[dep_var_name] = dep_var_name_resolved
                     break
@@ -88,13 +90,13 @@ class VariableResolver(object):
                         # We assume we can always load variables from the last
                         # scope
                         var.resolved[dep_var_name] = dep_var_name_resolved
-                        self._resolved_vars.append(dep_var_name_resolved)
+                        known_names.append(dep_var_name_resolved)
                         load_seq.append(self.format_resolved(
                             other_scope, dep_var))
 
                     else:
-                        dep_load_status, dep_load_seq = self.resolve_var(
-                            other_scope, dep_var, ordering[idx:])
+                        dep_load_status, dep_load_seq, _ = self.resolve_var(
+                            other_scope, dep_var, ordering[idx:], known_names)
                         if dep_load_status:
                             var.resolved[dep_var_name] = dep_var_name_resolved
                             load_seq += dep_load_seq
@@ -102,15 +104,15 @@ class VariableResolver(object):
                             break  # No point continue if a dep can't load
 
         if var.ok:
-            self._resolved_vars.append(scope+'_'+var.name)
+            known_names.append(scope+'_'+var.name)
             load_seq.append(self.format_resolved(scope, var))
-            return True, load_seq  # Resolution successful
+            return True, load_seq, known_names  # Resolution successful
 
         # See if we tried all possible rvalues for this variable
         if var.next():  # this variable has more rvalues, try resolve it again
-            return self.resolve_var(scope, var, ordering)
+            return self.resolve_var(scope, var, ordering, known_names)
 
-        return False, load_seq  # Failed to load
+        return False, load_seq, known_names  # Failed to load
 
     @staticmethod
     def format_resolved(scope, var):

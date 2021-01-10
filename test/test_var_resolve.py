@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 06:00 AM +0100
+# Last Change: Sun Jan 10, 2021 at 06:02 AM +0100
 
 from collections import defaultdict
 
@@ -149,4 +149,24 @@ def test_VariableResolver_multi_scope():
             'raw_b',
             'calc_a'
         ]
+    )
+
+
+def test_VariableResolver_multi_scope_fail():
+    namespace = {
+        'rename': {
+            'x': Variable('x', rvalues=['a'])
+        },
+        'raw': {
+            'a': Variable('a'),
+            'b': Variable('b')
+        }
+    }
+    resolver = VariableResolver(namespace)
+
+    assert resolver.resolve_var('calc', Variable('a', rvalues=['b+y']),
+                                ordering=['rename', 'raw']) == (
+        False,
+        [('raw', Variable('b'))],
+        ['raw_b']
     )

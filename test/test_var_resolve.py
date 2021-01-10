@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 10:18 PM +0100
+# Last Change: Mon Jan 11, 2021 at 12:04 AM +0100
 
 from collections import defaultdict
 
@@ -280,10 +280,10 @@ def test_VariableResolver_vars_simple():
         }
     }
     resolver = VariableResolver(namespace)
+    result = resolver.resolve_vars_in_scope(
+        'calc', namespace['calc'].values(), ordering=['calc', 'rename', 'raw'])
 
-    assert resolver.resolve_vars_in_scope(
-        'calc', namespace['calc'].values(),
-        ordering=['calc', 'rename', 'raw']) == (
+    assert result == (
         [
             ('raw', Variable('b')),
             ('calc', Variable('b', rvalues=['GEV2(b)'])),
@@ -293,3 +293,4 @@ def test_VariableResolver_vars_simple():
         ],
         []
     )
+    assert result[0][4][1].sub == 'calc_b/rename_c'

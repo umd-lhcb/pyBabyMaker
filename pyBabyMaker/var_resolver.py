@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 11:57 PM +0100
+# Last Change: Mon Jan 11, 2021 at 12:14 AM +0100
 
 import re
 import logging
@@ -105,53 +105,58 @@ class VariableResolver(object):
         load_seq = []
         known_names = [] if known_names is None else known_names
         var_name_resolved = scope+'_'+var.name
-        DEBUG('Start resolving: {} {}.{}'.format(var.type, scope, var.name))
+        DEBUG('Start resolving: {}.{}'.format(scope, var.name))
 
         if var_name_resolved in self._resolved_names or \
                 var_name_resolved in known_names:
-            DEBUG('Variable {} already resolved. Return right away.'.format(
-                var.name))
+            DEBUG('Variable {}.{} already resolved. Return right away.'.format(
+                scope, var.name))
             return True, load_seq, known_names
 
         for idx, other_scope in enumerate(ordering):
+            if var.ok:
+                break
+
             deps = [i for i in list(var.deps.values())[var.idx]
                     if i not in var.resolved and
                     (other_scope != scope or i != var.name)]
             DEBUG('Resolving dependencies ({}) in {} of variable {}.{}.'.format(
                 ','.join(deps), other_scope, scope, var.name))
             # Here we already remove self-referential cases in the same scope
+
             for dep_var_name in deps:
                 dep_var_name_resolved = other_scope+'_'+dep_var_name
 
                 if dep_var_name in self.namespace[other_scope]:
                     dep_var = self.namespace[other_scope][dep_var_name]
                     if idx+1 == len(ordering):
-                        DEBUG('Resolved dep {} in {}, a terminal scope'.format(
-                            dep_var_name, other_scope))
+                        DEBUG('Resolved dep {}.{} in terminal scope {}'.format(
+                            other_scope, dep_var_name, other_scope))
                         var.resolved[dep_var_name] = dep_var_name_resolved
                         known_names.append(dep_var_name_resolved)
                         load_seq.append(self.format_resolved(
                             other_scope, dep_var))
 
                     else:
-                        DEBUG('Try to resolve dep {} in scope {}.'.format(
-                            dep_var_name, other_scope))
+                        DEBUG('Try to resolve dep {}.{}.'.format(
+                            other_scope, dep_var_name))
                         dep_load_status, dep_load_seq, _ = self.resolve_var(
                             other_scope, dep_var, ordering[idx:], known_names)
                         if dep_load_status:
-                            DEBUG('Resolved dep {} in {}.'.format(
-                                dep_var_name, other_scope))
+                            DEBUG('Resolved dep {}.{}.'.format(
+                                other_scope, dep_var_name))
                             var.resolved[dep_var_name] = dep_var_name_resolved
                             load_seq += dep_load_seq
 
         if var.ok:
-            DEBUG('Fully resolved: {} {}.{}.'.format(var.type, scope, var.name))
+            DEBUG('Fully resolved: {}.{}.'.format(scope, var.name))
             known_names.append(var_name_resolved)
             load_seq.append(self.format_resolved(scope, var))
             return True, load_seq, known_names  # Resolution successful
 
-        # See if we tried all possible rvalues for this variable
-        if var.next():  # this variable has more rvalues, try resolve it again
+        if var.next():
+            DEBUG('Trying alternative rvalues for variable {}.{}'.format(
+                scope, var.name))
             return self.resolve_var(scope, var, ordering)
 
         return False, load_seq, known_names  # Failed to load

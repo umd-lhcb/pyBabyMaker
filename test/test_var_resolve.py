@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 05:04 PM +0100
+# Last Change: Sun Jan 10, 2021 at 05:09 PM +0100
 
 from collections import defaultdict
 
@@ -214,3 +214,40 @@ def test_VariableResolver_existing_var():
     assert resolver.resolve_var('rename', var) == (
         True, [], []  # No need to resolve since it's already loaded before
     )
+
+
+def test_VariableResolver_circular():
+    var = Variable('x', rvalues=['GEV2(x)'])
+    namespace = {
+        'calc': {
+            'x': var,
+        },
+        'raw': {
+            'x': Variable('x'),
+        }
+    }
+    resolver = VariableResolver(namespace)
+
+    assert resolver.resolve_var('calc', var, ordering=['calc', 'raw']) == (
+        True,
+        [
+            ('raw', Variable('x')),
+            ('calc', var)
+        ],
+        [
+            'raw_x',
+            'calc_x'
+        ]
+    )
+    assert var.sub == 'GEV2(raw_x)'
+
+
+def test_VariableResolver_full_fail():
+    resolver = VariableResolver({'raw': {}})
+    var = Variable('x', rvalues=['a+b'])
+
+    assert resolver.resolve_var('calc', var) == (
+        False, [], []
+    )
+    assert var.idx == 0
+    assert not var.ok

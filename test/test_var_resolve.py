@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 10:03 PM +0100
+# Last Change: Sun Jan 10, 2021 at 10:18 PM +0100
 
 from collections import defaultdict
 
@@ -72,6 +72,11 @@ def test_Variable_eq():
     assert var1 == var2
     assert var1.idx == 1
     assert var2.idx == 0
+
+
+def test_Variable_repr():
+    var = Variable('test', 'Double_t', ['a+b', 'a', 'b'])
+    assert str(var) == 'Double_t test = a+b|a|b'
 
 
 #############################

@@ -2,11 +2,11 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 10:12 PM +0100
+# Last Change: Sun Jan 10, 2021 at 10:22 PM +0100
 
 import re
 
-from dataclasses import dataclass, InitVar
+from dataclasses import dataclass, field
 from typing import List, Dict
 
 from pyBabyMaker.boolean.utils import find_all_vars
@@ -19,14 +19,17 @@ class Variable:
     """
     name: str
     type: str = 'nil'
-    rvalues: InitVar[List[str]] = ['']
+    rvalues: List[str] = field(default_factory=lambda: [''])
     deps: Dict[str, List[str]] = None
 
-    def __post_init__(self, rvalues):
+    def __post_init__(self):
         self.resolved = {}
         self.idx = 0
-        self.deps = {rv: find_all_vars(rv) for rv in rvalues}
+        self.deps = {rv: find_all_vars(rv) for rv in self.rvalues}
         self.len = len(self.deps)
+
+    def __repr__(self):
+        return '{} {} = {}'.format(self.type, self.name, '|'.join(self.rvalues))
 
     def next(self):
         """
@@ -99,10 +102,6 @@ class VariableResolver(object):
         load_seq = []
         known_names = [] if known_names is None else known_names
         var_name_resolved = scope+'_'+var.name
-        print('----')
-        print(scope, var)
-        print(known_names)
-        print('----')
 
         # If it's already loaded somewhere else, just use it
         if var_name_resolved in self._resolved_names or \

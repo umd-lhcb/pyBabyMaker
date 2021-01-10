@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 06:13 AM +0100
+# Last Change: Sun Jan 10, 2021 at 06:42 AM +0100
 
 import re
 
@@ -69,24 +69,23 @@ class VariableResolver(object):
     def resolve_var(self, scope, var, ordering=['raw'], known_names=None):
         load_seq = []
         known_names = [] if known_names is None else known_names
-        num_of_scopes = len(ordering)
-        deps = list(var.deps.values())[var.idx]
+        var_name_resolved = scope+'_'+var.name
+
+        # If it's already loaded somewhere else, just use it
+        if var_name_resolved in self._resolved_names or \
+                var_name_resolved in known_names:
+            return True, load_seq, known_names
 
         for idx, other_scope in enumerate(ordering):
-            for dep_var_name in deps:
+            for dep_var_name in list(var.deps.values())[var.idx]:
                 dep_var_name_resolved = other_scope+'_'+dep_var_name
-                if dep_var_name_resolved in self._resolved_names or \
-                        dep_var_name_resolved in known_names:
-                    # If it's already loaded somewhere else, just use it
-                    var.resolved[dep_var_name] = dep_var_name_resolved
-                    break
 
                 if dep_var_name in self.namespace[other_scope]:
                     dep_var = self.namespace[other_scope][dep_var_name]
                     if scope == other_scope and dep_var_name == var.name:
                         continue  # Don't do circular resolution
 
-                    if idx+1 == num_of_scopes:
+                    if idx+1 == len(ordering):
                         # We assume we can always load variables from the last
                         # scope
                         var.resolved[dep_var_name] = dep_var_name_resolved
@@ -104,7 +103,7 @@ class VariableResolver(object):
                             break  # No point continue if a dep can't load
 
         if var.ok:
-            known_names.append(scope+'_'+var.name)
+            known_names.append(var_name_resolved)
             load_seq.append(self.format_resolved(scope, var))
             return True, load_seq, known_names  # Resolution successful
 

@@ -2,9 +2,11 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Jan 08, 2021 at 04:48 AM +0100
+# Last Change: Sun Jan 10, 2021 at 05:00 AM +0100
 
-from pyBabyMaker.var_resolver import Variable
+from collections import defaultdict
+
+from pyBabyMaker.var_resolver import Variable, VariableResolver
 
 
 ##############
@@ -60,3 +62,16 @@ def test_Variable_sub():
     }
 
     assert var.sub() == 'scope1_a+scope2_b'
+
+
+#####################
+# Variable resolver #
+#####################
+
+def test_VariableResolver_trivial():
+    namespace = defaultdict(list)
+    resolver = VariableResolver(namespace)
+
+    assert resolver.resolve_var('id', Variable('id')) == (True, [
+        ('id', Variable('id'))
+    ])

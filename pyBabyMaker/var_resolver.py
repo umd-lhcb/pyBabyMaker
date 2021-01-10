@@ -2,12 +2,12 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 04:49 AM +0100
+# Last Change: Sun Jan 10, 2021 at 05:04 AM +0100
 
 import re
 
 from dataclasses import dataclass, InitVar
-from typing import List
+from typing import List, Dict
 
 from pyBabyMaker.boolean.utils import find_all_vars
 
@@ -19,12 +19,13 @@ class Variable:
     """
     name: str
     type: str = 'nil'
+    deps: Dict[str, List[str]] = None
     rvalues: InitVar[List[str]] = ['']
 
     def __post_init__(self, rvalues):
         self.resolved = {}
         self.idx = 0
-        self.deps = {v: find_all_vars(v) for v in rvalues}
+        self.deps = {rv: find_all_vars(rv) for rv in rvalues}
         self.len = len(self.deps)
 
     def next(self):
@@ -59,13 +60,11 @@ class Variable:
 
 
 class VariableResolver(object):
-    def __init__(self, namespace, ordering):
+    def __init__(self, namespace):
         self.namespace = namespace
-        self.ordering = ordering
-
         self._resolved_vars = []
 
-    def resolve_var(self, scope, var, ordering):
+    def resolve_var(self, scope, var, ordering=['raw']):
         load_seq = []
         num_of_scopes = len(ordering)
         deps = list(var.deps.values())[var.idx]

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 10, 2021 at 05:09 PM +0100
+# Last Change: Sun Jan 10, 2021 at 05:34 PM +0100
 
 from collections import defaultdict
 
@@ -243,7 +243,7 @@ def test_VariableResolver_circular():
 
 
 def test_VariableResolver_full_fail():
-    resolver = VariableResolver({'raw': {}})
+    resolver = VariableResolver({'raw': {}, 'rename': {'a': Variable('x')}})
     var = Variable('x', rvalues=['a+b'])
 
     assert resolver.resolve_var('calc', var) == (

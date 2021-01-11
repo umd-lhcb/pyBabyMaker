@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 11, 2021 at 12:14 AM +0100
+# Last Change: Mon Jan 11, 2021 at 02:37 AM +0100
 
 import re
 import logging
@@ -75,10 +75,21 @@ class VariableResolver(object):
         self.namespace = namespace
         self._resolved_names = []
 
-    def resolve_scope(self, scope):
+    def resolve_scope(self, scope, ordering=None):
         """
         Resolve all variables in a single scope.
+
+        **Note**: If ``ordering`` is not supplied, it will use an ordering that
+        passes all known scopes with ``scope`` being first and ``raw`` last.
         """
+        if scope not in self.namespace:
+            raise KeyError('Unknown scope: {}.'.format(scope))
+
+        ordering = [scope] + [o for o in self.namespace.keys()
+                              if o != 'raw'] + ['raw'] \
+            if ordering is None else ordering
+        return self.resolve_vars_in_scope(
+            scope, self.namespace[scope].values(), ordering)
 
     def resolve_vars_in_scope(self, scope, variables, ordering=['raw']):
         """

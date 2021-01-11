@@ -2,9 +2,10 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 11, 2021 at 12:04 AM +0100
+# Last Change: Mon Jan 11, 2021 at 02:36 AM +0100
 
 from collections import defaultdict
+from pytest import raises
 
 from pyBabyMaker.var_resolver import Variable, VariableResolver
 
@@ -294,3 +295,77 @@ def test_VariableResolver_vars_simple():
         []
     )
     assert result[0][4][1].sub == 'calc_b/rename_c'
+
+
+def test_VariableResolver_vars_partial():
+    namespace = {
+        'calc': {
+            'a': Variable('a', rvalues=['d/c']),
+            'b': Variable('b', rvalues=['GEV2(b)']),
+        },
+        'rename': {
+            'c': Variable('c', rvalues=['x'])
+        },
+        'raw': {
+            'b': Variable('b'),
+            'x': Variable('x')
+        }
+    }
+    resolver = VariableResolver(namespace)
+    result = resolver.resolve_vars_in_scope(
+        'calc', namespace['calc'].values(), ordering=['calc', 'rename', 'raw'])
+
+    assert result == (
+        [
+            ('raw', Variable('b')),
+            ('calc', Variable('b', rvalues=['GEV2(b)'])),
+        ],
+        [
+            Variable('a', rvalues=['d/c']),
+        ]
+    )
+    assert result[0][1][1].sub == 'GEV2(raw_b)'
+
+
+###########################################
+# Resolve all variables in a single scope #
+###########################################
+
+def test_VariableResolver_scope_unknown():
+    resolver = VariableResolver({})
+
+    with raises(KeyError) as e:
+        assert resolver.resolve_scope('test')
+    assert e.value.args[0] == 'Unknown scope: test.'
+
+
+def test_VariableResolver_scope_resolve():
+    namespace = {
+        'calc': {
+            'a': Variable('a', rvalues=['b/c']),
+            'b': Variable('b', rvalues=['GEV2(b)']),
+            'c': Variable('c', rvalues=['b*b'])
+        },
+        'rename': {
+            'c': Variable('c', rvalues=['x'])
+        },
+        'raw': {
+            'b': Variable('b'),
+            'x': Variable('x')
+        }
+    }
+    resolver = VariableResolver(namespace)
+    result = resolver.resolve_scope('calc')
+
+    assert result == (
+        [
+            ('raw', Variable('b')),
+            ('calc', Variable('b', rvalues=['GEV2(b)'])),
+            ('calc', Variable('c', rvalues=['b*b'])),
+            ('calc', Variable('a', rvalues=['b/c']))
+        ],
+        []
+    )
+    assert result[0][1][1].sub == 'GEV2(raw_b)'
+    assert result[0][1][2].sub == 'raw_b*raw_b'
+    assert result[0][1][3].sub == 'calc_b/calc_c'

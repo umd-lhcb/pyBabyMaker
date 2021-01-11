@@ -2,26 +2,47 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 11, 2021 at 03:14 AM +0100
+# Last Change: Mon Jan 11, 2021 at 04:36 AM +0100
 
 import re
 
-from collections import namedtuple, defaultdict
+from collections import defaultdict
+from dataclasses import dataclass
 
 from pyBabyMaker.base import TermColor as TC
 from pyBabyMaker.base import UniqueList, BaseMaker
 from pyBabyMaker.base import update_config
 from pyBabyMaker.engine.core import template_transformer, template_evaluator
-from pyBabyMaker.var_resolver import VariableResolver
+from pyBabyMaker.var_resolver import Variable, VariableResolver
 
 
 ###########
 # Helpers #
 ###########
 
-VariableResolved = namedtuple('VariableResolved',
-                              'type name rvalue, branch_name',
-                              defaults=(None, None))
+@dataclass
+class BabyVariable(Variable):
+    """
+    Store both raw variables and resolved variables.
+
+    The added attributes make sorting variables easier.
+    """
+    input: bool = False
+    output: bool = True
+    fake: bool = False
+    branch: str = None
+
+
+class BabyVariableResolver(VariableResolver):
+    @staticmethod
+    def format_resolved(scope, var):
+        """
+        Prepare resolved variables for ``babymaker``.
+        """
+        if var.output or var.output:
+            var.branch = var.name
+        var.name = scope+'_'+var.name
+        return var
 
 
 ########################
@@ -72,56 +93,56 @@ class BabyConfigParser:
             merge = config['inherit'] if 'inherit' in config else True
             config = update_config(self.parsed_config, config, merge=merge)
             namespace = defaultdict(dict)
-            namespace['raw'] = {n: Variable(t, n)
+            namespace['raw'] = {n: BabyVariable(n, t, input=True, output=False)
                                 for n, t in dumped_tree.items()}
-            subdirective = {
-                'input_tree': input_tree,
-                'namespace': namespace,
-                'loaded_vars': [],
-                'input_branches': [],
-                'output_branches': [],
-                'transient_vars': [],
-                'temp_vars': [],
-                'simple_vars': [],
-                'input_branch_names': [],
-                'output_branch_names': [],
-                'selection': ['true'],
-            }
 
-            # Put all variables in separate namespaces
-            self.parse_drop_keep_rename(config, subdirective)
-            self.parse_calculation(config, subdirective)
+            # Load all variables in separate namespaces
+            self.parse_drop_keep_rename(config, namespace)
+            self.parse_calculation(config, namespace)
+            self.parse_selection(config, namespace)
 
-            # Now resolve variable names for simple 'keep' and 'rename' actions
-            self.resolve_vars_in_scope(
-                'keep', subdirective['namespace']['keep'], subdirective)
-            self.resolve_vars_in_scope(
-                'rename', subdirective['namespace']['rename'], subdirective)
+            # Initialize a variable resolver
+            resolver = BabyVariableResolver(namespace)
 
-            # Resolve variables in 'calculation'
-            unresolved = self.resolve_vars_in_scope(
-                'calculation', subdirective['namespace']['calculation'],
-                subdirective, ['rename'])
+            # Resolve variables needed for selection
+            selection, unresolved_selection = resolver.resolve_scope(
+                'selection', ['calculation', 'rename', 'keep', 'raw'])
 
-            # Try to switch to alternative expression for unresolved variables
-            [v.use_alt() for v in unresolved.values()]
-            unresolved = self.resolve_vars_in_scope(
-                'calculation', unresolved, subdirective, ['rename'])
+            # Resolve all other variables
+            keep, unresolved_keep = resolver.resolve_scope('keep', ['raw'])
+            rename, unresolved_rename = resolver.resolve_scope(
+                'rename', ['raw'])
+            calculation, unresolved_calculation = resolver.resolve_scope(
+                'calculation', ['calculation', 'rename', 'keep', 'raw'])
+            resolved_vars = selection + keep + rename + calculation
+            most_unresolved_vars = unresolved_keep + unresolved_rename + \
+                unresolved_calculation
 
             # Remove variables that can't be resolved
-            for var in unresolved.values():
+            for var in most_unresolved_vars:
                 if var.output:
                     print("{}Output branch {} cannot be resolved...{}".format(
                         TC.YELLOW, var.name, TC.END))
                 else:
                     print("{}Temp variable {} cannot be resolved...{}".format(
                         TC.YELLOW, var.name, TC.END))
+            for var in unresolved_selection:
+                print("{}Selection expr {} cannot be resolved...{}".format(
+                    TC.YELLOW, var.rval, TC.END))
 
-            self.parse_selection(config, subdirective)
-
-            subdirective['input_branch_names'] = [
-                v.name for v in subdirective['input_branches']]
+            subdirective = {
+                'sel': ['true'] + [v.rval for v in selection if v.fake],
+                'pre_sel_vars':
+                [v for v in selection if not v.fake and not v.input],
+                'post_sel_vars':
+                [v for v in keep+rename+calculation
+                 if not v.fake and not v.input],
+                'input': [v for v in resolved_vars if v.input],
+                'output': [v for v in resolved_vars if v.output],
+                'input_br': [v.branch for v in resolved_vars if v.input],
+            }
             directive['trees'][output_tree] = subdirective
+
         return directive
 
     @staticmethod
@@ -135,7 +156,7 @@ class BabyConfigParser:
                     config['headers'][header_type]
 
     @classmethod
-    def parse_drop_keep_rename(cls, config, subdirective):
+    def parse_drop_keep_rename(cls, config, namespace):
         """
         Parse ``drop, keep, rename`` sections.
         """
@@ -143,35 +164,31 @@ class BabyConfigParser:
             rename_dict = config['rename']
             rename_vars = list(rename_dict.keys())
 
-        for var in subdirective['namespace']['raw'].values():
+        for var in namespace['raw'].values():
             if 'drop' in config and cls.match(config['drop'], var.name):
                 print('Dropping branch: {}'.format(var.name))
                 continue
 
             if 'rename' in config and cls.match(rename_vars, var.name):
                 renamed_var = rename_dict[var.name]
-                subdirective['namespace']['rename'][renamed_var] = Variable(
-                    var.type, renamed_var, var.name, transient=True)
+                namespace['rename'][renamed_var] = BabyVariable(
+                    renamed_var, var.type, var.name)
                 continue
 
             if 'keep' in config and cls.match(config['keep'], var.name):
-                subdirective['namespace']['keep'][var.name] = Variable(
-                    var.type, var.name, var.name)
+                namespace['keep'][var.name] = BabyVariable(
+                    var.name, var.type, var.name)
 
     @staticmethod
-    def parse_calculation(config, subdirective):
+    def parse_calculation(config, namespace):
         """
         Parse ``calculation`` section.
         """
         if 'calculation' in config:
             for name, code in config['calculation'].items():
-                splitted = [i.strip() for i in code.split(';')]
-                if len(splitted) == 3:
-                    datatype, rvalue, rvalue_alt = splitted
-                elif len(splitted) == 2:
-                    datatype, rvalue = splitted
-                    rvalue_alt = None
-                else:
+                try:
+                    datatype, *rvalues = [i.strip() for i in code.split(';')]
+                except Exception:
                     raise ValueError('Illegal specification for {}: {}.'.format(
                         name, code
                     ))
@@ -181,106 +198,19 @@ class BabyConfigParser:
                     datatype = datatype.strip('^')
                     output = False
 
-                subdirective['namespace']['calculation'][name] = Variable(
-                    datatype, name, rvalue, rvalue_alt, True, output)
+                namespace['calculation'][name] = BabyVariable(
+                    name, datatype, rvalues, output)
 
     @classmethod
-    def parse_selection(cls, config, subdirective):
+    def parse_selection(cls, config, namespace):
         """
         Parse ``selection`` section.
         """
         if 'selection' in config:
-            for expr in config['selection']:
-                virtual_var = Variable(None, 'sel', expr, output=False)
-                resolved = cls.resolve_var(
-                    'selection', virtual_var, subdirective,
-                    ['calculation', 'rename'])
-                if resolved:
-                    subdirective['selection'].append(virtual_var.expr())
-                else:
-                    print('{}Selection {} not resolved, deleting...{}'.format(
-                        TC.YELLOW, expr, TC.END))
-
-    @classmethod
-    def resolve_vars_in_scope(cls, scope, variables, subdirective,
-                              allowed_scopes=[], max_counter=5):
-        unresolved = {}
-        for var in variables.values():
-            if not cls.resolve_var(scope, var, subdirective,
-                                   allowed_scopes):
-                unresolved[var.name] = var
-
-        if len(unresolved) > 0 and \
-                next(iter(unresolved.values())).counter <= max_counter:
-            return cls.resolve_vars_in_scope(
-                scope, unresolved, subdirective, allowed_scopes, max_counter)
-
-        return unresolved
-
-    @staticmethod
-    def resolve_var(scope, var, subdirective, allowed_scopes):
-        """
-        Resolve variable names within allowed scoped or vanilla ntuple trees.
-        """
-        def resolve_in_scope(
-            s, namespace=subdirective['namespace'],
-            loaded=lambda x: x in subdirective['loaded_vars'], terminal=False
-        ):
-            remainder = []
-            for v in var.to_resolve_deps:
-                if s == scope and v == var.name:
-                    remainder.append(v)
-                    continue  # No self-referencing allowed!
-
-                v_resolved = s + '_' + v
-                if v in namespace[s] and loaded(v_resolved):
-                    var.resolved_vars[v] = v_resolved
-                elif v in namespace[s] and terminal:
-                    var.resolved_vars[v] = v_resolved
-                    subdirective['input_branches'].append(
-                        VariableResolved(
-                            namespace[s][v].type, v_resolved, None, v))
-                    subdirective['loaded_vars'].append(v_resolved)
-                else:
-                    remainder.append(v)
-            var.to_resolve_deps = remainder
-
-        if var.to_resolve_deps is False:  # Don't resolve if dependency is nil
-            var.counter += 1
-            return False
-
-        for s in allowed_scopes+[scope]:
-            resolve_in_scope(s)
-
-        # As a last resort, load from ntuple trees
-        resolve_in_scope('raw', terminal=True)
-
-        if not len(var.to_resolve_deps):
-            var_resolved = scope + '_' + var.name
-            subdirective['loaded_vars'].append(var_resolved)
-
-            if var.transient:
-                _var = VariableResolved(var.type, var_resolved, var.expr())
-                subdirective['transient_vars'].append(_var)
-                if not var.output:
-                    subdirective['temp_vars'].append(_var)
-
-            if var.output:
-                _var = VariableResolved(
-                    var.type, var_resolved, var.expr(), var.name)
-                subdirective['output_branches'].append(_var)
-                # Check if we have duplicated output branch name
-                if var.name in subdirective['output_branch_names']:
-                    raise ValueError('{}Redefinition of output branch {} in scope {}!{}'.format(
-                        TC.BOLD+TC.RED, var.name, scope, TC.END
-                    ))
-                else:
-                    subdirective['output_branch_names'].append(var.name)
-                if not var.transient:
-                    subdirective['simple_vars'].append(_var)
-
-        var.counter += 1
-        return not bool(len(var.to_resolve_deps))
+            for idx, expr in enumerate(config['selection']):
+                namespace['selection']['sel'+str(idx)] = BabyVariable(
+                    'sel'+str(idx), rvalues=[expr],
+                    input=False, output=False, fake=True)
 
     @staticmethod
     def match(patterns, string, return_value=True):

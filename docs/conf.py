@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'pyBabyMaker'
-copyright = '2019, Yipeng Sun'
+copyright = '2019-2021, Yipeng Sun'
 author = 'Yipeng Sun'
 
 

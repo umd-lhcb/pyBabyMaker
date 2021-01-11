@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 05, 2021 at 04:33 PM +0100
+# Last Change: Mon Jan 11, 2021 at 03:14 AM +0100
 
 import re
 
@@ -11,66 +11,13 @@ from collections import namedtuple, defaultdict
 from pyBabyMaker.base import TermColor as TC
 from pyBabyMaker.base import UniqueList, BaseMaker
 from pyBabyMaker.base import update_config
-from pyBabyMaker.boolean.utils import find_all_vars
 from pyBabyMaker.engine.core import template_transformer, template_evaluator
+from pyBabyMaker.var_resolver import VariableResolver
 
 
 ###########
 # Helpers #
 ###########
-
-class Variable(object):
-    """
-    Store input/output/transient variable to be resolved.
-
-    **Note**: ``transient`` here means the variable **DOES NOT** exist in the
-    input ntuple tree and thus went through some more complex transformation (
-    i.e. renaming or calculation).
-    """
-    def __init__(self, type, name,
-                 rvalue=None, rvalue_alt=None, transient=False, output=True):
-        self.type = type
-        self.name = name
-        self.rvalue = rvalue
-        self.rvalue_alt = rvalue_alt
-        self.transient = transient
-        self.output = output
-
-        self.resolved_vars = {}
-        self.counter = 0  # This holds counters to attempts to resolve this
-
-        self.dep_vars = UniqueList(find_all_vars(rvalue)) \
-            if rvalue is not None else []
-        self.dep_vars_alt = UniqueList(find_all_vars(rvalue_alt)) \
-            if rvalue_alt is not None else False
-
-        self.to_resolve_expr = rvalue
-        self.to_resolve_deps = self.dep_vars
-
-    def use_alt(self):
-        self.reset_counter()
-        self.to_resolve_expr = self.rvalue_alt
-        self.to_resolve_deps = self.dep_vars_alt
-        return self
-
-    def reset_counter(self):
-        self.counter = 0
-
-    def expr(self):
-        expr = self.to_resolve_expr
-        for orig, resolved in self.resolved_vars.items():
-            expr = re.sub(r'\b'+orig+r'\b', resolved, expr)
-        return expr
-
-    def __eq__(self, other):
-        if isinstance(other, Variable):
-            return (self.type == other.type and self.name == other.name and
-                    self.rvalue == other.rvalue and
-                    self.rvalue_alt == other.rvalue_alt and
-                    self.transient == other.transient and
-                    self.output == other.output)
-        return False
-
 
 VariableResolved = namedtuple('VariableResolved',
                               'type name rvalue, branch_name',

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 11, 2021 at 04:36 AM +0100
+# Last Change: Mon Jan 11, 2021 at 04:48 AM +0100
 
 import re
 
@@ -172,12 +172,12 @@ class BabyConfigParser:
             if 'rename' in config and cls.match(rename_vars, var.name):
                 renamed_var = rename_dict[var.name]
                 namespace['rename'][renamed_var] = BabyVariable(
-                    renamed_var, var.type, var.name)
+                    renamed_var, var.type, [var.name])
                 continue
 
             if 'keep' in config and cls.match(config['keep'], var.name):
                 namespace['keep'][var.name] = BabyVariable(
-                    var.name, var.type, var.name)
+                    var.name, var.type, [var.name])
 
     @staticmethod
     def parse_calculation(config, namespace):
@@ -199,7 +199,7 @@ class BabyConfigParser:
                     output = False
 
                 namespace['calculation'][name] = BabyVariable(
-                    name, datatype, rvalues, output)
+                    name, datatype, rvalues, output=output)
 
     @classmethod
     def parse_selection(cls, config, namespace):

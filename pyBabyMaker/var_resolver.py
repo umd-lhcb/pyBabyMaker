@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 11, 2021 at 02:51 AM +0100
+# Last Change: Mon Jan 11, 2021 at 03:39 AM +0100
 
 import re
 import logging
@@ -57,9 +57,13 @@ class Variable:
         return False
 
     @property
-    def sub(self):
+    def rval(self):
         """
-        Substitute variables in an expression with the resolved variable names.
+        Substitute variables in resolved rvalue with the resolved variable
+        names.
+
+        Suppose ``a -> calc_a``, and ``b -> rename_b``, then a rvalue of
+        ``a+b -> calc_a+rename_b``.
         """
         expr = list(self.deps)[self.idx]
         for orig, resolved in self.resolved.items():

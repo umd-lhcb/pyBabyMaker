@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 11, 2021 at 02:57 AM +0100
+# Last Change: Mon Jan 11, 2021 at 03:40 AM +0100
 
 from collections import defaultdict
 from pytest import raises
@@ -62,7 +62,7 @@ def test_Variable_sub():
         'b': 'scope2_b',
     }
 
-    assert var.sub == 'scope1_a+scope2_b'
+    assert var.rval == 'scope1_a+scope2_b'
 
 
 def test_Variable_eq():
@@ -209,7 +209,7 @@ def test_VariableResolver_multi_scope_alt_def():
         ]
     )
     assert var.idx == 1
-    assert var.sub == 'rename_x+raw_b'
+    assert var.rval == 'rename_x+raw_b'
 
 
 def test_VariableResolver_existing_var():
@@ -245,7 +245,7 @@ def test_VariableResolver_circular():
             'calc_x'
         ]
     )
-    assert var.sub == 'GEV2(raw_x)'
+    assert var.rval == 'GEV2(raw_x)'
 
 
 def test_VariableResolver_full_fail():
@@ -294,7 +294,7 @@ def test_VariableResolver_vars_simple():
         ],
         []
     )
-    assert result[0][4][1].sub == 'calc_b/rename_c'
+    assert result[0][4][1].rval == 'calc_b/rename_c'
 
 
 def test_VariableResolver_vars_partial():
@@ -324,7 +324,7 @@ def test_VariableResolver_vars_partial():
             Variable('a', rvalues=['d/c']),
         ]
     )
-    assert result[0][1][1].sub == 'GEV2(raw_b)'
+    assert result[0][1][1].rval == 'GEV2(raw_b)'
 
 
 ###########################################
@@ -366,6 +366,6 @@ def test_VariableResolver_scope_resolve():
         ],
         []
     )
-    assert result[0][1][1].sub == 'GEV2(raw_b)'
-    assert result[0][2][1].sub == 'calc_b*calc_b'
-    assert result[0][3][1].sub == 'calc_c/calc_b'
+    assert result[0][1][1].rval == 'GEV2(raw_b)'
+    assert result[0][2][1].rval == 'calc_b*calc_b'
+    assert result[0][3][1].rval == 'calc_c/calc_b'

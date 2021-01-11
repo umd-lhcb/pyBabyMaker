@@ -8,6 +8,7 @@ API
 
    pyBabyMaker.base
    pyBabyMaker.babymaker
+   pyBabyMaker.var_resolve
    pyBabyMaker.io.NestedYAMLLoader
    pyBabyMaker.engine.core
    pyBabyMaker.engine.eval

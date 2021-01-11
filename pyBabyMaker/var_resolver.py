@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 11, 2021 at 02:37 AM +0100
+# Last Change: Mon Jan 11, 2021 at 02:51 AM +0100
 
 import re
 import logging
@@ -86,8 +86,10 @@ class VariableResolver(object):
             raise KeyError('Unknown scope: {}.'.format(scope))
 
         ordering = [scope] + [o for o in self.namespace.keys()
-                              if o != 'raw'] + ['raw'] \
+                              if o != 'raw' and o != scope] + ['raw'] \
             if ordering is None else ordering
+        DEBUG('Ordering for walking through namespaces: {}.'.format(
+            ', '.join(ordering)))
         return self.resolve_vars_in_scope(
             scope, self.namespace[scope].values(), ordering)
 

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 11, 2021 at 02:36 AM +0100
+# Last Change: Mon Jan 11, 2021 at 02:57 AM +0100
 
 from collections import defaultdict
 from pytest import raises
@@ -342,7 +342,7 @@ def test_VariableResolver_scope_unknown():
 def test_VariableResolver_scope_resolve():
     namespace = {
         'calc': {
-            'a': Variable('a', rvalues=['b/c']),
+            'a': Variable('a', rvalues=['c/b']),
             'b': Variable('b', rvalues=['GEV2(b)']),
             'c': Variable('c', rvalues=['b*b'])
         },
@@ -362,10 +362,10 @@ def test_VariableResolver_scope_resolve():
             ('raw', Variable('b')),
             ('calc', Variable('b', rvalues=['GEV2(b)'])),
             ('calc', Variable('c', rvalues=['b*b'])),
-            ('calc', Variable('a', rvalues=['b/c']))
+            ('calc', Variable('a', rvalues=['c/b']))
         ],
         []
     )
     assert result[0][1][1].sub == 'GEV2(raw_b)'
-    assert result[0][1][2].sub == 'raw_b*raw_b'
-    assert result[0][1][3].sub == 'calc_b/calc_c'
+    assert result[0][2][1].sub == 'calc_b*calc_b'
+    assert result[0][3][1].sub == 'calc_c/calc_b'

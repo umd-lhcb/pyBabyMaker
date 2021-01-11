@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 11, 2021 at 04:50 AM +0100
+# Last Change: Mon Jan 11, 2021 at 01:23 PM +0100
 
 import pytest
 import os
@@ -172,8 +172,14 @@ def directive():
 
 
 @pytest.fixture
-def namespace():
-    return defaultdict(dict)
+def make_namespace():
+    def namespace(dumped_tree):
+        ns = defaultdict(dict)
+        ns['raw'] = {n: BabyVariable(n, t, input=True)
+                     for n, t in dumped_tree.items()}
+
+        return ns
+    return namespace
 
 
 def test_BabyConfigParser_parse_headers_none(directive,
@@ -208,7 +214,7 @@ def test_BabyConfigParser_parse_headers_user_only(directive,
     assert directive['user_headers'] == ['include/dummy.h']
 
 
-def test_BabyConfigParser_parse_drop_keep_rename(namespace,
+def test_BabyConfigParser_parse_drop_keep_rename(make_namespace,
                                                  default_BabyConfigParser):
     config = {
         'drop': ['Y_P.*'],
@@ -226,7 +232,7 @@ def test_BabyConfigParser_parse_drop_keep_rename(namespace,
         'Z_PY': 'float',
         'Z_PZ': 'float',
     }
-    namespace['raw'] = {n: BabyVariable(n, t) for n, t in dumped_tree.items()}
+    namespace = make_namespace(dumped_tree)
     default_BabyConfigParser.parse_drop_keep_rename(config, namespace)
 
     assert namespace['keep'] == {
@@ -236,12 +242,13 @@ def test_BabyConfigParser_parse_drop_keep_rename(namespace,
         'z_py': BabyVariable('z_py', 'float', ['Z_PY'])}
 
 
-def test_BabyConfigParser_parse_calculation(namespace,
+def test_BabyConfigParser_parse_calculation(make_namespace,
                                             default_BabyConfigParser):
     config = {'calculation': {
         'Y_P_TEMP': '^double;Y_PX+1',
         'Y_P_shift': 'double;Y_P_TEMP',
     }}
+    namespace = make_namespace({})
     default_BabyConfigParser.parse_calculation(config, namespace)
 
     assert namespace['calculation'] == {
@@ -251,11 +258,12 @@ def test_BabyConfigParser_parse_calculation(namespace,
     }
 
 
-def test_BabyConfigParser_parse_calculation_alt(namespace,
+def test_BabyConfigParser_parse_calculation_alt(make_namespace,
                                                 default_BabyConfigParser):
     config = {'calculation': {
         'Y_P_TEMP': '^double;Y_PX+1;FUNC(Y_PX, 1)',
     }}
+    namespace = make_namespace({})
     default_BabyConfigParser.parse_calculation(config, namespace)
 
     assert namespace['calculation'] == {

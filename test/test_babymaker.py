@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 12, 2021 at 01:38 PM +0100
+# Last Change: Tue Jan 12, 2021 at 01:50 PM +0100
 
 import pytest
 import os
@@ -145,27 +145,18 @@ def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
     ]
 
 
-# def test_BabyConfigParser_parse_YetAnotherTuple(realistic_BabyConfigParser):
-    # directive = realistic_BabyConfigParser.parse()
+def test_BabyConfigParser_parse_YetAnotherTuple(realistic_BabyConfigParser):
+    directive = realistic_BabyConfigParser.parse()
+    input_br = directive['trees']['YetAnotherTuple']['input_br']
 
-    # input_branch_names = \
-        # directive['trees']['YetAnotherTuple']['input_branch_names']
-    # output_branch_names = \
-        # directive['trees']['YetAnotherTuple']['output_branch_names']
-
-    # assert directive['trees']['YetAnotherTuple']['input_tree'] == \
-        # 'TupleB0WSPi/DecayTree'
-
-    # assert 'raw_Y_ISOLATION_CHI22' in input_branch_names
-    # assert 'raw_Y_ISOLATION_NNp3' in input_branch_names
-
-    # assert 'Y_ISOLATION_CHI22' in output_branch_names
-    # assert 'Y_ISOLATION_NNp3' in output_branch_names
-
-    # assert directive['trees']['YetAnotherTuple']['selection'] == [
-        # 'true',
-        # 'raw_piminus_isMuon'
-    # ]
+    assert directive['trees']['YetAnotherTuple']['input_tree'] == \
+        'TupleB0WSPi/DecayTree'
+    assert 'raw_Y_ISOLATION_CHI22' in input_br
+    assert 'raw_Y_ISOLATION_NNp3' in input_br
+    assert directive['trees']['YetAnotherTuple']['sel'] == [
+        'true',
+        'raw_piminus_isMuon'
+    ]
 
 
 ###################################

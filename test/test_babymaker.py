@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 12, 2021 at 03:17 AM +0100
+# Last Change: Tue Jan 12, 2021 at 03:30 AM +0100
 
 import pytest
 import os
@@ -37,8 +37,9 @@ def test_BabyVariable_default():
 
 def test_BabyVariable_set_fname():
     var = BabyVariable('stuff')
-    var.fname = 'test_stuff'
+    assert var.fname == 'stuff'
 
+    var.fname = 'test_stuff'
     assert var.fname == 'test_stuff'
 
     var.fname = 'fake_stuff'
@@ -309,7 +310,7 @@ def test_BabyVariableResolver_simple(make_namespace):
     assert load_seq[2].fname == 'test_p_sum'
 
 
-def test_BabyVariableResolver_self(make_namespace, default_BabyConfigParser):
+def test_BabyVariableResolver_self(make_namespace):
     dumped_tree = {
         'q2': 'float',
     }
@@ -327,8 +328,7 @@ def test_BabyVariableResolver_self(make_namespace, default_BabyConfigParser):
     ]
 
 
-def test_BabyVariableResolver_self_no_resolve(make_namespace,
-                                              default_BabyConfigParser):
+def test_BabyVariableResolver_self_no_resolve(make_namespace):
     namespace = make_namespace({})
     var = BabyVariable('q2', 'float', ['GEV2(q2)'])
     namespace['test']['q2'] = var
@@ -339,8 +339,7 @@ def test_BabyVariableResolver_self_no_resolve(make_namespace,
     assert status is False
 
 
-def test_BabyVariableResolver_scope_keep(make_namespace,
-                                         default_BabyConfigParser):
+def test_BabyVariableResolver_scope_keep(make_namespace):
     dumped_tree = {
         'q2': 'float',
         'Y_PX': 'float',
@@ -348,9 +347,10 @@ def test_BabyVariableResolver_scope_keep(make_namespace,
         'Y_PZ': 'float'
     }
     namespace = make_namespace(dumped_tree)
-    var_Y_PX = BabyVariable('Y_PX', 'float', ['Y_PX'])
-    var_q2 = BabyVariable('q2', 'float', ['q2'])
-    namespace['keep'] = {'Y_PX': var_Y_PX, 'q2': var_q2}
+    namespace['keep'] = {
+        'Y_PX': BabyVariable('Y_PX', 'float', ['Y_PX']),
+        'q2': BabyVariable('q2', 'float', ['q2'])
+    }
     resolver = BabyVariableResolver(namespace)
     load_seq, unresolved = resolver.resolve_scope('keep', ordering=['raw'])
 
@@ -363,8 +363,7 @@ def test_BabyVariableResolver_scope_keep(make_namespace,
     assert unresolved == []
 
 
-def test_BabyVariableResolver_scope_rename(make_namespace,
-                                           default_BabyConfigParser):
+def test_BabyVariableResolver_scope_rename(make_namespace):
     dumped_tree = {
         'q2': 'float',
         'Y_PX': 'float',
@@ -372,9 +371,10 @@ def test_BabyVariableResolver_scope_rename(make_namespace,
         'Y_PZ': 'float'
     }
     namespace = make_namespace(dumped_tree)
-    var_y_px = BabyVariable('y_px', 'float', ['Y_PX'])
-    var_Q2 = BabyVariable('Q2', 'float', ['q2'])
-    namespace['rename'] = {'y_px': var_y_px, 'Q2': var_Q2}
+    namespace['rename'] = {
+        'y_px': BabyVariable('y_px', 'float', ['Y_PX']),
+        'Q2': BabyVariable('Q2', 'float', ['q2'])
+    }
     resolver = BabyVariableResolver(namespace)
     load_seq, unresolved = resolver.resolve_scope('rename', ordering=['raw'])
 
@@ -390,8 +390,7 @@ def test_BabyVariableResolver_scope_rename(make_namespace,
     assert unresolved == []
 
 
-def test_BabyVariableResolver_scope_calculation(make_namespace,
-                                                default_BabyConfigParser):
+def test_BabyVariableResolver_scope_calculation(make_namespace):
     dumped_tree = {
         'q2': 'float',
         'Y_PX': 'float',
@@ -399,9 +398,10 @@ def test_BabyVariableResolver_scope_calculation(make_namespace,
         'Y_PZ': 'float'
     }
     namespace = make_namespace(dumped_tree)
-    var_y_p_sum = BabyVariable('y_p_sum', 'float', ['Y_PX+Y_PY'])
-    var_q2 = BabyVariable('q2', 'float', ['q2 / 1000'])
-    namespace['calc'] = {'y_p_sum': var_y_p_sum, 'q2': var_q2}
+    namespace['calc'] = {
+        'y_p_sum': BabyVariable('y_p_sum', 'float', ['Y_PX+Y_PY']),
+        'q2': BabyVariable('q2', 'float', ['q2 / 1000'])
+    }
     resolver = BabyVariableResolver(namespace)
     load_seq, unresolved = resolver.resolve_scope('calc')
 
@@ -419,15 +419,15 @@ def test_BabyVariableResolver_scope_calculation(make_namespace,
     assert unresolved == []
 
 
-def test_BabyVariableResolver_scope_calculation_complex(
-        make_namespace, default_BabyConfigParser):
+def test_BabyVariableResolver_scope_calculation_complex(make_namespace):
     dumped_tree = {
         'q2': 'float',
     }
     namespace = make_namespace(dumped_tree)
-    var_q2_diff = BabyVariable('q2_diff', 'float', ['q2_temp'])
-    var_q2_temp = BabyVariable('q2_temp', 'float', ['q2 / 1000'], output=False)
-    namespace['calc'] = {'q2_diff': var_q2_diff, 'q2_temp': var_q2_temp}
+    namespace['calc'] = {
+        'q2_diff': BabyVariable('q2_diff', 'float', ['q2_temp']),
+        'q2_temp': BabyVariable('q2_temp', 'float', ['q2 / 1000'], output=False)
+    }
     resolver = BabyVariableResolver(namespace)
     load_seq, unresolved = resolver.resolve_scope('calc')
 
@@ -442,56 +442,33 @@ def test_BabyVariableResolver_scope_calculation_complex(
     assert unresolved == []
 
 
-# def test_BabyConfigParser_resolve_vars_in_scope_calculation_more_complex(
-        # subdirective, default_BabyConfigParser):
-    # dumped_tree = {
-        # 'Y_PX': 'float',
-        # 'Y_PY': 'float',
-        # 'Y_PZ': 'float'
-    # }
-    # subdirective['namespace']['raw'] = {v: Variable(t, v)
-                                        # for v, t in dumped_tree.items()}
-    # subdirective['namespace']['rename'] = {
-        # 'y_px': Variable('float', 'y_px', 'Y_PX', transient=True),
-        # 'y_py': Variable('float', 'y_py', 'Y_PY', transient=True),
-    # }
-    # subdirective['namespace']['calculation'] = {
-        # 'y_p_sum': Variable('float', 'y_p_sum', 'y_p_temp', transient=True),
-        # 'y_p_temp': Variable('float', 'y_p_temp', 'y_px + y_py', transient=True,
-                             # output=False)
-    # }
+def test_BabyVariableResolver_scope_calculation_more_complex(make_namespace):
+    dumped_tree = {
+        'Y_PX': 'float',
+        'Y_PY': 'float',
+        'Y_PZ': 'float'
+    }
+    namespace = make_namespace(dumped_tree)
+    namespace['rename'] = {
+        'y_px': BabyVariable('y_px', 'float', ['Y_PX']),
+        'y_py': BabyVariable('y_py', 'float', ['Y_PY']),
+    }
+    namespace['calc'] = {
+        'y_p_sum': BabyVariable('y_p_sum', 'float', ['y_p_temp']),
+        'y_p_temp': BabyVariable('y_p_temp', 'float', ['y_px + y_py'])
+    }
+    resolver = BabyVariableResolver(namespace)
+    load_seq, unresolved = resolver.resolve_scope('calc')
 
-    # assert default_BabyConfigParser.resolve_vars_in_scope(
-        # 'rename', subdirective['namespace']['rename'], subdirective) == {}
-
-    # unresolved = default_BabyConfigParser.resolve_vars_in_scope(
-        # 'calculation', subdirective['namespace']['calculation'], subdirective,
-        # ['rename']
-    # )
-
-    # assert subdirective['transient_vars'] == [
-        # VariableResolved('float', 'rename_y_px', 'raw_Y_PX'),
-        # VariableResolved('float', 'rename_y_py', 'raw_Y_PY'),
-        # VariableResolved('float', 'calculation_y_p_temp',
-                         # 'rename_y_px + rename_y_py'),
-        # VariableResolved('float', 'calculation_y_p_sum',
-                         # 'calculation_y_p_temp'),
-    # ]
-    # assert subdirective['output_branches'] == [
-        # VariableResolved('float', 'rename_y_px', 'raw_Y_PX', 'y_px'),
-        # VariableResolved('float', 'rename_y_py', 'raw_Y_PY', 'y_py'),
-        # VariableResolved('float', 'calculation_y_p_sum',
-                         # 'calculation_y_p_temp', 'y_p_sum'),
-    # ]
-    # assert subdirective['loaded_vars'] == [
-        # 'raw_Y_PX',
-        # 'rename_y_px',
-        # 'raw_Y_PY',
-        # 'rename_y_py',
-        # 'calculation_y_p_temp',
-        # 'calculation_y_p_sum',
-    # ]
-    # assert unresolved == {}
+    assert load_seq == [
+        namespace['raw']['Y_PX'],
+        namespace['rename']['y_px'],
+        namespace['raw']['Y_PY'],
+        namespace['rename']['y_py'],
+        namespace['calc']['y_p_temp'],
+        namespace['calc']['y_p_sum'],
+    ]
+    assert unresolved == []
 
 
 ##################

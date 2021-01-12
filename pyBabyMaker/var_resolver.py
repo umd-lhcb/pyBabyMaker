@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 11, 2021 at 03:39 AM +0100
+# Last Change: Tue Jan 12, 2021 at 02:52 AM +0100
 
 import re
 import logging
@@ -23,7 +23,7 @@ class Variable:
     name: str
     type: str = 'nil'
     rvalues: List[str] = field(default_factory=lambda: [''])
-    deps: Dict[str, List[str]] = None
+    deps: Dict[str, List[str]] = field(init=False)
 
     def __post_init__(self):
         self.resolved = {}

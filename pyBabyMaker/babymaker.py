@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 12, 2021 at 04:18 AM +0100
+# Last Change: Tue Jan 12, 2021 at 01:40 PM +0100
 
 import re
 import logging
@@ -128,14 +128,14 @@ class BabyConfigParser:
 
             # Resolve variables needed for selection
             selection, unresolved_selection = resolver.resolve_scope(
-                'selection', ['calculation', 'rename', 'keep', 'raw'])
+                'selection', ['calculation', 'rename', 'raw'])
 
             # Resolve all other variables
             keep, unresolved_keep = resolver.resolve_scope('keep', ['raw'])
             rename, unresolved_rename = resolver.resolve_scope(
                 'rename', ['raw'])
             calculation, unresolved_calculation = resolver.resolve_scope(
-                'calculation', ['calculation', 'rename', 'keep', 'raw'])
+                'calculation', ['calculation', 'rename', 'raw'])
             resolved_vars = selection + keep + rename + calculation
             most_unresolved_vars = unresolved_keep + unresolved_rename + \
                 unresolved_calculation

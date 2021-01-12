@@ -18,13 +18,14 @@ calculation:
     TempStuff: '^Double_t; D0_P+Y_PT'
     some_var: '^Double_t; y_pt + y_pz'
     some_other_var: 'Double_t; some_var'
-    alt_def: 'Double_t; b0_pe; Y_PE'
 
 output:
     ATuple:
         input: TupleB0/DecayTree
         selection:
             - "Y_PT > 10000"
+        calculation:
+            alt_def: 'Double_t; b0_pe; Y_PE'
 
     AnotherTuple:
         input: TupleB0/DecayTree

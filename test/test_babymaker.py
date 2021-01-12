@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 12, 2021 at 04:49 AM +0100
+# Last Change: Tue Jan 12, 2021 at 01:38 PM +0100
 
 import pytest
 import os
@@ -113,39 +113,36 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
     ]
 
 
-# def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
-    # directive = realistic_BabyConfigParser.parse()
+def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
+    directive = realistic_BabyConfigParser.parse()
 
-    # assert directive['trees']['AnotherTuple']['input_tree'] == \
-        # 'TupleB0/DecayTree'
-    # assert directive['trees']['AnotherTuple']['input_branches'] == [
-        # BabyVariable('Double_t', 'raw_Y_PE', None, 'Y_PE'),
-        # BabyVariable('Double_t', 'raw_Y_PX', None, 'Y_PX'),
-        # BabyVariable('Double_t', 'raw_Y_PY', None, 'Y_PY'),
-        # BabyVariable('Double_t', 'raw_Y_PZ', None, 'Y_PZ'),
-        # BabyVariable('Double_t', 'raw_Y_PT', None, 'Y_PT'),
-        # BabyVariable('Double_t', 'raw_D0_P', None, 'D0_P'),
-    # ]
-    # assert directive['trees']['AnotherTuple']['output_branches'] == [
-        # BabyVariable('Double_t', 'keep_Y_PE', 'raw_Y_PE', 'Y_PE'),
-        # BabyVariable('Double_t', 'keep_Y_PX', 'raw_Y_PX', 'Y_PX'),
-        # BabyVariable('Double_t', 'keep_Y_PY', 'raw_Y_PY', 'Y_PY'),
-        # BabyVariable('Double_t', 'keep_Y_PZ', 'raw_Y_PZ', 'Y_PZ'),
-        # BabyVariable('Double_t', 'rename_b0_pt', 'raw_Y_PT', 'b0_pt'),
-        # BabyVariable('Double_t', 'calculation_RandStuff',
-                         # 'calculation_TempStuff', 'RandStuff'),
-        # # NOTE: 'some_other_var' is not resolvable for this tree!
-        # #       Because the change in 'rename' selection, 'y_pt' and 'y_pz' are
-        # #       not defined!
-        # BabyVariable('Double_t', 'calculation_alt_def',
-                         # 'raw_Y_PE', 'alt_def'),
-    # ]
-    # assert directive['system_headers'] == ['cmath', 'iostream']
-    # assert directive['trees']['AnotherTuple']['selection'] == [
-        # 'true',
-        # 'rename_b0_pt > 10000',
-        # 'raw_Y_PE > (100 * pow(10, 3))'
-    # ]
+    assert directive['trees']['AnotherTuple']['input_tree'] == \
+        'TupleB0/DecayTree'
+    assert directive['trees']['AnotherTuple']['input'] == [
+        BabyVariable('Y_PT', 'Double_t', input=True, output=False),
+        BabyVariable('Y_PE', 'Double_t', input=True, output=False),
+        BabyVariable('Y_PX', 'Double_t', input=True, output=False),
+        BabyVariable('Y_PY', 'Double_t', input=True, output=False),
+        BabyVariable('Y_PZ', 'Double_t', input=True, output=False),
+        BabyVariable('D0_P', 'Double_t', input=True, output=False),
+    ]
+    assert directive['trees']['AnotherTuple']['output'] == [
+        # NOTE: 'some_other_var' is not resolvable for this tree!
+        #       Because the change in 'rename' selection, 'y_pt' and 'y_pz' are
+        #       not defined!
+        BabyVariable('b0_pt', 'Double_t', ['Y_PT']),
+        BabyVariable('Y_PE', 'Double_t', ['Y_PE']),
+        BabyVariable('Y_PX', 'Double_t', ['Y_PX']),
+        BabyVariable('Y_PY', 'Double_t', ['Y_PY']),
+        BabyVariable('Y_PZ', 'Double_t', ['Y_PZ']),
+        BabyVariable('RandStuff', 'Double_t', ['TempStuff']),
+    ]
+    assert directive['system_headers'] == ['cmath', 'iostream']
+    assert directive['trees']['AnotherTuple']['sel'] == [
+        'true',
+        'rename_b0_pt > 10000',
+        'raw_Y_PE > (100 * pow(10, 3))'
+    ]
 
 
 # def test_BabyConfigParser_parse_YetAnotherTuple(realistic_BabyConfigParser):

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 12, 2021 at 03:02 AM +0100
+# Last Change: Tue Jan 12, 2021 at 03:17 AM +0100
 
 import re
 import logging
@@ -40,8 +40,7 @@ class BabyVariable(Variable):
         self.fname_set = False
 
     def __repr__(self):
-        return '{} {} = {}'.format(self.type, self.fname,
-                                   '|'.join(self.rvalues))
+        return super().__repr__()
 
     @property
     def fname(self):

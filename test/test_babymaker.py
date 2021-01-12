@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 12, 2021 at 03:12 AM +0100
+# Last Change: Tue Jan 12, 2021 at 03:17 AM +0100
 
 import pytest
 import os
@@ -436,6 +436,8 @@ def test_BabyVariableResolver_scope_calculation_complex(
         namespace['calc']['q2_temp'],
         namespace['calc']['q2_diff'],
     ]
+    assert str(load_seq[2]) == 'float q2_diff = q2_temp'
+    assert load_seq[2].fname == 'calc_q2_diff'
     assert load_seq[2].rval == 'calc_q2_temp'
     assert unresolved == []
 

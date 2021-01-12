@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Jan 13, 2021 at 12:33 AM +0100
+# Last Change: Wed Jan 13, 2021 at 12:58 AM +0100
 
 import pytest
 import os
@@ -59,13 +59,8 @@ def load_files():
 
 
 @pytest.fixture
-def default_BabyConfigParser():
-    return BabyConfigParser(None, None)
-
-
-@pytest.fixture
 def realistic_BabyConfigParser(load_files):
-    return BabyConfigParser(*load_files)
+    return BabyConfigParser(*load_files, debug=True)
 
 
 def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
@@ -115,6 +110,8 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
         BabyVariable('some_other_var', 'Double_t', ['some_var']),
         BabyVariable('alt_def', 'Double_t', ['b0_pe', 'Y_PE']),
     ]
+    assert realistic_BabyConfigParser._resolvers[0]._resolved_names[0] == \
+        ('raw', 'Y_PT')
 
 
 def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
@@ -190,17 +187,24 @@ def make_namespace():
     return namespace
 
 
-def test_BabyConfigParser_parse_headers_none(directive,
-                                             default_BabyConfigParser):
-    default_BabyConfigParser.parse_headers({}, directive)
+def test_BabyConfigParser_parse_non_existing_tree(directive):
+    parsed_yml = {'output': {'nothing': {'input': 'nil'}}}
+    dumped_ntuple = {'fake': {'br1': 'double'}}
+    parser = BabyConfigParser(parsed_yml, dumped_ntuple)
+    directive = parser.parse()
+
+    assert directive['trees'] == {}
+
+
+def test_BabyConfigParser_parse_headers_none(directive):
+    BabyConfigParser.parse_headers({}, directive)
 
     assert directive['system_headers'] == []
     assert directive['user_headers'] == []
 
 
-def test_BabyConfigParser_parse_headers_system_only(directive,
-                                                    default_BabyConfigParser):
-    default_BabyConfigParser.parse_headers({
+def test_BabyConfigParser_parse_headers_system_only(directive):
+    BabyConfigParser.parse_headers({
         'headers': {
             'system': ['iostream', 'iostream']
         }
@@ -210,9 +214,8 @@ def test_BabyConfigParser_parse_headers_system_only(directive,
     assert directive['user_headers'] == []
 
 
-def test_BabyConfigParser_parse_headers_user_only(directive,
-                                                  default_BabyConfigParser):
-    default_BabyConfigParser.parse_headers({
+def test_BabyConfigParser_parse_headers_user_only(directive):
+    BabyConfigParser.parse_headers({
         'headers': {
             'user': ['include/dummy.h']
         }
@@ -222,8 +225,7 @@ def test_BabyConfigParser_parse_headers_user_only(directive,
     assert directive['user_headers'] == ['include/dummy.h']
 
 
-def test_BabyConfigParser_parse_drop_keep_rename(make_namespace,
-                                                 default_BabyConfigParser):
+def test_BabyConfigParser_parse_drop_keep_rename(make_namespace):
     config = {
         'drop': ['Y_P.*'],
         'keep': ['Y_P.*', 'Z_PX', 'X_P.*'],
@@ -241,7 +243,7 @@ def test_BabyConfigParser_parse_drop_keep_rename(make_namespace,
         'Z_PZ': 'float',
     }
     namespace = make_namespace(dumped_tree)
-    default_BabyConfigParser.parse_drop_keep_rename(config, namespace)
+    BabyConfigParser.parse_drop_keep_rename(config, namespace)
 
     assert namespace['keep'] == {
         n: BabyVariable(n, 'float', [n]) for n in dumped_tree.keys()
@@ -250,14 +252,13 @@ def test_BabyConfigParser_parse_drop_keep_rename(make_namespace,
         'z_py': BabyVariable('z_py', 'float', ['Z_PY'])}
 
 
-def test_BabyConfigParser_parse_calculation(make_namespace,
-                                            default_BabyConfigParser):
+def test_BabyConfigParser_parse_calculation(make_namespace):
     config = {'calculation': {
         'Y_P_TEMP': '^double;Y_PX+1',
         'Y_P_shift': 'double;Y_P_TEMP',
     }}
     namespace = make_namespace({})
-    default_BabyConfigParser.parse_calculation(config, namespace)
+    BabyConfigParser.parse_calculation(config, namespace)
 
     assert namespace['calculation'] == {
         'Y_P_TEMP': BabyVariable(
@@ -266,13 +267,12 @@ def test_BabyConfigParser_parse_calculation(make_namespace,
     }
 
 
-def test_BabyConfigParser_parse_calculation_alt(make_namespace,
-                                                default_BabyConfigParser):
+def test_BabyConfigParser_parse_calculation_alt(make_namespace):
     config = {'calculation': {
         'Y_P_TEMP': '^double;Y_PX+1;FUNC(Y_PX, 1)',
     }}
     namespace = make_namespace({})
-    default_BabyConfigParser.parse_calculation(config, namespace)
+    BabyConfigParser.parse_calculation(config, namespace)
 
     assert namespace['calculation'] == {
         'Y_P_TEMP': BabyVariable(
@@ -472,22 +472,21 @@ def test_BabyVariableResolver_scope_calculation_more_complex(make_namespace):
 # Helper methods #
 ##################
 
-def test_BabyConfigParser_match_True(default_BabyConfigParser):
-    assert default_BabyConfigParser.match(['quick', 'brown', 'fox'], 'fox')
+def test_BabyConfigParser_match_True():
+    assert BabyConfigParser.match(['quick', 'brown', 'fox'], 'fox')
 
 
-def test_BabyConfigParser_match_False(default_BabyConfigParser):
-    assert not default_BabyConfigParser.match(['quick', 'brown', 'fox'], 'Fox')
+def test_BabyConfigParser_match_False():
+    assert not BabyConfigParser.match(['quick', 'brown', 'fox'], 'Fox')
 
 
-def test_BabyConfigParser_match_True_inverse(default_BabyConfigParser):
-    assert not default_BabyConfigParser.match(['quick', 'brown', 'fox'], 'fox',
-                                              False)
+def test_BabyConfigParser_match_True_inverse():
+    assert not BabyConfigParser.match(['quick', 'brown', 'fox'], 'fox', False)
 
 
-def test_BabyConfigParser_match_False_partial_match(default_BabyConfigParser):
-    assert not default_BabyConfigParser.match(['quick', 'brown', 'fox2'], 'fox')
+def test_BabyConfigParser_match_False_partial_match():
+    assert not BabyConfigParser.match(['quick', 'brown', 'fox2'], 'fox')
 
 
-def test_BabyConfigParser_match_partial_match(default_BabyConfigParser):
-    assert default_BabyConfigParser.match(['quick', 'brown', 'fox'], 'fox2')
+def test_BabyConfigParser_match_partial_match():
+    assert BabyConfigParser.match(['quick', 'brown', 'fox'], 'fox2')

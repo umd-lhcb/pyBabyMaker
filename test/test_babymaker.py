@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 12, 2021 at 01:50 PM +0100
+# Last Change: Wed Jan 13, 2021 at 12:33 AM +0100
 
 import pytest
 import os
@@ -98,6 +98,10 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
         BabyVariable('some_other_var', 'Double_t', ['some_var']),
         BabyVariable('alt_def', 'Double_t', ['b0_pe', 'Y_PE']),
     ]
+    assert directive['trees']['ATuple']['tmp'] == [
+        BabyVariable('TempStuff', 'Double_t', ['D0_P+Y_PT'], output=False),
+        BabyVariable('some_var', 'Double_t', ['y_pt + y_pz'], output=False),
+    ]
     assert directive['trees']['ATuple']['pre_sel_vars'] == []
     assert directive['trees']['ATuple']['post_sel_vars'] == [
         BabyVariable('Y_PE', 'Double_t', ['Y_PE']),
@@ -136,6 +140,9 @@ def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
         BabyVariable('Y_PY', 'Double_t', ['Y_PY']),
         BabyVariable('Y_PZ', 'Double_t', ['Y_PZ']),
         BabyVariable('RandStuff', 'Double_t', ['TempStuff']),
+    ]
+    assert directive['trees']['AnotherTuple']['tmp'] == [
+        BabyVariable('TempStuff', 'Double_t', ['D0_P+Y_PT'], output=False),
     ]
     assert directive['system_headers'] == ['cmath', 'iostream']
     assert directive['trees']['AnotherTuple']['sel'] == [

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 12, 2021 at 01:40 PM +0100
+# Last Change: Wed Jan 13, 2021 at 12:30 AM +0100
 
 import re
 import logging
@@ -153,7 +153,7 @@ class BabyConfigParser:
                 print("{}Selection expr {} cannot be resolved...{}".format(
                     TC.YELLOW, var.rval, TC.END))
 
-            subdirective = {
+            directive['trees'][output_tree] = {
                 'input_tree': input_tree,
                 'sel': ['true'] + [v.rval for v in selection if v.fake],
                 'pre_sel_vars':
@@ -163,9 +163,11 @@ class BabyConfigParser:
                  if not v.fake and not v.input],
                 'input': [v for v in resolved_vars if v.input],
                 'output': [v for v in resolved_vars if v.output],
+                'tmp':
+                [v for v in resolved_vars
+                 if True not in [v.input, v.output, v.fake]],
                 'input_br': [v.fname for v in resolved_vars if v.input],
             }
-            directive['trees'][output_tree] = subdirective
 
         return directive
 

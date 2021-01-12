@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 12, 2021 at 03:17 AM +0100
+# Last Change: Tue Jan 12, 2021 at 04:18 AM +0100
 
 import re
 import logging
@@ -15,8 +15,6 @@ from pyBabyMaker.base import UniqueList, BaseMaker
 from pyBabyMaker.base import update_config
 from pyBabyMaker.engine.core import template_transformer, template_evaluator
 from pyBabyMaker.var_resolver import Variable, VariableResolver
-
-DEBUG = logging.debug
 
 
 ###########
@@ -59,7 +57,6 @@ class BabyVariableResolver(VariableResolver):
         """
         Prepare resolved variables for ``babymaker``.
         """
-        DEBUG("Formatter input: scope {}, var {}".format(scope, var))
         var.fname = scope+'_'+var.name
         return var
 
@@ -80,6 +77,10 @@ class BabyConfigParser:
         self.parsed_config = parsed_config
         self.dumped_ntuple = dumped_ntuple
         self.debug = debug
+
+        if debug:
+            logging.basicConfig(level=logging.DEBUG)
+            self._resolvers = []
 
     def parse(self):
         """
@@ -122,6 +123,8 @@ class BabyConfigParser:
 
             # Initialize a variable resolver
             resolver = BabyVariableResolver(namespace)
+            if self.debug:
+                self._resolvers.append(resolver)
 
             # Resolve variables needed for selection
             selection, unresolved_selection = resolver.resolve_scope(
@@ -151,6 +154,7 @@ class BabyConfigParser:
                     TC.YELLOW, var.rval, TC.END))
 
             subdirective = {
+                'input_tree': input_tree,
                 'sel': ['true'] + [v.rval for v in selection if v.fake],
                 'pre_sel_vars':
                 [v for v in selection if not v.fake and not v.input],
@@ -159,7 +163,7 @@ class BabyConfigParser:
                  if not v.fake and not v.input],
                 'input': [v for v in resolved_vars if v.input],
                 'output': [v for v in resolved_vars if v.output],
-                'input_br': [v.branch for v in resolved_vars if v.input],
+                'input_br': [v.fname for v in resolved_vars if v.input],
             }
             directive['trees'][output_tree] = subdirective
 

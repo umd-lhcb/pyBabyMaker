@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 12, 2021 at 02:52 AM +0100
+# Last Change: Tue Jan 12, 2021 at 04:32 AM +0100
 
 import re
 import logging
@@ -121,11 +121,10 @@ class VariableResolver(object):
         """
         load_seq = []
         known_names = [] if known_names is None else known_names
-        var_name_resolved = scope+'_'+var.name
+        var_key = (scope, var.name)
         DEBUG('Start resolving: {}.{}'.format(scope, var.name))
 
-        if var_name_resolved in self._resolved_names or \
-                var_name_resolved in known_names:
+        if var_key in self._resolved_names or var_key in known_names:
             DEBUG('Variable {}.{} already resolved. Return right away.'.format(
                 scope, var.name))
             return True, load_seq, known_names
@@ -143,14 +142,21 @@ class VariableResolver(object):
 
             for dep_var_name in deps:
                 dep_var_name_resolved = other_scope+'_'+dep_var_name
+                dep_var_key = (other_scope, dep_var_name)
 
                 if dep_var_name in self.namespace[other_scope]:
                     dep_var = self.namespace[other_scope][dep_var_name]
                     if idx+1 == len(ordering):
+                        var.resolved[dep_var_name] = dep_var_name_resolved
+                        if dep_var_key in self._resolved_names or \
+                                dep_var_key in known_names:
+                            DEBUG('Dep variable {}.{} already resolved.'.format(
+                                scope, dep_var.name))
+                            break
+
                         DEBUG('Resolved dep {}.{} in terminal scope {}'.format(
                             other_scope, dep_var_name, other_scope))
-                        var.resolved[dep_var_name] = dep_var_name_resolved
-                        known_names.append(dep_var_name_resolved)
+                        known_names.append(dep_var_key)
                         load_seq.append(self.format_resolved(
                             other_scope, dep_var))
 
@@ -167,7 +173,7 @@ class VariableResolver(object):
 
         if var.ok:
             DEBUG('Fully resolved: {}.{}.'.format(scope, var.name))
-            known_names.append(var_name_resolved)
+            known_names.append(var_key)
             load_seq.append(self.format_resolved(scope, var))
             return True, load_seq, known_names  # Resolution successful
 

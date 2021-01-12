@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 11, 2021 at 03:40 AM +0100
+# Last Change: Tue Jan 12, 2021 at 04:36 AM +0100
 
 from collections import defaultdict
 from pytest import raises
@@ -92,7 +92,7 @@ def test_VariableResolver_trivial():
     assert resolver.resolve_var('id', Variable('id')) == (
         True,
         [('id', var)],
-        ['id_id']
+        [('id', 'id')]
     )
     assert resolver._resolved_names == []
 
@@ -109,8 +109,8 @@ def test_VariableResolver_simple():
             ('keep', var)
         ],
         [
-            'raw_a',
-            'keep_a'
+            ('raw', 'a'),
+            ('keep', 'a')
         ]
     )
     assert resolver._resolved_names == []
@@ -152,10 +152,10 @@ def test_VariableResolver_multi_scope():
             ('calc', var)
         ],
         [
-            'raw_a',
-            'rename_x',
-            'raw_b',
-            'calc_a'
+            ('raw', 'a'),
+            ('rename', 'x'),
+            ('raw', 'b'),
+            ('calc', 'a')
         ]
     )
 
@@ -176,7 +176,7 @@ def test_VariableResolver_multi_scope_fail():
     assert resolver.resolve_var('calc', var, ordering=['rename', 'raw']) == (
         False,
         [('raw', Variable('b'))],
-        ['raw_b']
+        [('raw', 'b')]
     )
 
 
@@ -202,10 +202,10 @@ def test_VariableResolver_multi_scope_alt_def():
             ('calc', var)
         ],
         [
-            'raw_a',
-            'rename_x',
-            'raw_b',
-            'calc_a'
+            ('raw', 'a'),
+            ('rename', 'x'),
+            ('raw', 'b'),
+            ('calc', 'a')
         ]
     )
     assert var.idx == 1
@@ -214,7 +214,7 @@ def test_VariableResolver_multi_scope_alt_def():
 
 def test_VariableResolver_existing_var():
     resolver = VariableResolver({})
-    resolver._resolved_names = ['rename_a']
+    resolver._resolved_names = [('rename', 'a')]
     var = Variable('a', rvalues=['x'])
 
     assert resolver.resolve_var('rename', var) == (
@@ -241,8 +241,8 @@ def test_VariableResolver_circular():
             ('calc', var)
         ],
         [
-            'raw_x',
-            'calc_x'
+            ('raw', 'x'),
+            ('calc', 'x')
         ]
     )
     assert var.rval == 'GEV2(raw_x)'

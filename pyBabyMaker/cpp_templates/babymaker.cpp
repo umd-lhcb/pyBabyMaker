@@ -19,37 +19,31 @@ void generator_/* {% output_tree %} */(TFile *input_file, TFile *output_file) {
   TTree output(/* {% format: "\"{}\", \"{}\"", output_tree, output_tree %} */);
 
   // Load needed branches from ntuple
-  // {% for var in config.input_branches %}
-  //   {% format: "TTreeReaderValue<{}> {}(reader, \"{}\");", var.type, var.name, var.branch_name %}
+  // {% for var in config.input %}
+  //   {% format: "TTreeReaderValue<{}> {}(reader, \"{}\");", var.type, var.fname, var.name %}
   // {% endfor %}
 
   // Define output branches
-  // {% for var in config.output_branches %}
-  //   {% format: "{} {};", var.type, var.name %}
-  //   {% format: "output.Branch(\"{}\", &{});", var.branch_name, var.name %}
+  // {% for var in config.output %}
+  //   {% format: "{} {};", var.type, var.fname %}
+  //   {% format: "output.Branch(\"{}\", &{});", var.name, var.fname %}
   // {% endfor %}
 
   // Define temporary variables
-  // {% for var in config.temp_vars %}
-  //   {% format: "{} {};", var.type, var.name %}
+  // {% for var in config.tmp %}
+  //   {% format: "{} {};", var.type, var.fname %}
   // {% endfor %}
 
   while (reader.Next()) {
-    // Define all variables in case required by selection
-    //
-    // Input branches
-    //   All input branches are already available via TTreeReaderValue<>
-    //   variables.
-    //
-    // Transient variables (renamed output branches and temp variables)
-    // {% for var in config.transient_vars %}
-    //   {% format: "{} = {};", var.name, (deref_var: var.rvalue, config.input_branch_names) %}
+    // Define variables required by selection
+    // {% for var in config.pre_sel_vars %}
+    //   {% format: "{} = {};", var.fname, (deref_var: var.rval, config.input_br) %}
     // {% endfor %}
 
-    if (/* {% join: (deref_var_list: config.selection, config.input_branch_names), " && " %} */) {
+    if (/* {% join: (deref_var_list: config.sel, config.input_br), " && " %} */) {
       // Assign values for each output branch in this loop
-      // {% for var in config.simple_vars %}
-      //   {% format: "{} = {};", var.name, (deref_var: var.rvalue, config.input_branch_names) %}
+      // {% for var in config.post_sel_vars %}
+      //   {% format: "{} = {};", var.fname, (deref_var: var.rval, config.input_br) %}
       // {% endfor %}
 
       output.Fill();

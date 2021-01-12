@@ -2,9 +2,10 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 11, 2021 at 04:48 AM +0100
+# Last Change: Tue Jan 12, 2021 at 03:02 AM +0100
 
 import re
+import logging
 
 from collections import defaultdict
 from dataclasses import dataclass
@@ -14,6 +15,8 @@ from pyBabyMaker.base import UniqueList, BaseMaker
 from pyBabyMaker.base import update_config
 from pyBabyMaker.engine.core import template_transformer, template_evaluator
 from pyBabyMaker.var_resolver import Variable, VariableResolver
+
+DEBUG = logging.debug
 
 
 ###########
@@ -30,7 +33,25 @@ class BabyVariable(Variable):
     input: bool = False
     output: bool = True
     fake: bool = False
-    branch: str = None
+
+    def __post_init__(self):
+        super().__post_init__()
+        self._fname = self.name  # 'fname' -> full name
+        self.fname_set = False
+
+    def __repr__(self):
+        return '{} {} = {}'.format(self.type, self.fname,
+                                   '|'.join(self.rvalues))
+
+    @property
+    def fname(self):
+        return self._fname
+
+    @fname.setter
+    def fname(self, fname):
+        if not self.fname_set:
+            self.fname_set = True
+            self._fname = fname
 
 
 class BabyVariableResolver(VariableResolver):
@@ -39,9 +60,8 @@ class BabyVariableResolver(VariableResolver):
         """
         Prepare resolved variables for ``babymaker``.
         """
-        if var.output or var.output:
-            var.branch = var.name
-        var.name = scope+'_'+var.name
+        DEBUG("Formatter input: scope {}, var {}".format(scope, var))
+        var.fname = scope+'_'+var.name
         return var
 
 
@@ -126,6 +146,7 @@ class BabyConfigParser:
                 else:
                     print("{}Temp variable {} cannot be resolved...{}".format(
                         TC.YELLOW, var.name, TC.END))
+
             for var in unresolved_selection:
                 print("{}Selection expr {} cannot be resolved...{}".format(
                     TC.YELLOW, var.rval, TC.END))

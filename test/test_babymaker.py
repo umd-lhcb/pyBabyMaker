@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 12, 2021 at 03:30 AM +0100
+# Last Change: Tue Jan 12, 2021 at 04:49 AM +0100
 
 import pytest
 import os
@@ -68,47 +68,49 @@ def realistic_BabyConfigParser(load_files):
     return BabyConfigParser(*load_files)
 
 
-# def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
-    # directive = realistic_BabyConfigParser.parse()
+def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
+    directive = realistic_BabyConfigParser.parse()
 
-    # assert directive['trees']['ATuple']['input_tree'] == \
-        # 'TupleB0/DecayTree'
-    # assert directive['trees']['ATuple']['input_branches'] == [
-        # VariableResolved('Double_t', 'raw_Y_PE', None, 'Y_PE'),
-        # VariableResolved('Double_t', 'raw_Y_PT', None, 'Y_PT'),
-        # VariableResolved('Double_t', 'raw_Y_PX', None, 'Y_PX'),
-        # VariableResolved('Double_t', 'raw_Y_PY', None, 'Y_PY'),
-        # VariableResolved('Double_t', 'raw_Y_PZ', None, 'Y_PZ'),
-        # VariableResolved('Double_t', 'raw_D0_P', None, 'D0_P'),
-    # ]
-    # assert directive['trees']['ATuple']['output_branches'] == [
-        # VariableResolved('Double_t', 'keep_Y_PE', 'raw_Y_PE', 'Y_PE'),
-        # VariableResolved('Double_t', 'rename_y_pt', 'raw_Y_PT', 'y_pt'),
-        # VariableResolved('Double_t', 'rename_y_px', 'raw_Y_PX', 'y_px'),
-        # VariableResolved('Double_t', 'rename_y_py', 'raw_Y_PY', 'y_py'),
-        # VariableResolved('Double_t', 'rename_y_pz', 'raw_Y_PZ', 'y_pz'),
-        # VariableResolved('Double_t', 'calculation_some_other_var',
-                         # 'calculation_some_var', 'some_other_var'),
-        # VariableResolved('Double_t', 'calculation_RandStuff',
-                         # 'calculation_TempStuff', 'RandStuff'),
-        # VariableResolved('Double_t', 'calculation_alt_def',
-                         # 'raw_Y_PE', 'alt_def'),
-    # ]
-    # assert directive['trees']['ATuple']['transient_vars'] == [
-        # VariableResolved('Double_t', 'rename_y_pt', 'raw_Y_PT'),
-        # VariableResolved('Double_t', 'rename_y_px', 'raw_Y_PX'),
-        # VariableResolved('Double_t', 'rename_y_py', 'raw_Y_PY'),
-        # VariableResolved('Double_t', 'rename_y_pz', 'raw_Y_PZ'),
-        # VariableResolved('Double_t', 'calculation_TempStuff',
-                         # 'raw_D0_P+raw_Y_PT'),
-        # VariableResolved('Double_t', 'calculation_some_var',
-                         # 'rename_y_pt + rename_y_pz',),
-        # VariableResolved('Double_t', 'calculation_some_other_var',
-                         # 'calculation_some_var'),
-        # VariableResolved('Double_t', 'calculation_RandStuff',
-                         # 'calculation_TempStuff'),
-        # VariableResolved('Double_t', 'calculation_alt_def', 'raw_Y_PE'),
-    # ]
+    assert directive['trees']['ATuple']['input_tree'] == 'TupleB0/DecayTree'
+    assert directive['trees']['ATuple']['input_br'] == [
+        'raw_Y_PT',
+        'raw_Y_PE',
+        'raw_Y_PX',
+        'raw_Y_PY',
+        'raw_Y_PZ',
+        'raw_D0_P',
+    ]
+    assert directive['trees']['ATuple']['input'] == [
+        BabyVariable('Y_PT', 'Double_t', input=True, output=False),
+        BabyVariable('Y_PE', 'Double_t', input=True, output=False),
+        BabyVariable('Y_PX', 'Double_t', input=True, output=False),
+        BabyVariable('Y_PY', 'Double_t', input=True, output=False),
+        BabyVariable('Y_PZ', 'Double_t', input=True, output=False),
+        BabyVariable('D0_P', 'Double_t', input=True, output=False),
+    ]
+    assert directive['trees']['ATuple']['output'] == [
+        BabyVariable('Y_PE', 'Double_t', ['Y_PE']),
+        BabyVariable('y_pt', 'Double_t', ['Y_PT']),
+        BabyVariable('y_px', 'Double_t', ['Y_PX']),
+        BabyVariable('y_py', 'Double_t', ['Y_PY']),
+        BabyVariable('y_pz', 'Double_t', ['Y_PZ']),
+        BabyVariable('RandStuff', 'Double_t', ['TempStuff']),
+        BabyVariable('some_other_var', 'Double_t', ['some_var']),
+        BabyVariable('alt_def', 'Double_t', ['b0_pe', 'Y_PE']),
+    ]
+    assert directive['trees']['ATuple']['pre_sel_vars'] == []
+    assert directive['trees']['ATuple']['post_sel_vars'] == [
+        BabyVariable('Y_PE', 'Double_t', ['Y_PE']),
+        BabyVariable('y_pt', 'Double_t', ['Y_PT']),
+        BabyVariable('y_px', 'Double_t', ['Y_PX']),
+        BabyVariable('y_py', 'Double_t', ['Y_PY']),
+        BabyVariable('y_pz', 'Double_t', ['Y_PZ']),
+        BabyVariable('TempStuff', 'Double_t', ['D0_P+Y_PT'], output=False),
+        BabyVariable('RandStuff', 'Double_t', ['TempStuff']),
+        BabyVariable('some_var', 'Double_t', ['y_pt + y_pz'], output=False),
+        BabyVariable('some_other_var', 'Double_t', ['some_var']),
+        BabyVariable('alt_def', 'Double_t', ['b0_pe', 'Y_PE']),
+    ]
 
 
 # def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
@@ -117,25 +119,25 @@ def realistic_BabyConfigParser(load_files):
     # assert directive['trees']['AnotherTuple']['input_tree'] == \
         # 'TupleB0/DecayTree'
     # assert directive['trees']['AnotherTuple']['input_branches'] == [
-        # VariableResolved('Double_t', 'raw_Y_PE', None, 'Y_PE'),
-        # VariableResolved('Double_t', 'raw_Y_PX', None, 'Y_PX'),
-        # VariableResolved('Double_t', 'raw_Y_PY', None, 'Y_PY'),
-        # VariableResolved('Double_t', 'raw_Y_PZ', None, 'Y_PZ'),
-        # VariableResolved('Double_t', 'raw_Y_PT', None, 'Y_PT'),
-        # VariableResolved('Double_t', 'raw_D0_P', None, 'D0_P'),
+        # BabyVariable('Double_t', 'raw_Y_PE', None, 'Y_PE'),
+        # BabyVariable('Double_t', 'raw_Y_PX', None, 'Y_PX'),
+        # BabyVariable('Double_t', 'raw_Y_PY', None, 'Y_PY'),
+        # BabyVariable('Double_t', 'raw_Y_PZ', None, 'Y_PZ'),
+        # BabyVariable('Double_t', 'raw_Y_PT', None, 'Y_PT'),
+        # BabyVariable('Double_t', 'raw_D0_P', None, 'D0_P'),
     # ]
     # assert directive['trees']['AnotherTuple']['output_branches'] == [
-        # VariableResolved('Double_t', 'keep_Y_PE', 'raw_Y_PE', 'Y_PE'),
-        # VariableResolved('Double_t', 'keep_Y_PX', 'raw_Y_PX', 'Y_PX'),
-        # VariableResolved('Double_t', 'keep_Y_PY', 'raw_Y_PY', 'Y_PY'),
-        # VariableResolved('Double_t', 'keep_Y_PZ', 'raw_Y_PZ', 'Y_PZ'),
-        # VariableResolved('Double_t', 'rename_b0_pt', 'raw_Y_PT', 'b0_pt'),
-        # VariableResolved('Double_t', 'calculation_RandStuff',
+        # BabyVariable('Double_t', 'keep_Y_PE', 'raw_Y_PE', 'Y_PE'),
+        # BabyVariable('Double_t', 'keep_Y_PX', 'raw_Y_PX', 'Y_PX'),
+        # BabyVariable('Double_t', 'keep_Y_PY', 'raw_Y_PY', 'Y_PY'),
+        # BabyVariable('Double_t', 'keep_Y_PZ', 'raw_Y_PZ', 'Y_PZ'),
+        # BabyVariable('Double_t', 'rename_b0_pt', 'raw_Y_PT', 'b0_pt'),
+        # BabyVariable('Double_t', 'calculation_RandStuff',
                          # 'calculation_TempStuff', 'RandStuff'),
         # # NOTE: 'some_other_var' is not resolvable for this tree!
         # #       Because the change in 'rename' selection, 'y_pt' and 'y_pz' are
         # #       not defined!
-        # VariableResolved('Double_t', 'calculation_alt_def',
+        # BabyVariable('Double_t', 'calculation_alt_def',
                          # 'raw_Y_PE', 'alt_def'),
     # ]
     # assert directive['system_headers'] == ['cmath', 'iostream']

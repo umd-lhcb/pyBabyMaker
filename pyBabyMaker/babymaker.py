@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Jan 13, 2021 at 01:07 AM +0100
+# Last Change: Wed Jan 13, 2021 at 09:24 AM +0100
 
 import re
 import logging
@@ -21,7 +21,7 @@ from pyBabyMaker.var_resolver import Variable, VariableResolver
 # Helpers #
 ###########
 
-@dataclass
+@dataclass(repr=False)
 class BabyVariable(Variable):
     """
     Store both raw variables and resolved variables.
@@ -36,9 +36,6 @@ class BabyVariable(Variable):
         super().__post_init__()
         self._fname = self.name  # 'fname' -> full name
         self.fname_set = False
-
-    def __repr__(self):
-        return super().__repr__()
 
     @property
     def fname(self):

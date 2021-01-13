@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Jan 13, 2021 at 01:36 AM +0100
+# Last Change: Wed Jan 13, 2021 at 09:25 AM +0100
 
 import yaml
 import pytest
@@ -36,6 +36,7 @@ def test_BabyVariable_default():
     assert var.input is False
     assert var.output is True
     assert var.rval == ''
+    assert str(var) == 'nil stuff = '
 
 
 def test_BabyVariable_set_fname():

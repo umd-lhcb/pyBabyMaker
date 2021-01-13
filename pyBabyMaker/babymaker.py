@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Jan 13, 2021 at 09:24 AM +0100
+# Last Change: Wed Jan 13, 2021 at 10:10 AM +0100
 
 import re
 import logging
@@ -267,6 +267,9 @@ class BabyMaker(BaseMaker):
         self.use_reformater = use_reformater
 
     def gen(self, filename, debug=False):
+        """
+        Generate C++ file based on inputs.
+        """
         parsed_config = self.read(self.config_filename)
         dumped_ntuple = self.dump(self.ntuple_filename)
         directive = self.directive_gen(parsed_config, dumped_ntuple, debug)
@@ -283,5 +286,9 @@ class BabyMaker(BaseMaker):
 
     @staticmethod
     def directive_gen(parsed_config, dumped_ntuple, debug=False):
+        """
+        Generate data structure (``directive``) needed for the C++ macro
+        template.
+        """
         parser = BabyConfigParser(parsed_config, dumped_ntuple, debug)
         return parser.parse()

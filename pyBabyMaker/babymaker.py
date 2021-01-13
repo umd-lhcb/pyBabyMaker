@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Jan 13, 2021 at 12:30 AM +0100
+# Last Change: Wed Jan 13, 2021 at 01:07 AM +0100
 
 import re
 import logging
@@ -212,9 +212,8 @@ class BabyConfigParser:
         """
         if 'calculation' in config:
             for name, code in config['calculation'].items():
-                try:
-                    datatype, *rvalues = [i.strip() for i in code.split(';')]
-                except Exception:
+                datatype, *rvalues = [i.strip() for i in code.split(';')]
+                if not rvalues:
                     raise ValueError('Illegal specification for {}: {}.'.format(
                         name, code
                     ))

@@ -2,25 +2,28 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Jan 13, 2021 at 12:58 AM +0100
+# Last Change: Wed Jan 13, 2021 at 01:36 AM +0100
 
-import pytest
-import os
 import yaml
+import pytest
 
 from collections import defaultdict
+from os import pardir
+from os.path import join as J
+from os.path import dirname, realpath
 
-from pyBabyMaker.babymaker import BabyVariable, BabyConfigParser, \
+from pyBabyMaker.babymaker import BabyVariable, BabyMaker, BabyConfigParser, \
     BabyVariableResolver
 from pyBabyMaker.base import UniqueList
-
 from pyBabyMaker.io.NestedYAMLLoader import NestedYAMLLoader
 from pyBabyMaker.io.TupleDump import PyTupleDump
 
-PWD = os.path.dirname(os.path.realpath(__file__))
-PARDIR = os.path.join(PWD, os.pardir)
-SAMPLE_YAML = os.path.join(PARDIR, 'samples', 'sample-babymaker.yml')
-SAMPLE_ROOT = os.path.join(PARDIR, 'samples', 'sample.root')
+PWD = dirname(realpath(__file__))
+PARDIR = J(PWD, pardir)
+SAMPLE_YAML = J(PARDIR, 'samples', 'sample-babymaker.yml')
+SAMPLE_ROOT = J(PARDIR, 'samples', 'sample.root')
+SAMPLE_TMPL = J(PARDIR, 'pyBabyMaker', 'cpp_templates', 'babymaker.cpp')
+SAMPLE_CPP  = J(PARDIR, 'samples', 'sample_cpp', 'sample-babymaker.cpp')
 
 
 ######################
@@ -44,6 +47,21 @@ def test_BabyVariable_set_fname():
 
     var.fname = 'fake_stuff'
     assert var.fname == 'test_stuff'
+
+
+#############################
+# Test BabyMaker as a whole #
+#############################
+
+def test_BabyMaker_cpp_gen(tmp_path):
+    gen_cpp = tmp_path / "gen_cpp.cpp"
+    babymaker = BabyMaker(SAMPLE_YAML, SAMPLE_ROOT, SAMPLE_TMPL, False)
+    babymaker.gen(gen_cpp, debug=True)
+    gen_cpp_content = [line.strip()
+                       for line in gen_cpp.read_text().split('\n')[1:]]
+
+    with open(SAMPLE_CPP, 'r') as f:
+        assert gen_cpp_content == [line.strip() for line in f.readlines()]
 
 
 ##########################
@@ -279,6 +297,18 @@ def test_BabyConfigParser_parse_calculation_alt(make_namespace):
             'Y_P_TEMP', 'double', ['Y_PX+1', 'FUNC(Y_PX, 1)'], output=False)}
 
 
+def test_BabyConfigParser_parse_calculation_invalid_spec(make_namespace):
+    config = {'calculation': {
+        'TEMP': '^double Y_PX+1 FUNC(Y_PX, 1)',
+    }}
+    namespace = make_namespace({})
+
+    with pytest.raises(ValueError) as e:
+        BabyConfigParser.parse_calculation(config, namespace)
+    assert e.value.args[0] == \
+        'Illegal specification for TEMP: ^double Y_PX+1 FUNC(Y_PX, 1).'
+
+
 ############################
 # Test variable resolution #
 ############################
@@ -294,7 +324,7 @@ def test_BabyVariableResolver_simple(make_namespace):
     namespace = make_namespace(dumped_tree)
     var = BabyVariable('p_sum', 'float', ['Y_PX+Y_PY'])
     resolver = BabyVariableResolver(namespace)
-    status, load_seq, known_names = resolver.resolve_var('test', var)
+    status, load_seq, _ = resolver.resolve_var('test', var)
 
     assert status is True
     assert load_seq == [
@@ -315,7 +345,7 @@ def test_BabyVariableResolver_self(make_namespace):
     var = BabyVariable('q2', 'float', ['GEV2(q2)'])
     namespace['test']['q2'] = var
     resolver = BabyVariableResolver(namespace)
-    status, load_seq, known_names = resolver.resolve_var(
+    status, load_seq, _ = resolver.resolve_var(
         'test', var, ['test', 'raw'])
 
     assert status is True
@@ -330,7 +360,7 @@ def test_BabyVariableResolver_self_no_resolve(make_namespace):
     var = BabyVariable('q2', 'float', ['GEV2(q2)'])
     namespace['test']['q2'] = var
     resolver = BabyVariableResolver(namespace)
-    status, load_seq, known_names = resolver.resolve_var(
+    status, _, _ = resolver.resolve_var(
         'test', var, ['test', 'raw'])
 
     assert status is False

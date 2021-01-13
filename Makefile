@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Jan 13, 2021 at 12:39 AM +0100
+# Last Change: Wed Jan 13, 2021 at 01:20 AM +0100
 
 include ./samples/sample.mk
 
@@ -49,7 +49,7 @@ gen/sample-babymaker.root: samples/sample.root gen/postprocess
 	gen/postprocess $< $@
 
 gen/postprocess.cpp: samples/sample-babymaker.yml samples/sample.root gen
-	babymaker --debug -i $< -o $@ -d ./samples/sample.root
+	babymaker --debug --no-format -i $< -o $@ -d ./samples/sample.root
 
 gen:
 	@mkdir -p gen

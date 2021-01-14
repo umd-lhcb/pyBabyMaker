@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Jan 06, 2021 at 11:16 PM +0100
+# Last Change: Fri Jan 15, 2021 at 12:21 AM +0100
 """
 This module provides basic infrastructure for ntuple related C++ code
 generation.
@@ -70,12 +70,12 @@ class UniqueList(list):
 
 def load_file(filepath, current_file_path=__file__):
     """
-    Return relative path based on current file directory if ``filepath`` starts
-    with ``!:``.
+    Return relative path based on current file directory if ``filepath`` is
+    enclosed with ``<>``, otherwise return ``filepath`` verbatim.
     """
-    if filepath.startswith('!:'):
+    if filepath[0] == '<' and filepath[-1] == '>':
         return path.join(path.abspath(path.dirname(current_file_path)),
-                         filepath[2:])
+                         filepath[1:-1])
     return filepath
 
 

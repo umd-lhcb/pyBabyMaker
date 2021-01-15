@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 12, 2021 at 04:32 AM +0100
+# Last Change: Fri Jan 15, 2021 at 01:05 AM +0100
 
 import re
 import logging
@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from typing import List, Dict
 
 from pyBabyMaker.boolean.utils import find_all_vars
+from pyBabyMaker.base import TermColor as TC
 
 DEBUG = logging.debug
 
@@ -87,7 +88,8 @@ class VariableResolver(object):
         passes all known scopes with ``scope`` being first and ``raw`` last.
         """
         if scope not in self.namespace:
-            raise KeyError('Unknown scope: {}.'.format(scope))
+            print('{}Unknown scope: {}.{}'.format(TC.YELLOW, scope, TC.END))
+            return [], []
 
         ordering = [scope] + [o for o in self.namespace.keys()
                               if o != 'raw' and o != scope] + ['raw'] \

@@ -2,10 +2,9 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jan 12, 2021 at 04:36 AM +0100
+# Last Change: Fri Jan 15, 2021 at 01:06 AM +0100
 
 from collections import defaultdict
-from pytest import raises
 
 from pyBabyMaker.var_resolver import Variable, VariableResolver
 
@@ -333,10 +332,7 @@ def test_VariableResolver_vars_partial():
 
 def test_VariableResolver_scope_unknown():
     resolver = VariableResolver({})
-
-    with raises(KeyError) as e:
-        assert resolver.resolve_scope('test')
-    assert e.value.args[0] == 'Unknown scope: test.'
+    assert resolver.resolve_scope('test') == ([], [])
 
 
 def test_VariableResolver_scope_resolve():

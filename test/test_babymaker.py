@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Jan 13, 2021 at 09:25 AM +0100
+# Last Change: Fri Jan 15, 2021 at 01:31 AM +0100
 
 import yaml
 import pytest
@@ -213,6 +213,29 @@ def test_BabyConfigParser_parse_non_existing_tree(directive):
     directive = parser.parse()
 
     assert directive['trees'] == {}
+
+
+def test_BabyConfigParser_parse_duplicated_output_br():
+    parsed_yml = {'output': {
+        'test_tree': {
+            'input': 'tree',
+            'rename': {'Y_PX': 'dupl'},
+            'calculation': {'dupl': 'float;Y_PZ'}
+        }}}
+    dumped_ntuple = {'tree': {
+        'Y_PX': 'float',
+        'Y_PY': 'float',
+        'Y_PZ': 'float'
+    }}
+    parser = BabyConfigParser(parsed_yml, dumped_ntuple)
+
+    with pytest.raises(ValueError) as e:
+        parser.parse()
+    assert e.value.args[0] == \
+        'These output branches are defined multiple times:\n' \
+        '  dupl:\n' \
+        '    float dupl = Y_PX\n' \
+        '    float dupl = Y_PZ'
 
 
 def test_BabyConfigParser_parse_headers_none(directive):

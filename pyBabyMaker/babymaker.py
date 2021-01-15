@@ -2,12 +2,12 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Jan 13, 2021 at 10:10 AM +0100
+# Last Change: Fri Jan 15, 2021 at 01:29 AM +0100
 
 import re
 import logging
 
-from collections import defaultdict
+from collections import defaultdict, Counter
 from dataclasses import dataclass
 
 from pyBabyMaker.base import TermColor as TC
@@ -89,7 +89,6 @@ class BabyConfigParser:
             'user_headers': UniqueList(),
             'trees': {},
         }
-
         self.parse_headers(self.parsed_config, directive)
 
         for output_tree, config in self.parsed_config['output'].items():
@@ -137,7 +136,7 @@ class BabyConfigParser:
             most_unresolved_vars = unresolved_keep + unresolved_rename + \
                 unresolved_calculation
 
-            # Remove variables that can't be resolved
+            # Warn about variables that can't be resolved
             for var in most_unresolved_vars:
                 if var.output:
                     print("{}Output branch {} cannot be resolved...{}".format(
@@ -150,9 +149,23 @@ class BabyConfigParser:
                 print("{}Selection expr {} cannot be resolved...{}".format(
                     TC.YELLOW, var.rval, TC.END))
 
+            # Error when one output branch has multiple definitions
+            output_br = [v for v in resolved_vars if v.output]
+            dupl_br_name = [k for k, v in Counter(
+                [n.name for n in output_br]).items() if v > 1]
+            dupl_br_def = {n: [x for x in output_br if x.name == n]
+                           for n in dupl_br_name}
+            if dupl_br_def:
+                raise ValueError(
+                    'These output branches are defined multiple times:\n' +
+                    '\n'.join(
+                        ['\n'.join(['  '+n+':']+['    '+str(v) for v in vals])
+                         for n, vals in dupl_br_def.items()])
+                )
+
             directive['trees'][output_tree] = {
                 'input_tree': input_tree,
-                'sel': ['true'] + [v.rval for v in selection if v.fake],
+                'sel': ['true']+[v.rval for v in selection if v.fake],
                 'pre_sel_vars':
                 [v for v in selection if not v.fake and not v.input],
                 'post_sel_vars':

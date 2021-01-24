@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 24, 2021 at 05:23 PM +0100
+# Last Change: Sun Jan 24, 2021 at 10:03 PM +0100
 """
 This module provide a parser for template macros extracted from C++ files.
 
@@ -11,7 +11,11 @@ If you need that, define your own functors.
 
 This is because there's a conflict in the LALR(1) resolution when having both
 *subtraction* (``a-b``, where ``-`` is a binary operator) and *negation*
-(``-a``, where ``-`` is an unary operator).
+(``-a``, where ``-`` an unary operator).
+
+We also choose to **NOT** parse ``if`` and ``for`` statements as a unified
+block. This is because the parser works on a line-by-line basis---it doesn't
+have access to the whole "macro" source code.
 """
 
 from lark import Lark

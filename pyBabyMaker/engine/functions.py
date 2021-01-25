@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 09, 2020 at 03:06 AM +0800
+# Last Change: Mon Jan 25, 2021 at 03:22 AM +0100
 """
 This module defines functions for template macro.
 """
@@ -77,23 +77,40 @@ def func_format_list(str_template, lst):
 
 
 macro_funcs = {
+    # Trivial
     'identity': lambda x: x,
-    'join': lambda lst, string: string.join(lst),
-    'input': func_input,
     'one': lambda: 1,
+    # IO
+    'input': func_input,
+    # List & dict
+    'join': lambda lst, string: string.join(lst),
     'list': lambda *args: [i for i in args],
-    'val': lambda val, attrs: attrs[val],
+    'pop': lambda lst: lst.pop() if lst else None,
+    # Arithmetic
     'neg': lambda val: -val,
+    # Boolean
+    'comp': lambda cond: not cond,
+    'eq': lambda lhs, rhs: lhs == rhs,
+    'gt': lambda lhs, rhs: lhs > rhs,
+    'gte': lambda lhs, rhs: lhs >= rhs,
+    'lt': lambda lhs, rhs: lhs < rhs,
+    'lte': lambda lhs, rhs: lhs <= rhs,
+    'and': lambda cond1, cond2: cond1 and cond2,
+    'or': lambda cond1, cond2: cond1 or cond2,
+    # Attribute getters
+    'val': lambda val, attrs: attrs[val],
     'getattr': func_getattr,
     'getitem': lambda val, key: val[key],
+    # String manipulation
     'format': lambda str_template, *args: str_template.format(*args),
-    'pop': lambda lst: lst.pop() if lst else None,
+    'format_list': func_format_list,
+    # Function/Method callers
     'method_call': lambda instance, method_name, *args:
         getattr(instance, method_name)(*args),
+    # Aux
     'gendate': lambda fmt='%Y-%m-%d %H:%M:%S.%f': '// Generated on: {}'.format(
         datetime.now().strftime(fmt)),
     'deref_var': func_deref_var,
-    'format_list': func_format_list,
     'deref_var_list': lambda expr_lst, vars_to_deref:
         ['({})'.format(func_deref_var(expr, vars_to_deref))
          for expr in expr_lst],

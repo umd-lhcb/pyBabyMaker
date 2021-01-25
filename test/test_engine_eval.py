@@ -2,12 +2,12 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 25, 2021 at 02:42 AM +0100
+# Last Change: Mon Jan 25, 2021 at 03:02 AM +0100
 
 import pytest
 
 from pyBabyMaker.engine.eval import DelayedEvaluator
-from pyBabyMaker.engine.eval import ForStmtEvaluator
+from pyBabyMaker.engine.eval import ForStmtEvaluator, IfStmtEvaluator
 from pyBabyMaker.engine.eval import TransForTemplateMacro, Scope
 from pyBabyMaker.engine.syntax import template_macro_parser
 from collections import namedtuple
@@ -167,7 +167,7 @@ def test_TransForTemplateMacro_for_stmt_nested(scope):
     transformer = TransForTemplateMacro(scope, known_symb)
     exe = transformer.transform(expr1)
     nested_exe = transformer.transform(expr2)
-    exe.eval_list.append(nested_exe)
+    exe.loop.append(nested_exe)
     exe.eval()
 
     assert known_symb['idx'] == [7, 8, 9]
@@ -204,3 +204,26 @@ def test_TransForTemplateMacro_endfor_stmt_mismatch(scope):
         transformer.transform(expr, lineno=11)
 
     assert 'Line 11' in str(execinfo.value)
+
+
+def test_TransForTemplateMacro_if_stmt(scope):
+    expr = template_macro_parser.parse('if data.value then')
+    known_symb = {'data': {'value': True}}
+
+    transformer = TransForTemplateMacro(scope, known_symb)
+    exe = transformer.transform(expr)
+    transformer.scope.append(DelayedEvaluator('identity', ('ok',)))
+    assert exe.eval() == ['ok']
+
+    assert transformer.scope.parent == scope
+    assert transformer.scope.evaluator == exe
+
+
+def test_TransForTemplateMacro_endif_stmt(scope):
+    expr = template_macro_parser.parse('endif')
+    parent = Scope()
+    scope = Scope(parent=parent, evalulator=IfStmtEvaluator(0, []))
+    transformer = TransForTemplateMacro(scope, {})
+
+    assert transformer.transform(expr) is False
+    assert scope == parent

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 25, 2021 at 04:03 AM +0100
+# Last Change: Mon Jan 25, 2021 at 05:36 AM +0100
 
 import pytest
 
@@ -135,6 +135,14 @@ def test_TransForTemplateMacro_method_call_no_arg():
         [], {'data': {'stuff': {'a': 1, 'b': 2}}})
     exe = transformer.transform(expr)
     assert exe.eval() == {'a': 1, 'b': 2}.items()
+
+
+def test_TransForTemplateMacro_boolean_call_complex():
+    expr = template_macro_parser.parse('a >= b || b < c && d.e > 1')
+    transformer = TransForTemplateMacro(
+        [], {'a': 3.4, 'b': 2, 'c': 3, 'd': {'e': 1.1}})
+    exe = transformer.transform(expr)
+    assert exe.eval() is True
 
 
 #########################

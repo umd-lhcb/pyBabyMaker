@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 25, 2021 at 05:05 AM +0100
+# Last Change: Mon Jan 25, 2021 at 05:11 AM +0100
 
 import pytest
 
@@ -145,4 +145,41 @@ def test_template_evaluator_for_stmt_proper():
         '  cout << c <<endl;\n',
         '    cout << 6 <<endl;\n',
         '  cout << "stuff" <<endl;\n',
+    ]
+
+
+def test_template_evaluator_if_stmt_proper():
+    file_content = [
+        '// {% if directive.a && true then %}\n',
+        '  cout << /* {% directive.A %} */ <<endl;\n',
+        '  cout << /* {% directive.B %} */ <<endl;\n',
+        '  cout << /* {% directive.C %} */ <<endl;\n',
+        '// {% elif directive.b || false then  %}\n',
+        '  cout << /* {% directive.B %} */ <<endl;\n',
+        '// {% else %}\n',
+        '  cout << /* {% directive.C %} */ <<endl;\n',
+        '// {% endif %}\n',
+    ]
+
+    # Case 1
+    known_symb = {'a': True, 'b': True, 'A': 1, 'B': 2, 'C': 3}
+    result = template_transformer(file_content, known_symb)
+    assert template_evaluator(result) == [
+        '  cout << 1 <<endl;\n',
+        '  cout << 2 <<endl;\n',
+        '  cout << 3 <<endl;\n',
+    ]
+
+    # Case 2
+    known_symb = {'a': False, 'b': True, 'A': 1, 'B': 2, 'C': 3}
+    result = template_transformer(file_content, known_symb)
+    assert template_evaluator(result) == [
+        '  cout << 2 <<endl;\n',
+    ]
+
+    # Case 3
+    known_symb = {'a': False, 'b': False, 'A': 1, 'B': 2, 'C': 3}
+    result = template_transformer(file_content, known_symb)
+    assert template_evaluator(result) == [
+        '  cout << 3 <<endl;\n',
     ]

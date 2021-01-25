@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 25, 2021 at 03:43 AM +0100
+# Last Change: Mon Jan 25, 2021 at 04:20 AM +0100
 """
 This module provide template macro evaluation.
 """
@@ -63,6 +63,7 @@ class ForStmtEvaluator(object):
         self.iterable = iterable
         self.loop = loop
         self.known_symb = known_symb
+        self.name = 'for'
 
     def eval(self):
         """
@@ -96,6 +97,7 @@ class IfStmtEvaluator(object):
         :param list branch: empty list to store evaluators in the if branch.
         """
         self.conds = [(cond, branch)]
+        self.name = 'if'
 
     def add_cond(self, cond, branch):
         """
@@ -304,7 +306,7 @@ class TransForTemplateMacro(Transformer):
             self.scope = child_scope
             return False
         else:
-            raise ValueError('Line {}: Unmatched "elif" statement.'.format(
+            raise ValueError('Line {}: Unmatched "else" statement.'.format(
                 self.lineno))
 
     @v_args(inline=True)

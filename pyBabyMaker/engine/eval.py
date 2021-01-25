@@ -2,13 +2,20 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 04:27 AM +0800
+# Last Change: Mon Jan 25, 2021 at 02:36 AM +0100
 """
 This module provide template macro evaluation.
 """
 
 from lark import Transformer, v_args
 from .functions import macro_funcs
+
+
+class Scope(list):
+    def __init__(self, iterable=[], parent=None, evalulator=None):
+        self.parent = parent
+        self.evaluator = evalulator
+        super().__init__(iterable)
 
 
 class DelayedEvaluator(object):
@@ -41,22 +48,20 @@ class DelayedEvaluator(object):
 
 class ForStmtEvaluator(object):
     """
-    General container for storing info needed for executing macro at a later
-    stage.
+    Delayed evaluator for ``for ... endfor`` statement.
     """
-    def __init__(self, idx, iterable, scope, known_symb):
+    def __init__(self, idx, iterable, eval_list, known_symb):
         """
         Initialize for-statement evaluator.
 
         :param str idx: name of the loop variable.
-        :param DelayedEvaluator iterable: iterable in the for-loop.
+        :param DelayedEvaluator iterable: the object to be iterated over.
+        :param list eval_list: empty list to store evaluators in the for loop.
+        :param dict known_symb: all known symbols.
         """
-        self.eval_list = []
-        scope.append(self.eval_list)
-
         self.idx = idx
         self.iterable = iterable
-
+        self.eval_list = eval_list
         self.known_symb = known_symb
 
     def eval(self):
@@ -79,6 +84,36 @@ class ForStmtEvaluator(object):
         return out
 
 
+class IfStmtEvaluator(object):
+    """
+    Delayed evaluator for ``if ... (elif ... else ...) fi`` statements.
+    """
+    def __init__(self, scope, known_symb):
+        """
+        Initialize if-statements evaluator.
+        """
+        self.conds = []
+        self.known_symb = known_symb
+
+    def add_cond(self, cond, iterable):
+        """
+        Add an unevaluated conditional with iterable to be evaluated if the
+        conditional is true.
+
+        :param DelayedEvaluator cond: conditional.
+        :param DelayedEvaluator iterable: iterable to evaluate if cond is true.
+        """
+        pass
+
+    def eval(self):
+        """
+        Evaluate if-statements and all evaluable in its selected branch.
+        """
+        for cond, out in self.conds:
+            if cond.eval():
+                return out
+
+
 class TransForTemplateMacro(Transformer):
     """
     Transformer for template macro.
@@ -86,7 +121,6 @@ class TransForTemplateMacro(Transformer):
     def __init__(self, scope, known_symb):
         self.scope = scope
         self.known_symb = known_symb
-        self.stmt_counters = {'for': 0}
         self.lineno = 0
 
     ###########
@@ -171,15 +205,26 @@ class TransForTemplateMacro(Transformer):
         idx = [str(i) for i in args[:-1]]
         iterable = args[-1]
 
-        self.stmt_counters['for'] += 1
-        return ForStmtEvaluator(idx, iterable, self.scope, self.known_symb)
+        child_scope = Scope(parent=self.scope)
+        exe = ForStmtEvaluator(idx, iterable, child_scope, self.known_symb)
+        child_scope.evaluator = exe
+        self.scope = child_scope
+
+        return exe
 
     @v_args(inline=True)
     def endfor_stmt(self):
-        self.stmt_counters['for'] -= 1
-
-        if self.stmt_counters['for'] >= 0:
-            return self.scope.pop()
+        if isinstance(self.scope.evaluator, ForStmtEvaluator):
+            self.scope = self.scope.parent
+            return False
         else:
             raise ValueError('Line {}: Unmatched "endfor" statement.'.format(
                 self.lineno))
+
+    @v_args(inline=True)
+    def if_stmt(self, *args):
+        pass
+
+    @v_args(inline=True)
+    def endif_stmt(self, *args):
+        pass

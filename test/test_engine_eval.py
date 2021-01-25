@@ -2,15 +2,20 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 03:53 AM +0800
+# Last Change: Mon Jan 25, 2021 at 02:42 AM +0100
 
 import pytest
 
 from pyBabyMaker.engine.eval import DelayedEvaluator
-from pyBabyMaker.engine.eval import TransForTemplateMacro
+from pyBabyMaker.engine.eval import ForStmtEvaluator
+from pyBabyMaker.engine.eval import TransForTemplateMacro, Scope
 from pyBabyMaker.engine.syntax import template_macro_parser
 from collections import namedtuple
 
+
+##########################
+# Stateless transformers #
+##########################
 
 def test_DelayedEvaluator_simple():
     exe = DelayedEvaluator('join', (['a', 'b'], '.'))
@@ -132,23 +137,31 @@ def test_TransForTemplateMacro_method_call_no_arg():
     assert exe.eval() == {'a': 1, 'b': 2}.items()
 
 
-def test_TransForTemplateMacro_for_stmt():
+#########################
+# Stateful transformers #
+#########################
+
+@pytest.fixture
+def scope():
+    return Scope()
+
+
+def test_TransForTemplateMacro_for_stmt(scope):
     expr = template_macro_parser.parse('for idx in data.value')
-    scope = []
     known_symb = {'data': {'value': [1, 2, 3]}}
 
     transformer = TransForTemplateMacro(scope, known_symb)
     exe = transformer.transform(expr)
     exe.eval()
 
-    assert scope == [[]]
+    assert transformer.scope.parent == scope
+    assert transformer.scope.evaluator == exe
     assert known_symb['idx'] == 3
 
 
-def test_TransForTemplateMacro_for_stmt_nested():
+def test_TransForTemplateMacro_for_stmt_nested(scope):
     expr1 = template_macro_parser.parse('for idx in data.value')
     expr2 = template_macro_parser.parse('for j in idx')
-    scope = []
     known_symb = {'data': {'value': [[1, 2, 3], [4, 5, 6], [7, 8, 9]]}}
 
     transformer = TransForTemplateMacro(scope, known_symb)
@@ -161,9 +174,8 @@ def test_TransForTemplateMacro_for_stmt_nested():
     assert known_symb['j'] == 9
 
 
-def test_TransForTemplateMacro_for_stmt_multi_idx():
+def test_TransForTemplateMacro_for_stmt_multi_idx(scope):
     expr = template_macro_parser.parse('for i, j in data.value')
-    scope = []
     known_symb = {'data': {'value': [[1, 2], [5, 6], [7, 9]]}}
 
     transformer = TransForTemplateMacro(scope, known_symb)
@@ -176,19 +188,16 @@ def test_TransForTemplateMacro_for_stmt_multi_idx():
 
 def test_TransForTemplateMacro_endfor_stmt():
     expr = template_macro_parser.parse('endfor')
-    scope = [[1]]
+    parent = Scope()
+    scope = Scope(parent=parent, evalulator=ForStmtEvaluator(0, 0, [], {}))
     transformer = TransForTemplateMacro(scope, {})
-    transformer.stmt_counters['for'] += 1
 
-    result = transformer.transform(expr)
-
-    assert result == [1]
-    assert scope == []
+    assert transformer.transform(expr) is False
+    assert scope == parent
 
 
-def test_TransForTemplateMacro_endfor_stmt_mismatch():
+def test_TransForTemplateMacro_endfor_stmt_mismatch(scope):
     expr = template_macro_parser.parse('endfor')
-    scope = [[1]]
     transformer = TransForTemplateMacro(scope, {})
 
     with pytest.raises(Exception) as execinfo:

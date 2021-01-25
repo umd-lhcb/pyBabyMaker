@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 25, 2021 at 03:02 AM +0100
+# Last Change: Mon Jan 25, 2021 at 04:03 AM +0100
 
 import pytest
 
@@ -219,6 +219,72 @@ def test_TransForTemplateMacro_if_stmt(scope):
     assert transformer.scope.evaluator == exe
 
 
+def test_TransForTemplateMacro_if_stmt_complex(scope):
+    expr = template_macro_parser.parse('if data.value && true then')
+    known_symb = {'data': {'value': True}}
+
+    transformer = TransForTemplateMacro(scope, known_symb)
+    exe = transformer.transform(expr)
+    transformer.scope.append(DelayedEvaluator('identity', ('ok',)))
+    assert exe.eval() == ['ok']
+
+    assert transformer.scope.parent == scope
+    assert transformer.scope.evaluator == exe
+
+
+def test_TransForTemplateMacro_elif_stmt():
+    expr = template_macro_parser.parse('elif data.value then')
+    known_symb = {'data': {'value': True}}
+
+    parent = Scope()
+    scope = Scope(parent=parent, evalulator=IfStmtEvaluator(
+        DelayedEvaluator("false", ()), []))
+    transformer = TransForTemplateMacro(scope, known_symb)
+    transformer.transform(expr)
+    transformer.scope.append(DelayedEvaluator('identity', ('ok',)))
+    exe = scope.evaluator
+    assert exe.eval() == ['ok']
+
+    assert transformer.scope.parent == scope
+    assert transformer.scope.evaluator == exe
+
+
+def test_TransForTemplateMacro_elif_stmt_mismatch(scope):
+    expr = template_macro_parser.parse('elif true then')
+    transformer = TransForTemplateMacro(scope, {})
+
+    with pytest.raises(Exception) as execinfo:
+        transformer.transform(expr, lineno=12)
+
+    assert 'Line 12' in str(execinfo.value)
+
+
+def test_TransForTemplateMacro_else_stmt():
+    expr = template_macro_parser.parse('else')
+
+    parent = Scope()
+    scope = Scope(parent=parent, evalulator=IfStmtEvaluator(
+        DelayedEvaluator("false", ()), []))
+    transformer = TransForTemplateMacro(scope, {})
+    transformer.transform(expr)
+    transformer.scope.append(DelayedEvaluator('identity', ('ok',)))
+    exe = scope.evaluator
+    assert exe.eval() == ['ok']
+
+    assert transformer.scope.parent == scope
+    assert transformer.scope.evaluator == exe
+
+
+def test_TransForTemplateMacro_else_stmt_mismatch(scope):
+    expr = template_macro_parser.parse('else')
+    transformer = TransForTemplateMacro(scope, {})
+
+    with pytest.raises(Exception) as execinfo:
+        transformer.transform(expr, lineno=12)
+
+    assert 'Line 12' in str(execinfo.value)
+
+
 def test_TransForTemplateMacro_endif_stmt(scope):
     expr = template_macro_parser.parse('endif')
     parent = Scope()
@@ -227,3 +293,13 @@ def test_TransForTemplateMacro_endif_stmt(scope):
 
     assert transformer.transform(expr) is False
     assert scope == parent
+
+
+def test_TransForTemplateMacro_endif_stmt_mismatch(scope):
+    expr = template_macro_parser.parse('endif')
+    transformer = TransForTemplateMacro(scope, {})
+
+    with pytest.raises(Exception) as execinfo:
+        transformer.transform(expr, lineno=12)
+
+    assert 'Line 12' in str(execinfo.value)

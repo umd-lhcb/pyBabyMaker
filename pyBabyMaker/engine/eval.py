@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 25, 2021 at 03:23 AM +0100
+# Last Change: Mon Jan 25, 2021 at 03:43 AM +0100
 """
 This module provide template macro evaluation.
 """
@@ -169,6 +169,14 @@ class TransForTemplateMacro(Transformer):
         return DelayedEvaluator('comp', (cond,))
 
     ##############
+    # Arithmetic #
+    ##############
+
+    @v_args(inline=True)
+    def neg(self, val):
+        return DelayedEvaluator('neg', (val,))
+
+    ##############
     # comparison #
     ##############
 
@@ -208,17 +216,13 @@ class TransForTemplateMacro(Transformer):
     def op_or(self, cond1, cond2):
         return DelayedEvaluator('or', (cond1, cond2))
 
-    #######################
-    # Delayed evaluations #
-    #######################
+    ####################
+    # Variable loading #
+    ####################
 
     @v_args(inline=True)
     def var(self, val):
         return DelayedEvaluator('val', (val, self.known_symb))
-
-    @v_args(inline=True)
-    def neg(self, val):
-        return DelayedEvaluator('neg', (val,))
 
     ########################
     # Function/method call #
@@ -280,7 +284,31 @@ class TransForTemplateMacro(Transformer):
         return exe
 
     @v_args(inline=True)
-    def endif_stmt(self, *args):
+    def elif_stmt(self, cond):
+        exe = self.scope.evaluator
+        if isinstance(exe, IfStmtEvaluator):
+            child_scope = Scope(parent=self.scope.parent, evalulator=exe)
+            exe.add_cond(cond, child_scope)
+            self.scope = child_scope
+            return False
+        else:
+            raise ValueError('Line {}: Unmatched "elif" statement.'.format(
+                self.lineno))
+
+    @v_args(inline=True)
+    def else_stmt(self):
+        exe = self.scope.evaluator
+        if isinstance(exe, IfStmtEvaluator):
+            child_scope = Scope(parent=self.scope.parent, evalulator=exe)
+            exe.add_cond(DelayedEvaluator('true', ()), child_scope)
+            self.scope = child_scope
+            return False
+        else:
+            raise ValueError('Line {}: Unmatched "elif" statement.'.format(
+                self.lineno))
+
+    @v_args(inline=True)
+    def endif_stmt(self):
         if isinstance(self.scope.evaluator, IfStmtEvaluator):
             self.scope = self.scope.parent
             return False

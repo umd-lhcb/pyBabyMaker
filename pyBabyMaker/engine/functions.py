@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 25, 2021 at 03:22 AM +0100
+# Last Change: Mon Jan 25, 2021 at 03:42 AM +0100
 """
 This module defines functions for template macro.
 """
@@ -80,6 +80,8 @@ macro_funcs = {
     # Trivial
     'identity': lambda x: x,
     'one': lambda: 1,
+    'true': lambda: True,
+    'false': lambda: False,
     # IO
     'input': func_input,
     # List & dict

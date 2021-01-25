@@ -2,12 +2,33 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 05:32 PM +0800
+# Last Change: Mon Jan 25, 2021 at 01:17 AM +0100
 
 import pytest
 
 from lark.exceptions import UnexpectedToken
 from pyBabyMaker.engine.syntax import template_macro_parser
+
+
+def test_if_stmt_simple():
+    assert template_macro_parser.parse('if a then').pretty() == \
+        "if_stmt\n" \
+        "  var\ta\n"
+
+
+def test_if_stmt_complex():
+    assert template_macro_parser.parse('if a && b.c->stuff: x then'
+                                       ).pretty() == \
+        "if_stmt\n" \
+        "  op_and\n" \
+        "    var\ta\n" \
+        "    method_call\n" \
+        "      getattr\n" \
+        "        var\tb\n" \
+        "        c\n" \
+        "      stuff\n" \
+        "      arguments\n" \
+        "        var\tx\n"
 
 
 def test_for_stmt_simple():

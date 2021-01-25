@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jan 24, 2021 at 10:03 PM +0100
+# Last Change: Mon Jan 25, 2021 at 01:12 AM +0100
 """
 This module provide a parser for template macros extracted from C++ files.
 
@@ -26,8 +26,8 @@ template_macro_grammar = '''
         | if_stmt | elif_stmt | else_stmt | endif_stmt
         | boolor
 
-    if_stmt: "if" boolor
-    elif_stmt: "elif" boolor
+    if_stmt: "if" boolor "then"
+    elif_stmt: "elif" boolor "then"
     else_stmt: "else"
     endif_stmt: "endif"
 

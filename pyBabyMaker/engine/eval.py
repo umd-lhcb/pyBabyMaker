@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 25, 2021 at 04:20 AM +0100
+# Last Change: Mon Jan 25, 2021 at 05:13 AM +0100
 """
 This module provide template macro evaluation.
 """
@@ -116,6 +116,7 @@ class IfStmtEvaluator(object):
         for cond, branch in self.conds:
             if cond.eval():
                 return [e.eval() for e in branch]
+        return []
 
 
 class TransForTemplateMacro(Transformer):

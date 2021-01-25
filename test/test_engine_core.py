@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 25, 2021 at 05:11 AM +0100
+# Last Change: Mon Jan 25, 2021 at 05:15 AM +0100
 
 import pytest
 
@@ -149,6 +149,30 @@ def test_template_evaluator_for_stmt_proper():
 
 
 def test_template_evaluator_if_stmt_proper():
+    file_content = [
+        'cout << /* {% directive.B %} */ <<endl;\n',
+        '// {% if directive.a && true then %}\n',
+        '  cout << /* {% directive.A %} */ <<endl;\n',
+        '// {% endif %}\n',
+    ]
+
+    # Case 1
+    known_symb = {'a': True, 'A': 1, 'B': 2, 'C': 3}
+    result = template_transformer(file_content, known_symb)
+    assert template_evaluator(result) == [
+        'cout << 2 <<endl;\n',
+        '  cout << 1 <<endl;\n',
+    ]
+
+    # Case 2
+    known_symb = {'a': False, 'A': 1, 'B': 2, 'C': 3}
+    result = template_transformer(file_content, known_symb)
+    assert template_evaluator(result) == [
+        'cout << 2 <<endl;\n',
+    ]
+
+
+def test_template_evaluator_if_stmt_proper_complex():
     file_content = [
         '// {% if directive.a && true then %}\n',
         '  cout << /* {% directive.A %} */ <<endl;\n',

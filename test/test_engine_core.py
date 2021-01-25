@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Sep 01, 2020 at 06:35 PM +0800
+# Last Change: Mon Jan 25, 2021 at 05:05 AM +0100
 
 import pytest
 
@@ -53,10 +53,10 @@ def test_template_evaluator_for_stmt_simple():
     file_content = [
         '// {% for i in directive.b %}\n',
         'cout << "Random stuff";\n',
-        'cout << /* {% i %} */ ;\n'
+        'cout << /* {% i %} */ ;\n',
     ]
     result = template_transformer(file_content, {'b': [1, 2, 3]}, False)
-    assert template_evaluator(result) == [
+    assert template_evaluator(result.parent) == [
         'cout << "Random stuff";\n',
         'cout << 1 ;\n',
         'cout << "Random stuff";\n',
@@ -71,12 +71,13 @@ def test_template_evaluator_for_stmt_nested():
         '// {% for i in directive.b %}\n',
         'cout << "Random stuff";\n',
         '// {% for j in i.stuff %}\n',
-        '  cout << /* {% j %} */ ;\n'
+        '  cout << /* {% j %} */ ;\n',
+        '// {% endfor %}\n',
+        '// {% endfor %}\n'
     ]
     result = template_transformer(
         file_content,
-        {'b': [{'stuff': [1, 2]}, {'stuff': [3]}, {'stuff': [4, 5, 6]}]},
-        False)
+        {'b': [{'stuff': [1, 2]}, {'stuff': [3]}, {'stuff': [4, 5, 6]}]})
     assert template_evaluator(result) == [
         'cout << "Random stuff";\n',
         '  cout << 1 ;\n',
@@ -99,7 +100,7 @@ def test_template_evaluator_for_stmt_multi_idx():
         file_content,
         {'b': {'a': 1, 'b': 2, 'c': 3}},
         False)
-    assert template_evaluator(result) == [
+    assert template_evaluator(result.parent) == [
         '  cout << a = 1 <<endl;\n',
         '  cout << b = 2 <<endl;\n',
         '  cout << c = 3 <<endl;\n',
@@ -114,7 +115,7 @@ def test_template_transformer_for_stmt_mismatch():
     with pytest.raises(ValueError) as execinfo:
         template_transformer(file_content, {'b': {'a': 1, 'b': 2}})
 
-    assert 'Mismatch: statement' in str(execinfo.value)
+    assert 'Unclosed for statement\n' == str(execinfo.value)
 
 
 def test_template_evaluator_for_stmt_proper():

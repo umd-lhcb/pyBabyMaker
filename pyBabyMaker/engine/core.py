@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Sep 03, 2020 at 09:40 PM +0800
+# Last Change: Mon Jan 25, 2021 at 04:41 AM +0100
 """
 This module glues all submodules in ``engine`` together to parse and evaluate
 template macros in a C++ file.
@@ -11,6 +11,7 @@ template macros in a C++ file.
 from .identifiers import full_line_id, inline_id
 from .eval import DelayedEvaluator
 from .eval import TransForTemplateMacro
+from .eval import Scope
 from .syntax import template_macro_parser
 
 
@@ -52,11 +53,7 @@ def template_transformer(file_content, directive, do_check=True, eol='\n'):
     :param Iterable file_content: content of the raw template.
     :param dict directive: Parsed YAML directive.
     """
-    known_symb = {'directive': directive}
-    parsed = []
-    scope = [parsed]
-
-    transformer = TransForTemplateMacro(scope, known_symb)
+    transformer = TransForTemplateMacro(Scope(), {'directive': directive})
 
     for lineno, line in enumerate(file_content, 1):
         for pattern in [full_line_id, inline_id]:
@@ -66,26 +63,32 @@ def template_transformer(file_content, directive, do_check=True, eol='\n'):
 
         if match:
             macro = template_macro_parser.parse(match[pattern.macro_idx])
-            eva = transformer.transform(macro, lineno=lineno)
+            exe = transformer.transform(macro, lineno=lineno)
 
-            if type(eva) == DelayedEvaluator:
-                scope[-1].append(DelayedEvaluator(
+            if exe is False:
+                pass
+
+            elif isinstance(exe, DelayedEvaluator):
+                transformer.scope.append(DelayedEvaluator(
                     'format', ('{}'*pattern.groups+eol, *helper_eval_args(
-                        match, pattern, eva))))
+                        match, pattern, exe))))
 
-            elif type(eva) != list:
-                scope[-2].append(eva)
+            else:
+                transformer.scope.parent.append(exe)
 
         else:  # Line without any template macro
-            scope[-1].append(DelayedEvaluator('identity', (line,)))
+            transformer.scope.append(DelayedEvaluator('identity', (line,)))
 
     if do_check:
-        for stmt, counter in transformer.stmt_counters.items():
-            if counter > 0:
-                raise ValueError('Mismatch: statement "{}" has a non-zero counter value of {}'.format(
-                    stmt, counter))
+        error = ''
+        while transformer.scope.parent is not None:
+            error += 'Unclosed {} statement\n'.format(
+                transformer.scope.evaluator.name)
+            transformer.scope = transformer.scope.parent
+        if len(error) > 0:
+            raise ValueError(error)
 
-    return parsed
+    return transformer.scope
 
 
 def template_evaluator(parsed):

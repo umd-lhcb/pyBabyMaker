@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Jan 15, 2021 at 01:31 AM +0100
+# Last Change: Wed Mar 10, 2021 at 11:53 PM +0100
 
 import yaml
 import pytest
@@ -95,39 +95,39 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
         'raw_D0_P',
     ]
     assert directive['trees']['ATuple']['input'] == [
-        BabyVariable('Y_PT', 'Double_t', input=True, output=False),
-        BabyVariable('Y_PE', 'Double_t', input=True, output=False),
-        BabyVariable('Y_PX', 'Double_t', input=True, output=False),
-        BabyVariable('Y_PY', 'Double_t', input=True, output=False),
-        BabyVariable('Y_PZ', 'Double_t', input=True, output=False),
-        BabyVariable('D0_P', 'Double_t', input=True, output=False),
+        BabyVariable('Y_PT', 'double', input=True, output=False),
+        BabyVariable('Y_PE', 'double', input=True, output=False),
+        BabyVariable('Y_PX', 'double', input=True, output=False),
+        BabyVariable('Y_PY', 'double', input=True, output=False),
+        BabyVariable('Y_PZ', 'double', input=True, output=False),
+        BabyVariable('D0_P', 'double', input=True, output=False),
     ]
     assert directive['trees']['ATuple']['output'] == [
-        BabyVariable('Y_PE', 'Double_t', ['Y_PE']),
-        BabyVariable('y_pt', 'Double_t', ['Y_PT']),
-        BabyVariable('y_px', 'Double_t', ['Y_PX']),
-        BabyVariable('y_py', 'Double_t', ['Y_PY']),
-        BabyVariable('y_pz', 'Double_t', ['Y_PZ']),
-        BabyVariable('RandStuff', 'Double_t', ['TempStuff']),
-        BabyVariable('some_other_var', 'Double_t', ['some_var']),
-        BabyVariable('alt_def', 'Double_t', ['b0_pe', 'Y_PE']),
+        BabyVariable('Y_PE', 'double', ['Y_PE']),
+        BabyVariable('y_pt', 'double', ['Y_PT']),
+        BabyVariable('y_px', 'double', ['Y_PX']),
+        BabyVariable('y_py', 'double', ['Y_PY']),
+        BabyVariable('y_pz', 'double', ['Y_PZ']),
+        BabyVariable('RandStuff', 'double', ['TempStuff']),
+        BabyVariable('some_other_var', 'double', ['some_var']),
+        BabyVariable('alt_def', 'double', ['b0_pe', 'Y_PE']),
     ]
     assert directive['trees']['ATuple']['tmp'] == [
-        BabyVariable('TempStuff', 'Double_t', ['D0_P+Y_PT'], output=False),
-        BabyVariable('some_var', 'Double_t', ['y_pt + y_pz'], output=False),
+        BabyVariable('TempStuff', 'double', ['D0_P+Y_PT'], output=False),
+        BabyVariable('some_var', 'double', ['y_pt + y_pz'], output=False),
     ]
     assert directive['trees']['ATuple']['pre_sel_vars'] == []
     assert directive['trees']['ATuple']['post_sel_vars'] == [
-        BabyVariable('Y_PE', 'Double_t', ['Y_PE']),
-        BabyVariable('y_pt', 'Double_t', ['Y_PT']),
-        BabyVariable('y_px', 'Double_t', ['Y_PX']),
-        BabyVariable('y_py', 'Double_t', ['Y_PY']),
-        BabyVariable('y_pz', 'Double_t', ['Y_PZ']),
-        BabyVariable('TempStuff', 'Double_t', ['D0_P+Y_PT'], output=False),
-        BabyVariable('RandStuff', 'Double_t', ['TempStuff']),
-        BabyVariable('some_var', 'Double_t', ['y_pt + y_pz'], output=False),
-        BabyVariable('some_other_var', 'Double_t', ['some_var']),
-        BabyVariable('alt_def', 'Double_t', ['b0_pe', 'Y_PE']),
+        BabyVariable('Y_PE', 'double', ['Y_PE']),
+        BabyVariable('y_pt', 'double', ['Y_PT']),
+        BabyVariable('y_px', 'double', ['Y_PX']),
+        BabyVariable('y_py', 'double', ['Y_PY']),
+        BabyVariable('y_pz', 'double', ['Y_PZ']),
+        BabyVariable('TempStuff', 'double', ['D0_P+Y_PT'], output=False),
+        BabyVariable('RandStuff', 'double', ['TempStuff']),
+        BabyVariable('some_var', 'double', ['y_pt + y_pz'], output=False),
+        BabyVariable('some_other_var', 'double', ['some_var']),
+        BabyVariable('alt_def', 'double', ['b0_pe', 'Y_PE']),
     ]
     assert realistic_BabyConfigParser._resolvers[0]._resolved_names[0] == \
         ('raw', 'Y_PT')
@@ -139,26 +139,26 @@ def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
     assert directive['trees']['AnotherTuple']['input_tree'] == \
         'TupleB0/DecayTree'
     assert directive['trees']['AnotherTuple']['input'] == [
-        BabyVariable('Y_PT', 'Double_t', input=True, output=False),
-        BabyVariable('Y_PE', 'Double_t', input=True, output=False),
-        BabyVariable('Y_PX', 'Double_t', input=True, output=False),
-        BabyVariable('Y_PY', 'Double_t', input=True, output=False),
-        BabyVariable('Y_PZ', 'Double_t', input=True, output=False),
-        BabyVariable('D0_P', 'Double_t', input=True, output=False),
+        BabyVariable('Y_PT', 'double', input=True, output=False),
+        BabyVariable('Y_PE', 'double', input=True, output=False),
+        BabyVariable('Y_PX', 'double', input=True, output=False),
+        BabyVariable('Y_PY', 'double', input=True, output=False),
+        BabyVariable('Y_PZ', 'double', input=True, output=False),
+        BabyVariable('D0_P', 'double', input=True, output=False),
     ]
     assert directive['trees']['AnotherTuple']['output'] == [
         # NOTE: 'some_other_var' is not resolvable for this tree!
         #       Because the change in 'rename' selection, 'y_pt' and 'y_pz' are
         #       not defined!
-        BabyVariable('b0_pt', 'Double_t', ['Y_PT']),
-        BabyVariable('Y_PE', 'Double_t', ['Y_PE']),
-        BabyVariable('Y_PX', 'Double_t', ['Y_PX']),
-        BabyVariable('Y_PY', 'Double_t', ['Y_PY']),
-        BabyVariable('Y_PZ', 'Double_t', ['Y_PZ']),
-        BabyVariable('RandStuff', 'Double_t', ['TempStuff']),
+        BabyVariable('b0_pt', 'double', ['Y_PT']),
+        BabyVariable('Y_PE', 'double', ['Y_PE']),
+        BabyVariable('Y_PX', 'double', ['Y_PX']),
+        BabyVariable('Y_PY', 'double', ['Y_PY']),
+        BabyVariable('Y_PZ', 'double', ['Y_PZ']),
+        BabyVariable('RandStuff', 'double', ['TempStuff']),
     ]
     assert directive['trees']['AnotherTuple']['tmp'] == [
-        BabyVariable('TempStuff', 'Double_t', ['D0_P+Y_PT'], output=False),
+        BabyVariable('TempStuff', 'double', ['D0_P+Y_PT'], output=False),
     ]
     assert directive['system_headers'] == ['cmath', 'iostream']
     assert directive['trees']['AnotherTuple']['sel'] == [

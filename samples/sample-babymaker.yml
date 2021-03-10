@@ -14,10 +14,10 @@ rename:
     b0_PE: b0_pe
 
 calculation:
-    RandStuff: 'Double_t; TempStuff'
-    TempStuff: '^Double_t; D0_P+Y_PT'
-    some_var: '^Double_t; y_pt + y_pz'
-    some_other_var: 'Double_t; some_var'
+    RandStuff: 'double; TempStuff'
+    TempStuff: '^double; D0_P+Y_PT'
+    some_var: '^double; y_pt + y_pz'
+    some_other_var: 'double; some_var'
 
 output:
     ATuple:
@@ -25,7 +25,7 @@ output:
         selection:
             - "Y_PT > 10000"
         calculation:
-            alt_def: 'Double_t; b0_pe; Y_PE'
+            alt_def: 'double; b0_pe; Y_PE'
 
     AnotherTuple:
         input: TupleB0/DecayTree

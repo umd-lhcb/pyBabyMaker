@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Mar 10, 2021 at 09:30 PM +0100
+# Last Change: Wed Mar 10, 2021 at 10:31 PM +0100
 
 import setuptools
 import subprocess
@@ -62,29 +62,6 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 
-########################
-# Compile instructions #
-########################
-
-root_libdir = get_pipe_output('root-config --libdir')
-root_incdir = get_pipe_output('root-config --incdir')
-
-cxx_flags = get_pipe_output('root-config --cflags').split()
-
-# Make sure to enable C++ 14 support
-extra_flags = [re.sub(r'std=c\+\+11', 'std=c++14', f) for f in cxx_flags]
-
-TupleDumpExtension = Extension(
-    name="pyBabyMaker.io.TupleDump",
-    sources=["pyBabyMaker/io/TupleDump.cpp"],
-    libraries=["RIO", "Tree"],
-    library_dirs=[root_libdir],
-    include_dirs=[root_incdir],
-    extra_compile_args=extra_flags,
-    language='c++',
-)
-
-
 #########
 # Setup #
 #########
@@ -112,7 +89,6 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent'
     ],
-    ext_modules=[TupleDumpExtension],
     tests_require=['pytest'],
     test_suite="test",
     cmdclass={'test': PyTest}

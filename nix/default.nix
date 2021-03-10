@@ -1,9 +1,11 @@
 { stdenv
 , buildPythonPackage
-, root
+, uproot
 , pyyaml
 , lark-parser
 }:
+
+# FIXME: We require uproot 4 but it's not in nixpkgs yet.
 
 buildPythonPackage rec {
   pname = "pyBabyMaker";
@@ -11,8 +13,8 @@ buildPythonPackage rec {
 
   src = builtins.path { path = ./..; name = pname; };
 
-  buildInputs = [ root ];
   propagatedBuildInputs = [
+    uproot
     pyyaml
     lark-parser
   ];

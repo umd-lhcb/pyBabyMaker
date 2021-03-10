@@ -1,4 +1,4 @@
-cython
 pyyaml
-pytest
 lark-parser
+uproot
+lz4

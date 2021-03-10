@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Sep 17, 2020 at 01:44 AM +0800
+# Last Change: Wed Mar 10, 2021 at 09:30 PM +0100
 
 import setuptools
 import subprocess
@@ -103,7 +103,9 @@ setup(
     include_package_data=True,
     install_requires=[
         'pyyaml',
-        'lark-parser'
+        'lark-parser',
+        'uproot',
+        'lz4'
     ],
     classifiers=[
         'Programming Language :: Python :: 3',

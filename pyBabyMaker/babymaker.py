@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Jan 15, 2021 at 01:29 AM +0100
+# Last Change: Thu Mar 11, 2021 at 09:53 PM +0100
 
 import re
 import logging
@@ -205,7 +205,7 @@ class BabyConfigParser:
                 print('Dropping branch: {}'.format(var.name))
                 continue
 
-            if 'rename' in config and cls.match(rename_vars, var.name):
+            if 'rename' in config and var.name in config['rename']:
                 renamed_var = rename_dict[var.name]
                 namespace['rename'][renamed_var] = BabyVariable(
                     renamed_var, var.type, [var.name])

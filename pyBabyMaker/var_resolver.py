@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Jan 15, 2021 at 01:05 AM +0100
+# Last Change: Thu Mar 11, 2021 at 11:20 PM +0100
 
 import re
 import logging
@@ -76,9 +76,10 @@ class VariableResolver(object):
     """
     General variable resolver.
     """
-    def __init__(self, namespace):
+    def __init__(self, namespace, skip_names=None):
         self.namespace = namespace
         self._resolved_names = []
+        self.skip_names = [] if skip_names is None else skip_names
 
     def resolve_scope(self, scope, ordering=None):
         """
@@ -125,6 +126,10 @@ class VariableResolver(object):
         known_names = [] if known_names is None else known_names
         var_key = (scope, var.name)
         DEBUG('Start resolving: {}.{}'.format(scope, var.name))
+
+        if var.name in self.skip_names:
+            DEBUG('Skipping name {}...'.format(var.name))
+            return True, load_seq, known_names
 
         if var_key in self._resolved_names or var_key in known_names:
             DEBUG('Variable {}.{} already resolved. Return right away.'.format(

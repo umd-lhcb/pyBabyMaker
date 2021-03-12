@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Mar 11, 2021 at 11:20 PM +0100
+# Last Change: Fri Mar 12, 2021 at 10:28 PM +0100
 
 import re
 import logging
@@ -127,10 +127,6 @@ class VariableResolver(object):
         var_key = (scope, var.name)
         DEBUG('Start resolving: {}.{}'.format(scope, var.name))
 
-        if var.name in self.skip_names:
-            DEBUG('Skipping name {}...'.format(var.name))
-            return True, load_seq, known_names
-
         if var_key in self._resolved_names or var_key in known_names:
             DEBUG('Variable {}.{} already resolved. Return right away.'.format(
                 scope, var.name))
@@ -151,7 +147,13 @@ class VariableResolver(object):
                 dep_var_name_resolved = other_scope+'_'+dep_var_name
                 dep_var_key = (other_scope, dep_var_name)
 
-                if dep_var_name in self.namespace[other_scope]:
+                # NOTE: Handling of skipped names
+                #       They should only be part of the rvalues
+                if dep_var_name in self.skip_names:
+                    DEBUG('Skipping name {}...'.format(var.name))
+                    var.resolved[dep_var_name] = dep_var_name
+
+                elif dep_var_name in self.namespace[other_scope]:
                     dep_var = self.namespace[other_scope][dep_var_name]
                     if idx+1 == len(ordering):
                         var.resolved[dep_var_name] = dep_var_name_resolved

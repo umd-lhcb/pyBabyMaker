@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Jan 15, 2021 at 01:06 AM +0100
+# Last Change: Fri Mar 12, 2021 at 10:33 PM +0100
 
 from collections import defaultdict
 
@@ -259,6 +259,25 @@ def test_VariableResolver_full_fail():
     )
     assert var.idx == 0
     assert not var.ok
+
+
+def test_VariableResolver_skip_names_simple():
+    resolver = VariableResolver(
+        {'raw': {}},
+        ['GeV']
+    )
+    var = Variable('x', rvalues=['300*GeV'])
+
+    assert resolver.resolve_var('calc', var) == (
+        True,
+        [
+            ('calc', var)
+        ],
+        [
+            ('calc', 'x')
+        ]
+    )
+    assert var.rval == '300*GeV'
 
 
 ################################################

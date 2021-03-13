@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Mar 12, 2021 at 03:49 PM +0100
+# Last Change: Sat Mar 13, 2021 at 01:10 AM +0100
 
 import re
 import logging
@@ -202,7 +202,6 @@ class BabyConfigParser:
         """
         if 'rename' in config:
             rename_dict = config['rename']
-            rename_vars = list(rename_dict.keys())
 
         for var in namespace['raw'].values():
             if 'drop' in config and cls.match(config['drop'], var.name):

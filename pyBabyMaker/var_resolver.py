@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Mar 12, 2021 at 10:28 PM +0100
+# Last Change: Sat Mar 13, 2021 at 02:17 AM +0100
 
 import re
 import logging
@@ -161,7 +161,7 @@ class VariableResolver(object):
                                 dep_var_key in known_names:
                             DEBUG('Dep variable {}.{} already resolved.'.format(
                                 scope, dep_var.name))
-                            break
+                            continue
 
                         DEBUG('Resolved dep {}.{} in terminal scope {}'.format(
                             other_scope, dep_var_name, other_scope))

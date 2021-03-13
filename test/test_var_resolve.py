@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Mar 12, 2021 at 10:33 PM +0100
+# Last Change: Sat Mar 13, 2021 at 02:17 AM +0100
 
 from collections import defaultdict
 
@@ -278,6 +278,19 @@ def test_VariableResolver_skip_names_simple():
         ]
     )
     assert var.rval == '300*GeV'
+
+
+def test_VariableResolver_selection():
+    resolver = VariableResolver({
+        'raw': {
+            'k_PT': Variable('k_PT'),
+            'pi_PT': Variable('pi_PT')
+        },
+    }, ['MeV'])
+    var = Variable('sel0', rvalues=['k_PT + pi_PT > 1400.0*MeV'],)
+
+    resolver.resolve_var('sel', var, known_names=[('raw', 'k_PT')])
+    assert var.rval == 'raw_k_PT + raw_pi_PT > 1400.0*MeV'
 
 
 ################################################

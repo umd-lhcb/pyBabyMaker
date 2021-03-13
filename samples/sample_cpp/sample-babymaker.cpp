@@ -20,6 +20,9 @@ void generator_ATuple(TFile *input_file, TFile *output_file) {
   // Load needed branches from ntuple
   TTreeReaderValue<double> raw_Y_PT(reader, "Y_PT");
   TTreeReaderValue<double> raw_Y_PE(reader, "Y_PE");
+  TTreeReaderValue<uint32_t> raw_runNumber(reader, "runNumber");
+  TTreeReaderValue<uint64_t> raw_eventNumber(reader, "eventNumber");
+  TTreeReaderValue<uint64_t> raw_GpsTime(reader, "GpsTime");
   TTreeReaderValue<double> raw_Y_PX(reader, "Y_PX");
   TTreeReaderValue<double> raw_Y_PY(reader, "Y_PY");
   TTreeReaderValue<double> raw_Y_PZ(reader, "Y_PZ");
@@ -28,6 +31,12 @@ void generator_ATuple(TFile *input_file, TFile *output_file) {
   // Define output branches
   double keep_Y_PE;
   output.Branch("Y_PE", &keep_Y_PE);
+  uint32_t keep_runNumber;
+  output.Branch("runNumber", &keep_runNumber);
+  uint64_t keep_eventNumber;
+  output.Branch("eventNumber", &keep_eventNumber);
+  uint64_t keep_GpsTime;
+  output.Branch("GpsTime", &keep_GpsTime);
   double rename_y_pt;
   output.Branch("y_pt", &rename_y_pt);
   double rename_y_px;
@@ -53,6 +62,9 @@ void generator_ATuple(TFile *input_file, TFile *output_file) {
     if ((true) && ((*raw_Y_PT) > 10000)) {
       // Assign values for each output branch in this loop
       keep_Y_PE = (*raw_Y_PE);
+      keep_runNumber = (*raw_runNumber);
+      keep_eventNumber = (*raw_eventNumber);
+      keep_GpsTime = (*raw_GpsTime);
       rename_y_pt = (*raw_Y_PT);
       rename_y_px = (*raw_Y_PX);
       rename_y_py = (*raw_Y_PY);
@@ -80,6 +92,9 @@ void generator_AnotherTuple(TFile *input_file, TFile *output_file) {
   TTreeReaderValue<double> raw_Y_PX(reader, "Y_PX");
   TTreeReaderValue<double> raw_Y_PY(reader, "Y_PY");
   TTreeReaderValue<double> raw_Y_PZ(reader, "Y_PZ");
+  TTreeReaderValue<uint32_t> raw_runNumber(reader, "runNumber");
+  TTreeReaderValue<uint64_t> raw_eventNumber(reader, "eventNumber");
+  TTreeReaderValue<uint64_t> raw_GpsTime(reader, "GpsTime");
   TTreeReaderValue<double> raw_D0_P(reader, "D0_P");
 
   // Define output branches
@@ -93,6 +108,12 @@ void generator_AnotherTuple(TFile *input_file, TFile *output_file) {
   output.Branch("Y_PY", &keep_Y_PY);
   double keep_Y_PZ;
   output.Branch("Y_PZ", &keep_Y_PZ);
+  uint32_t keep_runNumber;
+  output.Branch("runNumber", &keep_runNumber);
+  uint64_t keep_eventNumber;
+  output.Branch("eventNumber", &keep_eventNumber);
+  uint64_t keep_GpsTime;
+  output.Branch("GpsTime", &keep_GpsTime);
   double calculation_RandStuff;
   output.Branch("RandStuff", &calculation_RandStuff);
 
@@ -109,6 +130,9 @@ void generator_AnotherTuple(TFile *input_file, TFile *output_file) {
       keep_Y_PX = (*raw_Y_PX);
       keep_Y_PY = (*raw_Y_PY);
       keep_Y_PZ = (*raw_Y_PZ);
+      keep_runNumber = (*raw_runNumber);
+      keep_eventNumber = (*raw_eventNumber);
+      keep_GpsTime = (*raw_GpsTime);
       calculation_TempStuff = (*raw_D0_P)+(*raw_Y_PT);
       calculation_RandStuff = calculation_TempStuff;
 
@@ -206,6 +230,9 @@ void generator_YetAnotherTuple(TFile *input_file, TFile *output_file) {
   TTreeReaderValue<float> raw_Y_ISOLATION_IsMuon4(reader, "Y_ISOLATION_IsMuon4");
   TTreeReaderValue<float> raw_Y_ISOLATION_NNghost4(reader, "Y_ISOLATION_NNghost4");
   TTreeReaderValue<int32_t> raw_Y_ISOLATION_TRUEID4(reader, "Y_ISOLATION_TRUEID4");
+  TTreeReaderValue<uint32_t> raw_runNumber(reader, "runNumber");
+  TTreeReaderValue<uint64_t> raw_eventNumber(reader, "eventNumber");
+  TTreeReaderValue<uint64_t> raw_GpsTime(reader, "GpsTime");
   TTreeReaderValue<double> raw_Y_PT(reader, "Y_PT");
   TTreeReaderValue<double> raw_Y_PX(reader, "Y_PX");
   TTreeReaderValue<double> raw_Y_PY(reader, "Y_PY");
@@ -375,6 +402,12 @@ void generator_YetAnotherTuple(TFile *input_file, TFile *output_file) {
   output.Branch("Y_ISOLATION_NNghost4", &keep_Y_ISOLATION_NNghost4);
   int32_t keep_Y_ISOLATION_TRUEID4;
   output.Branch("Y_ISOLATION_TRUEID4", &keep_Y_ISOLATION_TRUEID4);
+  uint32_t keep_runNumber;
+  output.Branch("runNumber", &keep_runNumber);
+  uint64_t keep_eventNumber;
+  output.Branch("eventNumber", &keep_eventNumber);
+  uint64_t keep_GpsTime;
+  output.Branch("GpsTime", &keep_GpsTime);
   double rename_y_pt;
   output.Branch("y_pt", &rename_y_pt);
   double rename_y_px;
@@ -478,6 +511,9 @@ void generator_YetAnotherTuple(TFile *input_file, TFile *output_file) {
       keep_Y_ISOLATION_IsMuon4 = (*raw_Y_ISOLATION_IsMuon4);
       keep_Y_ISOLATION_NNghost4 = (*raw_Y_ISOLATION_NNghost4);
       keep_Y_ISOLATION_TRUEID4 = (*raw_Y_ISOLATION_TRUEID4);
+      keep_runNumber = (*raw_runNumber);
+      keep_eventNumber = (*raw_eventNumber);
+      keep_GpsTime = (*raw_GpsTime);
       rename_y_pt = (*raw_Y_PT);
       rename_y_px = (*raw_Y_PX);
       rename_y_py = (*raw_Y_PY);

@@ -5,6 +5,9 @@ headers:
 
 keep:
     - ^Y_P\w$
+    - runNumber
+    - eventNumber
+    - GpsTime
 
 rename:
     Y_PT: y_pt

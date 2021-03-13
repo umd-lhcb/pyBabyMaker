@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Mar 13, 2021 at 04:32 PM +0100
+# Last Change: Sat Mar 13, 2021 at 04:37 PM +0100
 """
 This module dumps all branch names and their types from all TTrees in a ntuple.
 """
@@ -16,8 +16,10 @@ class PyTupleDump:
         self.ntp = uproot.open(ntp_path)
 
     def dump(self):
-        return {self.tree_name(key): self.type_hint(self.ntp[key].typenames())
-                for key in self.ttree_only(self.ntp)}
+        return {self.tree_name(tree):
+                {k: self.type_hint(v)
+                 for k, v in self.ntp[tree].typenames().items()}
+                for tree in self.ttree_only(self.ntp)}
 
     @classmethod
     def ttree_only(cls, ntp, keey_highest_cycle_only=True):

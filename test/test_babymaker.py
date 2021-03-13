@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Mar 10, 2021 at 11:53 PM +0100
+# Last Change: Sat Mar 13, 2021 at 04:48 PM +0100
 
 import yaml
 import pytest
@@ -89,6 +89,9 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
     assert directive['trees']['ATuple']['input_br'] == [
         'raw_Y_PT',
         'raw_Y_PE',
+        'raw_runNumber',
+        'raw_eventNumber',
+        'raw_GpsTime',
         'raw_Y_PX',
         'raw_Y_PY',
         'raw_Y_PZ',
@@ -97,6 +100,9 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
     assert directive['trees']['ATuple']['input'] == [
         BabyVariable('Y_PT', 'double', input=True, output=False),
         BabyVariable('Y_PE', 'double', input=True, output=False),
+        BabyVariable('runNumber', 'UInt_t', input=True, output=False),
+        BabyVariable('eventNumber', 'ULong64_t', input=True, output=False),
+        BabyVariable('GpsTime', 'ULong64_t', input=True, output=False),
         BabyVariable('Y_PX', 'double', input=True, output=False),
         BabyVariable('Y_PY', 'double', input=True, output=False),
         BabyVariable('Y_PZ', 'double', input=True, output=False),
@@ -104,6 +110,9 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
     ]
     assert directive['trees']['ATuple']['output'] == [
         BabyVariable('Y_PE', 'double', ['Y_PE']),
+        BabyVariable('runNumber', 'UInt_t', ['runNumber']),
+        BabyVariable('eventNumber', 'ULong64_t', ['eventNumber']),
+        BabyVariable('GpsTime', 'ULong64_t', ['GpsTime']),
         BabyVariable('y_pt', 'double', ['Y_PT']),
         BabyVariable('y_px', 'double', ['Y_PX']),
         BabyVariable('y_py', 'double', ['Y_PY']),
@@ -119,6 +128,9 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
     assert directive['trees']['ATuple']['pre_sel_vars'] == []
     assert directive['trees']['ATuple']['post_sel_vars'] == [
         BabyVariable('Y_PE', 'double', ['Y_PE']),
+        BabyVariable('runNumber', 'UInt_t', ['runNumber']),
+        BabyVariable('eventNumber', 'ULong64_t', ['eventNumber']),
+        BabyVariable('GpsTime', 'ULong64_t', ['GpsTime']),
         BabyVariable('y_pt', 'double', ['Y_PT']),
         BabyVariable('y_px', 'double', ['Y_PX']),
         BabyVariable('y_py', 'double', ['Y_PY']),
@@ -144,6 +156,9 @@ def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
         BabyVariable('Y_PX', 'double', input=True, output=False),
         BabyVariable('Y_PY', 'double', input=True, output=False),
         BabyVariable('Y_PZ', 'double', input=True, output=False),
+        BabyVariable('runNumber', 'UInt_t', input=True, output=False),
+        BabyVariable('eventNumber', 'ULong64_t', input=True, output=False),
+        BabyVariable('GpsTime', 'ULong64_t', input=True, output=False),
         BabyVariable('D0_P', 'double', input=True, output=False),
     ]
     assert directive['trees']['AnotherTuple']['output'] == [
@@ -155,6 +170,9 @@ def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
         BabyVariable('Y_PX', 'double', ['Y_PX']),
         BabyVariable('Y_PY', 'double', ['Y_PY']),
         BabyVariable('Y_PZ', 'double', ['Y_PZ']),
+        BabyVariable('runNumber', 'UInt_t', ['runNumber']),
+        BabyVariable('eventNumber', 'ULong64_t', ['eventNumber']),
+        BabyVariable('GpsTime', 'ULong64_t', ['GpsTime']),
         BabyVariable('RandStuff', 'double', ['TempStuff']),
     ]
     assert directive['trees']['AnotherTuple']['tmp'] == [

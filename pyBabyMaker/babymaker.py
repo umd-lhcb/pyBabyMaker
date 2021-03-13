@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Mar 13, 2021 at 01:10 AM +0100
+# Last Change: Sun Mar 14, 2021 at 12:55 AM +0100
 
 import re
 import logging
@@ -182,6 +182,13 @@ class BabyConfigParser:
                  if True not in [v.input, v.output, v.fake]],
                 'input_br': [v.fname for v in resolved_vars if v.input],
             }
+
+            # Merge raw config sections that doesn't override keys above
+            config_to_merge = {k: v for k, v in config.items()
+                               if k not in directive['trees'][output_tree] and
+                               k not in ['headers', 'keep', 'rename',
+                                         'calculation', 'selection']}
+            directive['trees'][output_tree].update(config_to_merge)
 
         return directive
 

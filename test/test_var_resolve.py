@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Mar 14, 2021 at 03:23 AM +0100
+# Last Change: Sun Mar 14, 2021 at 04:40 PM +0100
 
 from collections import defaultdict
 
@@ -399,16 +399,19 @@ def test_VariableResolver_scope_resolve():
     assert result[0][3][1].rval == 'calc_c/calc_b'
 
 
-############################################
-# Resolve all variables in multiple scopes #
-############################################
-
-def test_VariableResolver_all_multi_scopes_alt_rval():
+# NOTE: In a real use case, the dependency variables in 'selection' were
+# resolved multiple times, thus an error message was emitted.
+def test_VariableResolver_scope_duplicated_resolution():
     namespace = {
+        'sel': {
+            'sel0': Variable('sel0', rvalues=['mu_pid > 0']),
+            'sel1': Variable('sel1', rvalues=['test > 0'])
+        },
         'calc': {
             'mu_pid': Variable('mu_pid',
                                rvalues=['MU_PID(mu_true_id)',
-                                        'MU_PID(mu_is_mu, mu_pid_mu)'])
+                                        'MU_PID(mu_is_mu, mu_pid_mu)']),
+            'test': Variable('test', rvalues=['TEST(mu_pid_mu, mu_is_mu)'])
         },
         'rename': {
             'mu_true_id': Variable('mu_true_id', rvalues=['mu_TRUEID']),
@@ -422,10 +425,9 @@ def test_VariableResolver_all_multi_scopes_alt_rval():
         }
     }
     resolver = VariableResolver(namespace)
-    step1 = resolver.resolve_scope('calc')
-    step2 = resolver.resolve_scope('rename')
+    result = resolver.resolve_scope('sel', ordering=['calc', 'rename', 'raw'])
 
-    assert step1 == (
+    assert result == (
         [
             ('raw', Variable('mu_isMuon')),
             ('rename', Variable('mu_is_mu', rvalues=['mu_isMuon'])),
@@ -433,13 +435,10 @@ def test_VariableResolver_all_multi_scopes_alt_rval():
             ('rename', Variable('mu_pid_mu', rvalues=['mu_PIDmu'])),
             ('calc', Variable('mu_pid',
                               rvalues=['MU_PID(mu_true_id)',
-                                       'MU_PID(mu_is_mu, mu_pid_mu)']))
+                                       'MU_PID(mu_is_mu, mu_pid_mu)'])),
+            ('sel', Variable('sel0', rvalues=['mu_pid > 0'])),
+            ('calc', Variable('test', rvalues=['TEST(mu_pid_mu, mu_is_mu)'])),
+            ('sel', Variable('sel1', rvalues=['test > 0']))
         ],
         []
-    )
-    assert step2 == (
-        [],
-        [
-            (Variable('mu_true_id', rvalues=['mu_TRUEID']))
-        ]
     )

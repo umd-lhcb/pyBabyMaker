@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Mar 13, 2021 at 02:17 AM +0100
+# Last Change: Mon Mar 15, 2021 at 12:04 AM +0100
 
 import re
 import logging
@@ -12,6 +12,7 @@ from typing import List, Dict
 
 from pyBabyMaker.boolean.utils import find_all_vars
 from pyBabyMaker.base import TermColor as TC
+from pyBabyMaker.base import UniqueList
 
 DEBUG = logging.debug
 
@@ -123,7 +124,7 @@ class VariableResolver(object):
         Resolve a single variable in namespaces following an ordering.
         """
         load_seq = []
-        known_names = [] if known_names is None else known_names
+        known_names = UniqueList() if known_names is None else known_names
         var_key = (scope, var.name)
         DEBUG('Start resolving: {}.{}'.format(scope, var.name))
 
@@ -172,13 +173,15 @@ class VariableResolver(object):
                     else:
                         DEBUG('Try to resolve dep {}.{}.'.format(
                             other_scope, dep_var_name))
-                        dep_load_status, dep_load_seq, _ = self.resolve_var(
-                            other_scope, dep_var, ordering[idx:], known_names)
+                        dep_load_status, dep_load_seq, dep_known_names = \
+                            self.resolve_var(other_scope, dep_var,
+                                             ordering[idx:], known_names)
                         if dep_load_status:
                             DEBUG('Resolved dep {}.{}.'.format(
                                 other_scope, dep_var_name))
                             var.resolved[dep_var_name] = dep_var_name_resolved
                             load_seq += dep_load_seq
+                            known_names += dep_known_names
 
         if var.ok:
             DEBUG('Fully resolved: {}.{}.'.format(scope, var.name))

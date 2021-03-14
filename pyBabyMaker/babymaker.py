@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Mar 14, 2021 at 12:55 AM +0100
+# Last Change: Sun Mar 14, 2021 at 02:49 AM +0100
 
 import re
 import logging
@@ -118,9 +118,8 @@ class BabyConfigParser:
             self.parse_selection(config, namespace)
 
             # Initialize a variable resolver
-            if 'skip_names' in self.parsed_config:
-                resolver = BabyVariableResolver(
-                    namespace, self.parsed_config['skip_names'])
+            if 'skip_names' in config:
+                resolver = BabyVariableResolver(namespace, config['skip_names'])
             else:
                 resolver = BabyVariableResolver(namespace)
             if self.debug:

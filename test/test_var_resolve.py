@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Mar 13, 2021 at 02:17 AM +0100
+# Last Change: Sun Mar 14, 2021 at 03:23 AM +0100
 
 from collections import defaultdict
 
@@ -397,3 +397,49 @@ def test_VariableResolver_scope_resolve():
     assert result[0][1][1].rval == 'GEV2(raw_b)'
     assert result[0][2][1].rval == 'calc_b*calc_b'
     assert result[0][3][1].rval == 'calc_c/calc_b'
+
+
+############################################
+# Resolve all variables in multiple scopes #
+############################################
+
+def test_VariableResolver_all_multi_scopes_alt_rval():
+    namespace = {
+        'calc': {
+            'mu_pid': Variable('mu_pid',
+                               rvalues=['MU_PID(mu_true_id)',
+                                        'MU_PID(mu_is_mu, mu_pid_mu)'])
+        },
+        'rename': {
+            'mu_true_id': Variable('mu_true_id', rvalues=['mu_TRUEID']),
+            'mu_is_mu': Variable('mu_is_mu', rvalues=['mu_isMuon']),
+            'mu_pid_mu': Variable('mu_pid_mu', rvalues=['mu_PIDmu'])
+        },
+        'raw': {
+            # 'mu_TRUEID': Variable('mu_TRUEID'),
+            'mu_isMuon': Variable('mu_isMuon'),
+            'mu_PIDmu': Variable('mu_PIDmu')
+        }
+    }
+    resolver = VariableResolver(namespace)
+    step1 = resolver.resolve_scope('calc')
+    step2 = resolver.resolve_scope('rename')
+
+    assert step1 == (
+        [
+            ('raw', Variable('mu_isMuon')),
+            ('rename', Variable('mu_is_mu', rvalues=['mu_isMuon'])),
+            ('raw', Variable('mu_PIDmu')),
+            ('rename', Variable('mu_pid_mu', rvalues=['mu_PIDmu'])),
+            ('calc', Variable('mu_pid',
+                              rvalues=['MU_PID(mu_true_id)',
+                                       'MU_PID(mu_is_mu, mu_pid_mu)']))
+        ],
+        []
+    )
+    assert step2 == (
+        [],
+        [
+            (Variable('mu_true_id', rvalues=['mu_TRUEID']))
+        ]
+    )

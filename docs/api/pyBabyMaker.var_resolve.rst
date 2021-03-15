@@ -1,5 +1,5 @@
-``pyBabyMaker.base``
---------------------
+``pyBabyMaker.var_resolve``
+---------------------------
 
 .. automodule:: pyBabyMaker.var_resolve
    :members:

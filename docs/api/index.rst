@@ -10,6 +10,7 @@ API
    pyBabyMaker.babymaker
    pyBabyMaker.var_resolve
    pyBabyMaker.io.NestedYAMLLoader
+   pyBabyMaker.io.TupleDump
    pyBabyMaker.engine.core
    pyBabyMaker.engine.eval
    pyBabyMaker.engine.functions

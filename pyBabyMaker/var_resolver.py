@@ -2,7 +2,10 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Mar 15, 2021 at 12:04 AM +0100
+# Last Change: Tue Mar 16, 2021 at 12:02 AM +0100
+"""
+This module provides general variable dependency resolution.
+"""
 
 import re
 import logging

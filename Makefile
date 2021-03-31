@@ -1,15 +1,12 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Jan 13, 2021 at 01:20 AM +0100
+# Last Change: Wed Mar 31, 2021 at 10:58 PM +0200
 
 include ./samples/sample.mk
 
 .PHONY: build sdist clean doc \
 	install install-egg gen \
 	test unittest integrationtest
-
-build:
-	@python ./compile.py build_ext --inplace
 
 sdist:
 	@python ./setup.py sdist

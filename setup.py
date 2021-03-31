@@ -1,16 +1,15 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Mar 10, 2021 at 10:31 PM +0100
+# Last Change: Wed Mar 31, 2021 at 10:53 PM +0200
 
 import setuptools
 import subprocess
 import sys
-import re
 import codecs
 import os.path
 
 from setuptools.command.test import test as TestCommand
-from distutils.core import setup, Extension
+from distutils.core import setup
 
 
 ###########

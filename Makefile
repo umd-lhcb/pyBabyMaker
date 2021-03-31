@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Mar 31, 2021 at 11:19 PM +0200
+# Last Change: Wed Mar 31, 2021 at 11:24 PM +0200
 
 include ./samples/sample.mk
 
@@ -16,7 +16,6 @@ clean:
 	@rm -rf ./dist
 	@rm -rf ./gen
 	@rm -rf ./pyBabyMaker.egg-info
-	@find . -name '*.so' -delete
 
 doc:
 	@sphinx-build -b html docs build
@@ -26,6 +25,9 @@ install:
 
 install-egg:
 	@python ./setup.py install
+
+gen:
+	@mkdir -p gen
 
 test: unittest
 
@@ -47,6 +49,3 @@ gen/sample-babymaker.root: samples/sample.root gen/postprocess
 
 gen/postprocess.cpp: samples/sample-babymaker.yml samples/sample.root gen
 	babymaker --debug --no-format -i $< -o $@ -d ./samples/sample.root
-
-gen:
-	@mkdir -p gen

@@ -1,3 +1,1 @@
-include pyBabyMaker/io/TupleDump_unwrapped/*.cpp
-include pyBabyMaker/io/TupleDump_unwrapped/*.h
 include pyBabyMaker/cpp_templates/*.cpp

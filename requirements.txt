@@ -1,4 +1,0 @@
-pyyaml
-lark-parser
-uproot
-lz4

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Mar 14, 2021 at 02:49 AM +0100
+# Last Change: Thu Jun 17, 2021 at 01:53 AM +0200
 
 import re
 import logging
@@ -278,13 +278,14 @@ class BabyMaker(BaseMaker):
     """
     ``babymaker`` class to glue parser and code generator together.
     """
-    def __init__(self, config_filename, ntuple_filename, template_filename,
-                 use_reformater=True):
+    def __init__(self, config_filename, ntuple_filename, friend_filenames,
+                 template_filename, use_reformater=True):
         """
         Initialize with path to YAML file and ntuple file.
         """
         self.config_filename = config_filename
         self.ntuple_filename = ntuple_filename
+        self.friend_filenames = friend_filenames
         self.template_filename = template_filename
         self.use_reformater = use_reformater
 
@@ -293,7 +294,7 @@ class BabyMaker(BaseMaker):
         Generate C++ file based on inputs.
         """
         parsed_config = self.read(self.config_filename)
-        dumped_ntuple = self.dump(self.ntuple_filename)
+        dumped_ntuple, tree_relations = self.dump_ntuples()
         directive = self.directive_gen(parsed_config, dumped_ntuple, debug)
 
         with open(self.template_filename) as tmpl:
@@ -305,6 +306,26 @@ class BabyMaker(BaseMaker):
             f.write(''.join(output_cpp))
         if self.use_reformater:
             self.reformat(filename)
+
+    def dump_ntuples(self):
+        """
+        Dump main ntuple and all friend ntuples.
+        """
+        trees = self.dump(self.ntuple_filename)
+        tree_relations = {k: [] for k in trees}
+
+        for friend in self.friend_filenames:
+            friend_trees = self.dump(friend)
+
+            for t in trees:
+                in_friend = t in friend_trees
+                tree_relations[t].append(in_friend)
+
+                if in_friend:
+                    # Mark branches in friend trees as available
+                    trees[t].update(friend_trees[t])
+
+        return trees, tree_relations
 
     @staticmethod
     def directive_gen(parsed_config, dumped_ntuple, debug=False):

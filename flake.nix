@@ -1,12 +1,13 @@
 {
   description = "Python babymaker (flat ntuple generation tool) library.";
 
-  inputs = rec {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-20.09";
-    flake-utils.url = "github:numtide/flake-utils";
+  inputs = {
+    root-curated.url = "github:umd-lhcb/root-curated";
+    nixpkgs.follows = "root-curated/nixpkgs";
+    flake-utils.follows = "root-curated/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, root-curated, nixpkgs, flake-utils }:
     {
       overlay = import ./nix/overlay.nix;
     }
@@ -15,7 +16,7 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ self.overlay ];
+          overlays = [ self.overlay root-curated.overlay ];
         };
         python = pkgs.python3;
         pythonPackages = python.pkgs;

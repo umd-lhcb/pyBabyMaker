@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Jun 17, 2021 at 01:53 AM +0200
+# Last Change: Thu Jun 17, 2021 at 01:55 AM +0200
 
 import re
 import logging
@@ -279,7 +279,7 @@ class BabyMaker(BaseMaker):
     ``babymaker`` class to glue parser and code generator together.
     """
     def __init__(self, config_filename, ntuple_filename, friend_filenames,
-                 template_filename, use_reformater=True):
+                 template_filename, use_reformatter=True):
         """
         Initialize with path to YAML file and ntuple file.
         """
@@ -287,7 +287,7 @@ class BabyMaker(BaseMaker):
         self.ntuple_filename = ntuple_filename
         self.friend_filenames = friend_filenames
         self.template_filename = template_filename
-        self.use_reformater = use_reformater
+        self.use_reformatter = use_reformatter
 
     def gen(self, filename, debug=False):
         """
@@ -304,7 +304,7 @@ class BabyMaker(BaseMaker):
 
         with open(filename, 'w') as f:
             f.write(''.join(output_cpp))
-        if self.use_reformater:
+        if self.use_reformatter:
             self.reformat(filename)
 
     def dump_ntuples(self):

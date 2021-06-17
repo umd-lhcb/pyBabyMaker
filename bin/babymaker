@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Jan 15, 2021 at 12:21 AM +0100
+# Last Change: Thu Jun 17, 2021 at 12:13 AM +0200
 
 from argparse import ArgumentParser
 from pyBabyMaker.babymaker import BabyMaker
@@ -29,11 +29,17 @@ path to input YAML file.''')
                         help='''
 path to output C++ file.''')
 
-    parser.add_argument('-d', '--data',
+    parser.add_argument('-n', '--ntuple',
                         nargs='?',
                         required=True,
                         help='''
-path to data ntuple file.''')
+path to the main ntuple file.''')
+
+    parser.add_argument('-f', '--friends',
+                        nargs='+',
+                        default=[],
+                        help='''
+path to the auxillary ntuples containing friend trees.''')
 
     parser.add_argument('--no-format',
                         action='store_false',
@@ -61,5 +67,6 @@ specify template path.''')
 if __name__ == '__main__':
     args = parse_input()
     template = load_file(args.template_path)
-    maker = BabyMaker(args.input, args.data, template, args.no_format)
+    maker = BabyMaker(args.input, args.ntuple, args.friends, template,
+                      args.no_format)
     maker.gen(args.output, args.debug)

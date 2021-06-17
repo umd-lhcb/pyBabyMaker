@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Jun 17, 2021 at 01:55 AM +0200
+# Last Change: Thu Jun 17, 2021 at 02:57 AM +0200
 
 import re
 import logging
@@ -296,6 +296,11 @@ class BabyMaker(BaseMaker):
         parsed_config = self.read(self.config_filename)
         dumped_ntuple, tree_relations = self.dump_ntuples()
         directive = self.directive_gen(parsed_config, dumped_ntuple, debug)
+
+        # Adding ntuple info to the directive
+        directive['ntuple'] = self.ntuple_filename
+        directive['friends'] = self.friend_filenames
+        directive['tree_relations'] = tree_relations
 
         with open(self.template_filename) as tmpl:
             macros = template_transformer(tmpl, directive)

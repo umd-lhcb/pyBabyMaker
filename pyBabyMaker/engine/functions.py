@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jan 25, 2021 at 03:42 AM +0100
+# Last Change: Thu Jun 17, 2021 at 03:32 AM +0200
 """
 This module defines functions for template macro.
 """
@@ -88,6 +88,7 @@ macro_funcs = {
     'join': lambda lst, string: string.join(lst),
     'list': lambda *args: [i for i in args],
     'pop': lambda lst: lst.pop() if lst else None,
+    'enum': lambda lst, start=0: enumerate(lst, start=start),
     # Arithmetic
     'neg': lambda val: -val,
     # Boolean
@@ -106,6 +107,7 @@ macro_funcs = {
     # String manipulation
     'format': lambda str_template, *args: str_template.format(*args),
     'format_list': func_format_list,
+    'quote': lambda s: '"{}"'.format(s),
     # Function/Method callers
     'method_call': lambda instance, method_name, *args:
         getattr(instance, method_name)(*args),
@@ -116,4 +118,7 @@ macro_funcs = {
     'deref_var_list': lambda expr_lst, vars_to_deref:
         ['({})'.format(func_deref_var(expr, vars_to_deref))
          for expr in expr_lst],
+    # C++ shorthands
+    'declare': lambda t, n: "{} {};".format(t, n),
+    'assign': lambda lval, rval: "{} = {};".format(lval, rval),
 }

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Jun 17, 2021 at 03:32 AM +0200
+# Last Change: Sat Jun 19, 2021 at 01:22 AM +0200
 """
 This module defines functions for template macro.
 """
@@ -76,12 +76,21 @@ def func_format_list(str_template, lst):
     return [str_template.format(*a) for a in args]
 
 
+def func_guard(input_str, chars_to_replace=['*', '/']):
+    """
+    Return a string with chars illegal in variable names replaced.
+
+    :param str input_str: string to be replaced.
+    :param list chars_to_replace: list of illegal chars.
+    """
+    for c in chars_to_replace:
+        input_str = input_str.replace(c, '_')
+    return input_str
+
+
 macro_funcs = {
     # Trivial
     'identity': lambda x: x,
-    'one': lambda: 1,
-    'true': lambda: True,
-    'false': lambda: False,
     # IO
     'input': func_input,
     # List & dict
@@ -108,6 +117,7 @@ macro_funcs = {
     'format': lambda str_template, *args: str_template.format(*args),
     'format_list': func_format_list,
     'quote': lambda s: '"{}"'.format(s),
+    'guard': func_guard,
     # Function/Method callers
     'method_call': lambda instance, method_name, *args:
         getattr(instance, method_name)(*args),

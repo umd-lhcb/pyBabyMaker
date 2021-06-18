@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 04, 2020 at 03:31 AM +0800
+# Last Change: Sat Jun 19, 2021 at 01:23 AM +0200
 
 from pyBabyMaker.engine.functions import macro_funcs
 
@@ -30,3 +30,8 @@ def test_func_format_list():
     lst = ['cmath', 'std']
     assert macro_funcs['format_list']('#include <{}>', lst) == \
         ['#include <cmath>', '#include <std>']
+
+
+def test_func_guard():
+    str_to_guard = r'a/test*/'
+    assert macro_funcs['guard'](str_to_guard) == 'a_test__'

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Mar 13, 2021 at 04:48 PM +0100
+# Last Change: Sat Jun 19, 2021 at 12:50 AM +0200
 
 import yaml
 import pytest
@@ -210,6 +210,7 @@ def directive():
         'system_headers': UniqueList(),
         'user_headers': UniqueList(),
         'tree': {},
+        'input_trees': [],
     }
 
 

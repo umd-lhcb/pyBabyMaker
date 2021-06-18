@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Jun 17, 2021 at 02:57 AM +0200
+# Last Change: Sat Jun 19, 2021 at 12:50 AM +0200
 
 import re
 import logging
@@ -87,12 +87,14 @@ class BabyConfigParser:
         directive = {
             'system_headers': UniqueList(),
             'user_headers': UniqueList(),
-            'trees': {},
+            'output_trees': {},
+            'input_trees': [],
         }
         self.parse_headers(self.parsed_config, directive)
 
         for output_tree, config in self.parsed_config['output'].items():
             input_tree = config['input']
+            directive['input_trees'].append(input_tree)
 
             try:
                 dumped_tree = self.dumped_ntuple[input_tree]

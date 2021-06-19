@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Jun 19, 2021 at 03:45 AM +0200
+# Last Change: Sat Jun 19, 2021 at 03:55 AM +0200
 """
 This module defines functions for template macro.
 """
@@ -94,9 +94,11 @@ def _func_wrapper(f):
             return f(*args, **kwargs)
         except Exception as e:
             print('Error when executing function: {}'.format(f.__name__))
-            print('The arguments are: {}'.format(', '.join(args)))
+            print('The arguments are: {}'.format(', '.join(
+                [str(i) for i in args]
+            )))
             print('The keyword arguments are: {}'.format(', '.join(
-                ['{}={}'.format(k, kwargs[k]) for k in kwargs]
+                ['{}={}'.format(k, str(kwargs[k])) for k in kwargs]
             )))
             raise e
 

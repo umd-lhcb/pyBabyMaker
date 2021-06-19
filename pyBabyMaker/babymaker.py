@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Jun 19, 2021 at 12:50 AM +0200
+# Last Change: Sat Jun 19, 2021 at 03:17 AM +0200
 
 import re
 import logging
@@ -87,7 +87,7 @@ class BabyConfigParser:
         directive = {
             'system_headers': UniqueList(),
             'user_headers': UniqueList(),
-            'output_trees': {},
+            'trees': {},
             'input_trees': [],
         }
         self.parse_headers(self.parsed_config, directive)

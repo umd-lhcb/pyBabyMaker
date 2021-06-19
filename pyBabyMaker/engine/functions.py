@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Jun 19, 2021 at 01:22 AM +0200
+# Last Change: Sat Jun 19, 2021 at 03:45 AM +0200
 """
 This module defines functions for template macro.
 """
@@ -35,7 +35,7 @@ def func_getattr(val, attr):
     """
     try:
         return getattr(val, str(attr))
-    except Exception:
+    except AttributeError:
         return val[str(attr)]
 
 
@@ -88,9 +88,28 @@ def func_guard(input_str, chars_to_replace=['*', '/']):
     return input_str
 
 
-macro_funcs = {
+def _func_wrapper(f):
+    def inner(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except Exception as e:
+            print('Error when executing function: {}'.format(f.__name__))
+            print('The arguments are: {}'.format(', '.join(args)))
+            print('The keyword arguments are: {}'.format(', '.join(
+                ['{}={}'.format(k, kwargs[k]) for k in kwargs]
+            )))
+            raise e
+
+    return inner
+
+
+macro_funcs_raw = {
     # Trivial
     'identity': lambda x: x,
+    'one': lambda: 1,
+    # Boolean
+    'true': lambda: True,
+    'false': lambda: False,
     # IO
     'input': func_input,
     # List & dict
@@ -132,3 +151,5 @@ macro_funcs = {
     'declare': lambda t, n: "{} {};".format(t, n),
     'assign': lambda lval, rval: "{} = {};".format(lval, rval),
 }
+
+macro_funcs = {k: _func_wrapper(f) for k, f in macro_funcs_raw.items()}

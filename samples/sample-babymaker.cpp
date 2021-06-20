@@ -558,13 +558,13 @@ int main(int, char** argv) {
   TString in_prefix  = TString(argv[1]) + "/";
   TString out_prefix = TString(argv[2]) + "/";
 
-  TFile *ntuple = new TFile(in_prefix + "./samples/sample.root");
-  cout << "The ntuple being worked on is: " << "./samples/sample.root"
+  TFile *ntuple = new TFile(in_prefix + "../samples/sample.root");
+  cout << "The ntuple being worked on is: " << "../samples/sample.root"
     << endl;
 
   vector<TFile*> friend_ntuples;
-    friend_ntuples.push_back(new TFile(in_prefix + "./samples/sample_friend.root"));
-    cout << "Additional friend ntuple: " << "./samples/sample_friend.root" << endl;
+    friend_ntuples.push_back(new TFile(in_prefix + "../samples/sample_friend.root"));
+    cout << "Additional friend ntuple: " << "../samples/sample_friend.root" << endl;
 
   // Define input trees and container to store associated friend trees
   auto tree_TupleB0_DecayTree = static_cast<TTree*>(ntuple->Get("TupleB0/DecayTree"));

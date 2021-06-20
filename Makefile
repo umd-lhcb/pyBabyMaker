@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jun 20, 2021 at 02:58 AM +0200
+# Last Change: Sun Jun 20, 2021 at 04:17 AM +0200
 
 include ./samples/sample.mk
 
@@ -36,7 +36,7 @@ test: unittest
 ##############
 
 unittest: install
-	@pytest ./test
+	@cd test; pytest .
 
 #####################
 # Integration tests #

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jun 20, 2021 at 03:54 AM +0200
+# Last Change: Sun Jun 20, 2021 at 04:15 AM +0200
 
 import yaml
 import pytest
@@ -21,8 +21,8 @@ from pyBabyMaker.io.TupleDump import PyTupleDump
 PWD = dirname(realpath(__file__))
 PARDIR = J(PWD, pardir)
 SAMPLE_YAML   = J(PARDIR, 'samples', 'sample-babymaker.yml')
-SAMPLE_ROOT   = J('.', 'samples', 'sample.root')
-SAMPLE_FRIEND = J('.', 'samples', 'sample_friend.root')
+SAMPLE_ROOT   = '../samples/sample.root'
+SAMPLE_FRIEND = '../samples/sample_friend.root'
 SAMPLE_TMPL   = J(PARDIR, 'pyBabyMaker', 'cpp_templates', 'babymaker.cpp')
 SAMPLE_CPP    = J(PARDIR, 'samples', 'sample-babymaker.cpp')
 

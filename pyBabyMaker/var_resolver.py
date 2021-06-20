@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Mar 16, 2021 at 12:02 AM +0100
+# Last Change: Mon Jun 21, 2021 at 12:01 AM +0200
 """
 This module provides general variable dependency resolution.
 """
@@ -29,6 +29,7 @@ class Variable:
     type: str = 'nil'
     rvalues: List[str] = field(default_factory=lambda: [''])
     deps: Dict[str, List[str]] = field(init=False)
+    literal: str = None
 
     def __post_init__(self):
         self.resolved = {}
@@ -57,7 +58,8 @@ class Variable:
         """
         Return if current rvalue is fully resolved.
         """
-        if len(self.resolved) == len(list(self.deps.values())[self.idx]):
+        if self.literal is not None or len(self.resolved) == \
+                len(list(self.deps.values())[self.idx]):
             return True
         return False
 
@@ -70,6 +72,9 @@ class Variable:
         Suppose ``a -> calc_a``, and ``b -> rename_b``, then a rvalue of
         ``a+b -> calc_a+rename_b``.
         """
+        if self.literal is not None:
+            return self.literal
+
         expr = list(self.deps)[self.idx]
         for orig, resolved in self.resolved.items():
             expr = re.sub(r'\b'+orig+r'\b', resolved, expr)

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Jun 19, 2021 at 10:51 PM +0200
+# Last Change: Sun Jun 20, 2021 at 11:31 PM +0200
 
 import re
 import logging
@@ -66,7 +66,8 @@ class BabyConfigParser:
     """
     Basic parser for YAML C++ code instruction.
     """
-    def __init__(self, parsed_config, dumped_ntuple, debug=False):
+    def __init__(self, parsed_config, dumped_ntuple, debug=False,
+                 literals={}):
         """
         Initialize the config parser with parsed YAML file and dumped ntuple
         structure.
@@ -74,6 +75,7 @@ class BabyConfigParser:
         self.parsed_config = parsed_config
         self.dumped_ntuple = dumped_ntuple
         self.debug = debug
+        self.literals = literals
 
         if debug:
             logging.basicConfig(level=logging.DEBUG)
@@ -111,6 +113,7 @@ class BabyConfigParser:
             merge = config['inherit'] if 'inherit' in config else True
             config = update_config(self.parsed_config, config, merge=merge)
             namespace = defaultdict(dict)
+            namespace['literals'] = self.literals
             namespace['raw'] = {n: BabyVariable(n, t, input=True, output=False)
                                 for n, t in dumped_tree.items()}
 
@@ -129,14 +132,14 @@ class BabyConfigParser:
 
             # Resolve variables needed for selection
             selection, unresolved_selection = resolver.resolve_scope(
-                'selection', ['calculation', 'rename', 'raw'])
+                'selection', ['literals', 'calculation', 'rename', 'raw'])
 
             # Resolve all other variables
             keep, unresolved_keep = resolver.resolve_scope('keep', ['raw'])
             rename, unresolved_rename = resolver.resolve_scope(
                 'rename', ['raw'])
             calculation, unresolved_calculation = resolver.resolve_scope(
-                'calculation', ['calculation', 'rename', 'raw'])
+                'calculation', ['literals', 'calculation', 'rename', 'raw'])
             resolved_vars = selection + keep + rename + calculation
             most_unresolved_vars = unresolved_keep + unresolved_rename + \
                 unresolved_calculation

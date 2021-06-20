@@ -8,7 +8,7 @@ Usage
 
 .. code-block:: console
 
-   babymaker -i <yaml_file> -d <ntuple_file> -o <output_cpp> -t <template_file>
+   babymaker -i <yaml_file> -n <main_ntuple> -f [<friend_ntuple1> ...] -o <output_cpp> -t <template_file>
 
 Note that:
 

@@ -8,6 +8,7 @@
 #include <TString.h>
 
 #include <vector>
+#include <iostream>
 
 // System headers
 // {% join: (format_list: "#include <{}>", directive.system_headers), "\n" %}
@@ -20,7 +21,8 @@ using namespace std;
 // Generator for each output tree: one tree per file
 // {% for tree_out, config in directive.trees->items: %}
 void generator_/* {% guard: tree_out %} */(TTree *input_tree, TString output_prefix) {
-  auto output_file = new TFile(output_prefix + /* {% quote: tree_out %} */ + ".root");
+  cout << "Generating output ntuple: " << /* {% quote: tree_out %} */ << endl;
+  auto output_file = new TFile(output_prefix + /* {% quote: tree_out %} */ + ".root", "recreate");
   TTreeReader reader(input_tree);
   TTree output("tree", "tree");
 
@@ -64,13 +66,16 @@ void generator_/* {% guard: tree_out %} */(TTree *input_tree, TString output_pre
 
 int main(int, char** argv) {
   TString in_prefix  = TString(argv[1]) + "/";
-  TString out_prefix = TString(argv[2]);
+  TString out_prefix = TString(argv[2]) + "/";
 
   TFile *ntuple = new TFile(in_prefix + /* {% quote: directive.ntuple %} */);
+  cout << "The ntuple being worked on is: " << /* {% quote: directive.ntuple %} */
+    << endl;
 
   vector<TFile*> friend_ntuples;
   // {% for friend in directive.friends %}
     friend_ntuples.push_back(new TFile(in_prefix + /* {% quote: friend %} */));
+    cout << "Additional friend ntuple: " << /* {% quote: friend %} */ << endl;
   // {% endfor %}
 
   // Define input trees and container to store associated friend trees
@@ -88,6 +93,7 @@ int main(int, char** argv) {
            tmp_tree->BuildIndex("runNumber", "eventNumber");
            tree_/* {% guard: tree %} */->AddFriend(tmp_tree);
            friends_/* {% guard: tree %} */.push_back(tmp_tree);
+           cout << "Handling input tree: " << /* {% quote: tree %} */ << endl;
   //     {% endif %}
   //   {% endfor %}
   // {% endfor %}
@@ -97,11 +103,12 @@ int main(int, char** argv) {
   // {% endfor %}
 
   // Cleanups
+  cout <<"Cleanups" << endl;
   delete ntuple;
-  for (auto ntp : friend_ntuples) delete ntp;
   // {% for tree in directive.input_trees %}
     for (auto tree : friends_/* {% guard: tree %} */) delete tree;
   // {% endfor %}
+  for (auto ntp : friend_ntuples) delete ntp;
 
   return 0;
 }

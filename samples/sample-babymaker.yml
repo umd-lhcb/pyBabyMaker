@@ -5,6 +5,7 @@ headers:
 
 keep:
     - ^Y_P\w$
+    - random_pt
     - runNumber
     - eventNumber
     - GpsTime

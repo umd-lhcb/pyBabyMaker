@@ -4,6 +4,10 @@
 #include <TTree.h>
 #include <TTreeReader.h>
 #include <TBranch.h>
+#include <TString.h>
+
+#include <vector>
+#include <iostream>
 
 // System headers
 #include <cmath>
@@ -12,10 +16,14 @@
 // User headers
 
 
-// Generator for each output tree
-void generator_ATuple(TFile *input_file, TFile *output_file) {
-  TTreeReader reader("TupleB0/DecayTree", input_file);
-  TTree output("ATuple", "ATuple");
+using namespace std;
+
+// Generator for each output tree: one tree per file
+void generator_ATuple(TTree *input_tree, TString output_prefix) {
+  cout << "Generating output ntuple: " << "ATuple" << endl;
+  auto output_file = new TFile(output_prefix + "ATuple" + ".root", "recreate");
+  TTreeReader reader(input_tree);
+  TTree output("tree", "tree");
 
   // Load needed branches from ntuple
   TTreeReaderValue<double> raw_Y_PT(reader, "Y_PT");
@@ -23,6 +31,7 @@ void generator_ATuple(TFile *input_file, TFile *output_file) {
   TTreeReaderValue<UInt_t> raw_runNumber(reader, "runNumber");
   TTreeReaderValue<ULong64_t> raw_eventNumber(reader, "eventNumber");
   TTreeReaderValue<ULong64_t> raw_GpsTime(reader, "GpsTime");
+  TTreeReaderValue<double> raw_random_pt(reader, "random_pt");
   TTreeReaderValue<double> raw_Y_PX(reader, "Y_PX");
   TTreeReaderValue<double> raw_Y_PY(reader, "Y_PY");
   TTreeReaderValue<double> raw_Y_PZ(reader, "Y_PZ");
@@ -37,6 +46,8 @@ void generator_ATuple(TFile *input_file, TFile *output_file) {
   output.Branch("eventNumber", &keep_eventNumber);
   ULong64_t keep_GpsTime;
   output.Branch("GpsTime", &keep_GpsTime);
+  double keep_random_pt;
+  output.Branch("random_pt", &keep_random_pt);
   double rename_y_pt;
   output.Branch("y_pt", &rename_y_pt);
   double rename_y_px;
@@ -65,6 +76,7 @@ void generator_ATuple(TFile *input_file, TFile *output_file) {
       keep_runNumber = (*raw_runNumber);
       keep_eventNumber = (*raw_eventNumber);
       keep_GpsTime = (*raw_GpsTime);
+      keep_random_pt = (*raw_random_pt);
       rename_y_pt = (*raw_Y_PT);
       rename_y_px = (*raw_Y_PX);
       rename_y_py = (*raw_Y_PY);
@@ -80,11 +92,14 @@ void generator_ATuple(TFile *input_file, TFile *output_file) {
   }
 
   output_file->Write();
+  delete output_file;
 }
 
-void generator_AnotherTuple(TFile *input_file, TFile *output_file) {
-  TTreeReader reader("TupleB0/DecayTree", input_file);
-  TTree output("AnotherTuple", "AnotherTuple");
+void generator_AnotherTuple(TTree *input_tree, TString output_prefix) {
+  cout << "Generating output ntuple: " << "AnotherTuple" << endl;
+  auto output_file = new TFile(output_prefix + "AnotherTuple" + ".root", "recreate");
+  TTreeReader reader(input_tree);
+  TTree output("tree", "tree");
 
   // Load needed branches from ntuple
   TTreeReaderValue<double> raw_Y_PT(reader, "Y_PT");
@@ -95,6 +110,7 @@ void generator_AnotherTuple(TFile *input_file, TFile *output_file) {
   TTreeReaderValue<UInt_t> raw_runNumber(reader, "runNumber");
   TTreeReaderValue<ULong64_t> raw_eventNumber(reader, "eventNumber");
   TTreeReaderValue<ULong64_t> raw_GpsTime(reader, "GpsTime");
+  TTreeReaderValue<double> raw_random_pt(reader, "random_pt");
   TTreeReaderValue<double> raw_D0_P(reader, "D0_P");
 
   // Define output branches
@@ -114,6 +130,8 @@ void generator_AnotherTuple(TFile *input_file, TFile *output_file) {
   output.Branch("eventNumber", &keep_eventNumber);
   ULong64_t keep_GpsTime;
   output.Branch("GpsTime", &keep_GpsTime);
+  double keep_random_pt;
+  output.Branch("random_pt", &keep_random_pt);
   double calculation_RandStuff;
   output.Branch("RandStuff", &calculation_RandStuff);
 
@@ -133,6 +151,7 @@ void generator_AnotherTuple(TFile *input_file, TFile *output_file) {
       keep_runNumber = (*raw_runNumber);
       keep_eventNumber = (*raw_eventNumber);
       keep_GpsTime = (*raw_GpsTime);
+      keep_random_pt = (*raw_random_pt);
       calculation_TempStuff = (*raw_D0_P)+(*raw_Y_PT);
       calculation_RandStuff = calculation_TempStuff;
 
@@ -141,11 +160,14 @@ void generator_AnotherTuple(TFile *input_file, TFile *output_file) {
   }
 
   output_file->Write();
+  delete output_file;
 }
 
-void generator_YetAnotherTuple(TFile *input_file, TFile *output_file) {
-  TTreeReader reader("TupleB0WSPi/DecayTree", input_file);
-  TTree output("YetAnotherTuple", "YetAnotherTuple");
+void generator_YetAnotherTuple(TTree *input_tree, TString output_prefix) {
+  cout << "Generating output ntuple: " << "YetAnotherTuple" << endl;
+  auto output_file = new TFile(output_prefix + "YetAnotherTuple" + ".root", "recreate");
+  TTreeReader reader(input_tree);
+  TTree output("tree", "tree");
 
   // Load needed branches from ntuple
   TTreeReaderValue<bool> raw_piminus_isMuon(reader, "piminus_isMuon");
@@ -528,21 +550,46 @@ void generator_YetAnotherTuple(TFile *input_file, TFile *output_file) {
   }
 
   output_file->Write();
+  delete output_file;
 }
 
 
 int main(int, char** argv) {
-  TFile *input_file = new TFile(argv[1], "read");
-  TFile *output_file = new TFile(argv[2], "recreate");
+  TString in_prefix  = TString(argv[1]) + "/";
+  TString out_prefix = TString(argv[2]) + "/";
 
-  generator_ATuple(input_file, output_file);
-  generator_AnotherTuple(input_file, output_file);
-  generator_YetAnotherTuple(input_file, output_file);
+  TFile *ntuple = new TFile(in_prefix + "./samples/sample.root");
+  cout << "The ntuple being worked on is: " << "./samples/sample.root"
+    << endl;
 
-  output_file->Close();
+  vector<TFile*> friend_ntuples;
+    friend_ntuples.push_back(new TFile(in_prefix + "./samples/sample_friend.root"));
+    cout << "Additional friend ntuple: " << "./samples/sample_friend.root" << endl;
 
-  delete input_file;
-  delete output_file;
+  // Define input trees and container to store associated friend trees
+  auto tree_TupleB0_DecayTree = static_cast<TTree*>(ntuple->Get("TupleB0/DecayTree"));
+  vector<TTree*> friends_TupleB0_DecayTree;
+  auto tree_TupleB0WSPi_DecayTree = static_cast<TTree*>(ntuple->Get("TupleB0WSPi/DecayTree"));
+  vector<TTree*> friends_TupleB0WSPi_DecayTree;
+
+  // Handle friend trees
+  TTree* tmp_tree;
+  tmp_tree = static_cast<TTree*>(friend_ntuples[0]->Get("TupleB0/DecayTree"));
+           tmp_tree->BuildIndex("runNumber", "eventNumber");
+  tree_TupleB0_DecayTree->AddFriend(tmp_tree, "0", true);
+           friends_TupleB0_DecayTree.push_back(tmp_tree);
+           cout << "Handling input tree: " << "TupleB0/DecayTree" << endl;
+
+  generator_ATuple(tree_TupleB0_DecayTree, out_prefix);
+  generator_AnotherTuple(tree_TupleB0_DecayTree, out_prefix);
+  generator_YetAnotherTuple(tree_TupleB0WSPi_DecayTree, out_prefix);
+
+  // Cleanups
+  cout <<"Cleanups" << endl;
+  delete ntuple;
+    for (auto tree : friends_TupleB0_DecayTree) delete tree;
+    for (auto tree : friends_TupleB0WSPi_DecayTree) delete tree;
+  for (auto ntp : friend_ntuples) delete ntp;
 
   return 0;
 }

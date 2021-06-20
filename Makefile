@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Mar 31, 2021 at 11:24 PM +0200
+# Last Change: Sun Jun 20, 2021 at 02:58 AM +0200
 
 include ./samples/sample.mk
 
@@ -44,8 +44,9 @@ unittest: install
 
 integrationtest: gen/sample-babymaker.root
 
-gen/sample-babymaker.root: samples/sample.root gen/postprocess
-	gen/postprocess $< $@
+gen/sample-babymaker.root: gen/postprocess
+	gen/postprocess . gen
 
-gen/postprocess.cpp: samples/sample-babymaker.yml samples/sample.root gen
-	babymaker --debug --no-format -i $< -o $@ -d ./samples/sample.root
+gen/postprocess.cpp: samples/sample-babymaker.yml samples/sample.root samples/sample_friend.root
+	@mkdir -p gen
+	babymaker --no-format -i $< -o $@ -n ./samples/sample.root -f ./samples/sample_friend.root

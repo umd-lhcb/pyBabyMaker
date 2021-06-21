@@ -26,6 +26,7 @@ void generator_ATuple(TTree *input_tree, TString output_prefix) {
   TTree output("tree", "tree");
 
   // Load needed branches from ntuple
+  TTreeReaderValue<double> raw_Y_ISOLATION_BDT(reader, "Y_ISOLATION_BDT");
   TTreeReaderValue<double> raw_Y_PT(reader, "Y_PT");
   TTreeReaderValue<double> raw_Y_PE(reader, "Y_PE");
   TTreeReaderValue<UInt_t> raw_runNumber(reader, "runNumber");
@@ -70,7 +71,7 @@ void generator_ATuple(TTree *input_tree, TString output_prefix) {
   while (reader.Next()) {
     // Define variables required by selection
 
-    if ((true) && ((*raw_Y_PT) > 10000)) {
+    if ((true) && ((*raw_Y_ISOLATION_BDT) > 0) && ((*raw_Y_PT) > 10000)) {
       // Assign values for each output branch in this loop
       keep_Y_PE = (*raw_Y_PE);
       keep_runNumber = (*raw_runNumber);
@@ -102,6 +103,7 @@ void generator_AnotherTuple(TTree *input_tree, TString output_prefix) {
   TTree output("tree", "tree");
 
   // Load needed branches from ntuple
+  TTreeReaderValue<double> raw_Y_ISOLATION_BDT(reader, "Y_ISOLATION_BDT");
   TTreeReaderValue<double> raw_Y_PT(reader, "Y_PT");
   TTreeReaderValue<double> raw_Y_PE(reader, "Y_PE");
   TTreeReaderValue<double> raw_Y_PX(reader, "Y_PX");
@@ -142,7 +144,7 @@ void generator_AnotherTuple(TTree *input_tree, TString output_prefix) {
     // Define variables required by selection
     rename_b0_pt = (*raw_Y_PT);
 
-    if ((true) && (rename_b0_pt > 10000) && ((*raw_Y_PE) > (100 * pow(10, 3)))) {
+    if ((true) && ((*raw_Y_ISOLATION_BDT) > 0) && (rename_b0_pt > 10000) && ((*raw_Y_PE) > (100 * pow(10, 3)))) {
       // Assign values for each output branch in this loop
       keep_Y_PE = (*raw_Y_PE);
       keep_Y_PX = (*raw_Y_PX);
@@ -170,6 +172,7 @@ void generator_YetAnotherTuple(TTree *input_tree, TString output_prefix) {
   TTree output("tree", "tree");
 
   // Load needed branches from ntuple
+  TTreeReaderValue<double> raw_Y_ISOLATION_BDT(reader, "Y_ISOLATION_BDT");
   TTreeReaderValue<bool> raw_piminus_isMuon(reader, "piminus_isMuon");
   TTreeReaderValue<double> raw_Y_OWNPV_X(reader, "Y_OWNPV_X");
   TTreeReaderValue<double> raw_Y_OWNPV_Y(reader, "Y_OWNPV_Y");
@@ -183,7 +186,6 @@ void generator_YetAnotherTuple(TTree *input_tree, TString output_prefix) {
   TTreeReaderValue<double> raw_Y_ISOLATION_CHI2(reader, "Y_ISOLATION_CHI2");
   TTreeReaderValue<double> raw_Y_ISOLATION_ANGLE(reader, "Y_ISOLATION_ANGLE");
   TTreeReaderValue<int32_t> raw_Y_ISOLATION_SC(reader, "Y_ISOLATION_SC");
-  TTreeReaderValue<double> raw_Y_ISOLATION_BDT(reader, "Y_ISOLATION_BDT");
   TTreeReaderValue<float> raw_Y_ISOLATION_CHARGE(reader, "Y_ISOLATION_CHARGE");
   TTreeReaderValue<float> raw_Y_ISOLATION_Type(reader, "Y_ISOLATION_Type");
   TTreeReaderValue<float> raw_Y_ISOLATION_PE(reader, "Y_ISOLATION_PE");
@@ -450,7 +452,7 @@ void generator_YetAnotherTuple(TTree *input_tree, TString output_prefix) {
   while (reader.Next()) {
     // Define variables required by selection
 
-    if ((true) && ((*raw_piminus_isMuon))) {
+    if ((true) && ((*raw_Y_ISOLATION_BDT) > 0) && ((*raw_piminus_isMuon))) {
       // Assign values for each output branch in this loop
       keep_Y_OWNPV_X = (*raw_Y_OWNPV_X);
       keep_Y_OWNPV_Y = (*raw_Y_OWNPV_Y);

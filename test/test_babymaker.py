@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jun 21, 2021 at 05:38 AM +0200
+# Last Change: Mon Jun 21, 2021 at 04:24 PM +0200
 
 import yaml
 import pytest
@@ -90,6 +90,7 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
 
     assert directive['trees']['ATuple']['input_tree'] == 'TupleB0/DecayTree'
     assert directive['trees']['ATuple']['input_br'] == [
+        'raw_Y_ISOLATION_BDT',
         'raw_Y_PT',
         'raw_Y_PE',
         'raw_runNumber',
@@ -101,6 +102,7 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
         'raw_D0_P',
     ]
     assert directive['trees']['ATuple']['input'] == [
+        BabyVariable('Y_ISOLATION_BDT', 'double', input=True, output=False),
         BabyVariable('Y_PT', 'double', input=True, output=False),
         BabyVariable('Y_PE', 'double', input=True, output=False),
         BabyVariable('runNumber', 'UInt_t', input=True, output=False),
@@ -145,7 +147,7 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
         BabyVariable('alt_def', 'double', ['b0_pe', 'Y_PE']),
     ]
     assert realistic_BabyConfigParser._resolvers[0]._resolved_names[0] == \
-        ('raw', 'Y_PT')
+        ('raw', 'Y_ISOLATION_BDT')
 
 
 def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
@@ -154,6 +156,7 @@ def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
     assert directive['trees']['AnotherTuple']['input_tree'] == \
         'TupleB0/DecayTree'
     assert directive['trees']['AnotherTuple']['input'] == [
+        BabyVariable('Y_ISOLATION_BDT', 'double', input=True, output=False),
         BabyVariable('Y_PT', 'double', input=True, output=False),
         BabyVariable('Y_PE', 'double', input=True, output=False),
         BabyVariable('Y_PX', 'double', input=True, output=False),
@@ -184,6 +187,7 @@ def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
     assert directive['system_headers'] == ['cmath', 'iostream']
     assert directive['trees']['AnotherTuple']['sel'] == [
         'true',
+        'raw_Y_ISOLATION_BDT > 0',
         'rename_b0_pt > 10000',
         'raw_Y_PE > (100 * pow(10, 3))'
     ]
@@ -199,6 +203,7 @@ def test_BabyConfigParser_parse_YetAnotherTuple(realistic_BabyConfigParser):
     assert 'raw_Y_ISOLATION_NNp3' in input_br
     assert directive['trees']['YetAnotherTuple']['sel'] == [
         'true',
+        'raw_Y_ISOLATION_BDT > 0',
         'raw_piminus_isMuon'
     ]
 

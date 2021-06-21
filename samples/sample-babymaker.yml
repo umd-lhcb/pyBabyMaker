@@ -23,6 +23,9 @@ calculation:
     some_var: '^double; y_pt + y_pz'
     some_other_var: 'double; some_var*pi'
 
+global_selection:
+    - "Y_ISOLATION_BDT > 0"
+
 output:
     ATuple:
         input: TupleB0/DecayTree

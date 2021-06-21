@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jun 20, 2021 at 11:31 PM +0200
+# Last Change: Mon Jun 21, 2021 at 05:29 AM +0200
 
 import re
 import logging
@@ -66,16 +66,16 @@ class BabyConfigParser:
     """
     Basic parser for YAML C++ code instruction.
     """
-    def __init__(self, parsed_config, dumped_ntuple, debug=False,
-                 literals={}):
+    def __init__(self, parsed_config, dumped_ntuple,
+                 literals={}, debug=False):
         """
         Initialize the config parser with parsed YAML file and dumped ntuple
         structure.
         """
         self.parsed_config = parsed_config
         self.dumped_ntuple = dumped_ntuple
-        self.debug = debug
         self.literals = literals
+        self.debug = debug
 
         if debug:
             logging.basicConfig(level=logging.DEBUG)
@@ -93,6 +93,9 @@ class BabyConfigParser:
             'input_trees': UniqueList(),
         }
         self.parse_headers(self.parsed_config, directive)
+        parsed_literals = {k: BabyVariable(k, literal=v)
+                           for k, v in self.literals.items()}
+        print(parsed_literals)
 
         for output_tree, config in self.parsed_config['output'].items():
             input_tree = config['input']
@@ -113,7 +116,7 @@ class BabyConfigParser:
             merge = config['inherit'] if 'inherit' in config else True
             config = update_config(self.parsed_config, config, merge=merge)
             namespace = defaultdict(dict)
-            namespace['literals'] = self.literals
+            namespace['literals'] = parsed_literals
             namespace['raw'] = {n: BabyVariable(n, t, input=True, output=False)
                                 for n, t in dumped_tree.items()}
 
@@ -284,7 +287,8 @@ class BabyMaker(BaseMaker):
     ``babymaker`` class to glue parser and code generator together.
     """
     def __init__(self, config_filename, ntuple_filename, friend_filenames,
-                 template_filename, use_reformatter=True):
+                 template_filename,
+                 use_reformatter=True):
         """
         Initialize with path to YAML file and ntuple file.
         """
@@ -294,13 +298,14 @@ class BabyMaker(BaseMaker):
         self.template_filename = template_filename
         self.use_reformatter = use_reformatter
 
-    def gen(self, filename, debug=False):
+    def gen(self, filename, literals={}, debug=False):
         """
         Generate C++ file based on inputs.
         """
         parsed_config = self.read(self.config_filename)
         dumped_ntuple, tree_relations = self.dump_ntuples()
-        directive = self.directive_gen(parsed_config, dumped_ntuple, debug)
+        directive = self.directive_gen(
+            parsed_config, dumped_ntuple, literals, debug)
 
         # Adding ntuple info to the directive
         directive['ntuple'] = self.ntuple_filename
@@ -338,10 +343,11 @@ class BabyMaker(BaseMaker):
         return trees, tree_relations
 
     @staticmethod
-    def directive_gen(parsed_config, dumped_ntuple, debug=False):
+    def directive_gen(parsed_config, dumped_ntuple,
+                      literals={}, debug=False):
         """
         Generate data structure (``directive``) needed for the C++ macro
         template.
         """
-        parser = BabyConfigParser(parsed_config, dumped_ntuple, debug)
+        parser = BabyConfigParser(parsed_config, dumped_ntuple, literals, debug)
         return parser.parse()

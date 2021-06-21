@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jun 21, 2021 at 12:01 AM +0200
+# Last Change: Mon Jun 21, 2021 at 12:39 AM +0200
 """
 This module provides general variable dependency resolution.
 """
@@ -38,6 +38,8 @@ class Variable:
         self.len = len(self.deps)
 
     def __repr__(self):
+        if self.literal is not None:
+            return '{} := {}'.format(self.name, self.literal)
         return '{} {} = {}'.format(self.type, self.name, '|'.join(self.rvalues))
 
     def next(self):
@@ -164,6 +166,13 @@ class VariableResolver(object):
 
                 elif dep_var_name in self.namespace[other_scope]:
                     dep_var = self.namespace[other_scope][dep_var_name]
+
+                    # Handle literal variables
+                    if dep_var.literal is not None:
+                        DEBUG('Handle literal variable {}...'.format(var.name))
+                        var.resolved[dep_var_name] = dep_var.literal
+                        continue
+
                     if idx+1 == len(ordering):
                         var.resolved[dep_var_name] = dep_var_name_resolved
                         if dep_var_key in self._resolved_names or \
@@ -209,4 +218,4 @@ class VariableResolver(object):
         """
         Format resolved variable.
         """
-        return (scope, var)
+        return scope, var

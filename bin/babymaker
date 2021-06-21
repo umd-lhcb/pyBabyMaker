@@ -2,9 +2,9 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Jun 17, 2021 at 12:13 AM +0200
+# Last Change: Mon Jun 21, 2021 at 05:29 AM +0200
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Action
 from pyBabyMaker.babymaker import BabyMaker
 from pyBabyMaker.base import load_file
 
@@ -12,6 +12,12 @@ from pyBabyMaker.base import load_file
 #################################
 # Command line arguments parser #
 #################################
+
+class AddVarAction(Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        result = dict([v.split(':') for v in values])
+        setattr(namespace, self.dest, result)
+
 
 def parse_input():
     parser = ArgumentParser(description='''
@@ -57,6 +63,13 @@ enable additional debug messages.''')
                         help='''
 specify template path.''')
 
+    parser.add_argument('-V', '--additional-vars',
+                        nargs='+',
+                        action=AddVarAction,
+                        default={},
+                        help='''
+specify additional literal variables.''')
+
     return parser.parse_args()
 
 
@@ -69,4 +82,4 @@ if __name__ == '__main__':
     template = load_file(args.template_path)
     maker = BabyMaker(args.input, args.ntuple, args.friends, template,
                       args.no_format)
-    maker.gen(args.output, args.debug)
+    maker.gen(args.output, args.additional_vars, args.debug)

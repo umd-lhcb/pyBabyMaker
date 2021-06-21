@@ -2,13 +2,14 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jun 21, 2021 at 05:29 AM +0200
+# Last Change: Mon Jun 21, 2021 at 04:21 PM +0200
 
 import re
 import logging
 
 from collections import defaultdict, Counter
 from dataclasses import dataclass
+from copy import deepcopy
 
 from pyBabyMaker.base import TermColor as TC
 from pyBabyMaker.base import UniqueList, BaseMaker
@@ -95,7 +96,6 @@ class BabyConfigParser:
         self.parse_headers(self.parsed_config, directive)
         parsed_literals = {k: BabyVariable(k, literal=v)
                            for k, v in self.literals.items()}
-        print(parsed_literals)
 
         for output_tree, config in self.parsed_config['output'].items():
             input_tree = config['input']
@@ -258,11 +258,16 @@ class BabyConfigParser:
         """
         Parse ``selection`` section.
         """
+        selections = deepcopy(config['global_selection']) \
+            if 'global_selection' in config else []
+
         if 'selection' in config:
-            for idx, expr in enumerate(config['selection']):
-                namespace['selection']['sel'+str(idx)] = BabyVariable(
-                    'sel'+str(idx), rvalues=[expr],
-                    input=False, output=False, fake=True)
+            selections += config['selection']
+
+        for idx, expr in enumerate(selections):
+            namespace['selection']['sel'+str(idx)] = BabyVariable(
+                'sel'+str(idx), rvalues=[expr],
+                input=False, output=False, fake=True)
 
     @staticmethod
     def match(patterns, string, return_value=True):

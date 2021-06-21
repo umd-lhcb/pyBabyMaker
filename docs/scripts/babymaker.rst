@@ -8,15 +8,17 @@ Usage
 
 .. code-block:: console
 
-   babymaker -i <yaml_file> -n <main_ntuple> -f [<friend_ntuple1> ...] -o <output_cpp> -t <template_file>
+   babymaker -i <yaml_file> -n <main_ntuple> -f [<friend_ntuple1> ...] -o <output_cpp> -t <template_file> -V "<var:name>"
 
 Note that:
 
 * ``<yaml_file>`` contains the instruction for postprocessing.
-* ``<ntuple_file>`` should have the exact tree structure as the ntuples to be
-  processed.
+* ``<main_file>`` main ntuples to be processed.
+* ``<friend_ntuple1>`` friend ntuples get their trees add as friends to the
+  main if the tree names are the same
 * ``<template_file>`` refers to the input C++ template with embedded template
   macros.
+* ``<var:name>`` additional literal variables
 
 By default, ``babymaker`` tries to reformat the generated C++ file with
 ``clang-format``, if it's available in user's ``$PATH``. This can be disabled

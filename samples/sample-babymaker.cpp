@@ -82,9 +82,9 @@ void generator_ATuple(TTree *input_tree, TString output_prefix) {
       rename_y_py = (*raw_Y_PY);
       rename_y_pz = (*raw_Y_PZ);
       calculation_TempStuff = (*raw_D0_P)+(*raw_Y_PT);
-      calculation_RandStuff = calculation_TempStuff;
+      calculation_RandStuff = calculation_TempStuff*3.14;
       calculation_some_var = rename_y_pt + rename_y_pz;
-      calculation_some_other_var = calculation_some_var;
+      calculation_some_other_var = calculation_some_var*3.14;
       calculation_alt_def = (*raw_Y_PE);
 
       output.Fill();
@@ -153,7 +153,7 @@ void generator_AnotherTuple(TTree *input_tree, TString output_prefix) {
       keep_GpsTime = (*raw_GpsTime);
       keep_random_pt = (*raw_random_pt);
       calculation_TempStuff = (*raw_D0_P)+(*raw_Y_PT);
-      calculation_RandStuff = calculation_TempStuff;
+      calculation_RandStuff = calculation_TempStuff*3.14;
 
       output.Fill();
     }
@@ -541,9 +541,9 @@ void generator_YetAnotherTuple(TTree *input_tree, TString output_prefix) {
       rename_y_py = (*raw_Y_PY);
       rename_y_pz = (*raw_Y_PZ);
       calculation_TempStuff = (*raw_D0_P)+(*raw_Y_PT);
-      calculation_RandStuff = calculation_TempStuff;
+      calculation_RandStuff = calculation_TempStuff*3.14;
       calculation_some_var = rename_y_pt + rename_y_pz;
-      calculation_some_other_var = calculation_some_var;
+      calculation_some_other_var = calculation_some_var*3.14;
 
       output.Fill();
     }

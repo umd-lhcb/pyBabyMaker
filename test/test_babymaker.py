@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Jun 20, 2021 at 04:15 AM +0200
+# Last Change: Mon Jun 21, 2021 at 05:38 AM +0200
 
 import yaml
 import pytest
@@ -58,8 +58,8 @@ def test_BabyVariable_set_fname():
 def test_BabyMaker_cpp_gen(tmp_path):
     gen_cpp = tmp_path / "gen_cpp.cpp"
     babymaker = BabyMaker(SAMPLE_YAML, SAMPLE_ROOT, [SAMPLE_FRIEND],
-                          SAMPLE_TMPL, False)
-    babymaker.gen(gen_cpp, debug=True)
+                          SAMPLE_TMPL, use_reformatter=False)
+    babymaker.gen(gen_cpp, literals={'pi': '3.14'}, debug=True)
     gen_cpp_content = [line.strip()
                        for line in gen_cpp.read_text().split('\n')[1:]]
 
@@ -82,7 +82,7 @@ def load_files():
 
 @pytest.fixture
 def realistic_BabyConfigParser(load_files):
-    return BabyConfigParser(*load_files, debug=True)
+    return BabyConfigParser(*load_files, literals={'pi': '3.14'}, debug=True)
 
 
 def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
@@ -120,8 +120,8 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
         BabyVariable('y_px', 'double', ['Y_PX']),
         BabyVariable('y_py', 'double', ['Y_PY']),
         BabyVariable('y_pz', 'double', ['Y_PZ']),
-        BabyVariable('RandStuff', 'double', ['TempStuff']),
-        BabyVariable('some_other_var', 'double', ['some_var']),
+        BabyVariable('RandStuff', 'double', ['TempStuff*pi']),
+        BabyVariable('some_other_var', 'double', ['some_var*pi']),
         BabyVariable('alt_def', 'double', ['b0_pe', 'Y_PE']),
     ]
     assert directive['trees']['ATuple']['tmp'] == [
@@ -139,9 +139,9 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
         BabyVariable('y_py', 'double', ['Y_PY']),
         BabyVariable('y_pz', 'double', ['Y_PZ']),
         BabyVariable('TempStuff', 'double', ['D0_P+Y_PT'], output=False),
-        BabyVariable('RandStuff', 'double', ['TempStuff']),
+        BabyVariable('RandStuff', 'double', ['TempStuff*pi']),
         BabyVariable('some_var', 'double', ['y_pt + y_pz'], output=False),
-        BabyVariable('some_other_var', 'double', ['some_var']),
+        BabyVariable('some_other_var', 'double', ['some_var*pi']),
         BabyVariable('alt_def', 'double', ['b0_pe', 'Y_PE']),
     ]
     assert realistic_BabyConfigParser._resolvers[0]._resolved_names[0] == \
@@ -176,7 +176,7 @@ def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
         BabyVariable('runNumber', 'UInt_t', ['runNumber']),
         BabyVariable('eventNumber', 'ULong64_t', ['eventNumber']),
         BabyVariable('GpsTime', 'ULong64_t', ['GpsTime']),
-        BabyVariable('RandStuff', 'double', ['TempStuff']),
+        BabyVariable('RandStuff', 'double', ['TempStuff*pi']),
     ]
     assert directive['trees']['AnotherTuple']['tmp'] == [
         BabyVariable('TempStuff', 'double', ['D0_P+Y_PT'], output=False),

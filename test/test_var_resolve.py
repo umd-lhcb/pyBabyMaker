@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sun Mar 14, 2021 at 04:40 PM +0100
+# Last Change: Mon Jun 21, 2021 at 03:02 AM +0200
 
 from collections import defaultdict
 
@@ -77,6 +77,11 @@ def test_Variable_eq():
 def test_Variable_repr():
     var = Variable('test', 'Double_t', ['a+b', 'a', 'b'])
     assert str(var) == 'Double_t test = a+b|a|b'
+
+
+def test_Variable_literal():
+    var = Variable('pi', literal='3.14')
+    assert str(var) == 'pi := 3.14'
 
 
 #############################
@@ -157,6 +162,42 @@ def test_VariableResolver_multi_scope():
             ('calc', 'a')
         ]
     )
+
+
+def test_VariableResolver_multi_scope_literal_shadow():
+    namespace = {
+        'rename': {
+            'x': Variable('x', rvalues=['a'])
+        },
+        'raw': {
+            'a': Variable('a'),
+            'b': Variable('b')
+        },
+        'literals': {
+            'b': Variable('b', literal='343')
+        }
+    }
+    resolver = VariableResolver(namespace)
+    var = Variable('a', rvalues=['x+b'])
+
+    assert resolver.resolve_var(
+        'calc', var, ordering=['literals', 'rename', 'raw']) == (
+        True,
+        [
+            ('raw', Variable('a')),
+            ('rename', Variable('x', rvalues=['a'])),
+            ('calc', var)
+        ],
+        [
+            ('raw', 'a'),
+            ('rename', 'x'),
+            ('calc', 'a')
+        ]
+    )
+
+    resolved_var = resolver.resolve_var(
+        'calc', var, ordering=['literals', 'rename', 'raw'])[1][-1][1]
+    assert resolved_var.rval == 'rename_x+343'
 
 
 def test_VariableResolver_multi_scope_fail():

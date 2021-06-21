@@ -18,10 +18,10 @@ rename:
     b0_PE: b0_pe
 
 calculation:
-    RandStuff: 'double; TempStuff'
+    RandStuff: 'double; TempStuff*pi'
     TempStuff: '^double; D0_P+Y_PT'
     some_var: '^double; y_pt + y_pz'
-    some_other_var: 'double; some_var'
+    some_other_var: 'double; some_var*pi'
 
 output:
     ATuple:

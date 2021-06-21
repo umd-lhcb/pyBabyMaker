@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Jan 06, 2021 at 11:22 PM +0100
+# Last Change: Tue Jun 22, 2021 at 01:02 AM +0200
 
 from pyBabyMaker.boolean.utils import find_all_args, find_all_vars
 
@@ -28,6 +28,14 @@ def test_find_all_vars():
     assert find_all_vars(
         '!(FUNC1(arg1, arg2) && FUNC2(FUNC3(arg3, arg4, FUNC4(1, 2)) + arg6))||'
         'FUNC6(arg7, arg8, arg9*FUNC7(arg10+arg11))'
+    ) == ['arg3', 'arg4', 'arg10', 'arg11', 'arg6', 'arg1', 'arg2', 'arg9',
+          'arg7', 'arg8']
+
+
+def test_find_all_vars_bracket_init():
+    assert find_all_vars(
+        '!(FUNC1{arg1, arg2} && FUNC2{FUNC3{arg3, arg4, FUNC4{1, 2}} + arg6})||'
+        'FUNC6{arg7, arg8, arg9*FUNC7{arg10+arg11}}'
     ) == ['arg3', 'arg4', 'arg10', 'arg11', 'arg6', 'arg1', 'arg2', 'arg9',
           'arg7', 'arg8']
 

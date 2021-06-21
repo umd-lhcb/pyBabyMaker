@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Sep 18, 2020 at 05:38 PM +0800
+# Last Change: Tue Jun 22, 2021 at 01:00 AM +0200
 """
 This module defines C++ boolean syntax.
 """
@@ -39,6 +39,7 @@ cpp_boolean_grammar = '''
         | product "/" molecule   -> div
 
     ?molecule: NAME "(" [arguments] ")"           -> func_call
+        | NAME "{" [arguments] "}"                -> func_call
         | molecule "." NAME                       -> getattr
         | molecule "->" NAME                      -> getattr
         | molecule "." NAME "(" [arguments] ")"   -> method_call

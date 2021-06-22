@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jun 21, 2021 at 03:02 AM +0200
+# Last Change: Tue Jun 22, 2021 at 04:14 AM +0200
 
 from collections import defaultdict
 
@@ -441,7 +441,7 @@ def test_VariableResolver_scope_resolve():
 
 
 # NOTE: In a real use case, the dependency variables in 'selection' were
-# resolved multiple times, thus an error message was emitted.
+#       resolved multiple times, thus an error message was emitted.
 def test_VariableResolver_scope_duplicated_resolution():
     namespace = {
         'sel': {
@@ -482,4 +482,81 @@ def test_VariableResolver_scope_duplicated_resolution():
             ('sel', Variable('sel1', rvalues=['test > 0']))
         ],
         []
+    )
+
+
+# NOTE: In a real use case, two selection variables have common dependencies. If
+#       the first one can't be fully resolved, the dependencies of the second
+#       variable were not fully resolved
+# NOTE: The 'simple' case initially worked; the 'complex' one doesn't
+def test_VariableResolver_partial_common_deps_simple():
+    namespace = {
+        'sel': {
+            'sel0': Variable('sel0', rvalues=['flag_d0mu']),
+            'sel1': Variable('sel1', rvalues=['flag_mu'])
+        },
+        'calc': {
+            'flag_d0mu': Variable(
+                'flag_d0mu',
+                rvalues=['FLAG_D0MU(mu_isMuon, k_isMuon, pi_isMuon)']
+            ),
+            'flag_mu': Variable('flag_mu', rvalues=['FLAG_MU(mu_isMuon)'])
+        },
+        'raw': {
+            # 'mu_TRUEID': Variable('mu_TRUEID'),
+            'mu_isMuon': Variable('mu_isMuon'),
+            'k_isMuon': Variable('k_isMuon'),
+        }
+    }
+    resolver = VariableResolver(namespace)
+    result = resolver.resolve_scope('sel', ordering=['calc', 'raw'])
+
+    assert result == (
+        [
+            ('raw', Variable('mu_isMuon')),
+            ('calc', Variable('flag_mu', rvalues=['FLAG_MU(mu_isMuon)'])),
+            ('sel', Variable('sel1', rvalues=['flag_mu']))
+        ],
+        [
+            Variable('sel0', rvalues=['flag_d0mu'])
+        ]
+    )
+
+
+def test_VariableResolver_partial_common_deps_complex():
+    namespace = {
+        'sel': {
+            'sel0': Variable('sel0', rvalues=['flag_d0mu']),
+            'sel1': Variable('sel1', rvalues=['flag_mu'])
+        },
+        'calc': {
+            'flag': Variable('flag', rvalues=['FLAG(mu_PT)']),
+            'flag_d0mu': Variable(
+                'flag_d0mu',
+                rvalues=['FLAG_D0MU(flag, mu_isMuon, k_isMuon, pi_isMuon)']
+            ),
+            'flag_mu': Variable('flag_mu', rvalues=['FLAG_MU(flag, mu_isMuon)'])
+        },
+        'raw': {
+            # 'mu_TRUEID': Variable('mu_TRUEID'),
+            'mu_isMuon': Variable('mu_isMuon'),
+            'k_isMuon': Variable('k_isMuon'),
+            'mu_PT': Variable('mu_PT')
+        }
+    }
+    resolver = VariableResolver(namespace)
+    result = resolver.resolve_scope('sel', ordering=['calc', 'raw'])
+    print(result)
+
+    assert result == (
+        [
+            ('raw', Variable('mu_PT')),  # This one was missing!
+            ('calc', Variable('flag', rvalues=['FLAG(mu_PT)'])),
+            ('raw', Variable('mu_isMuon')),
+            ('calc', Variable('flag_mu', rvalues=['FLAG_MU(mu_isMuon)'])),
+            ('sel', Variable('sel1', rvalues=['flag_mu']))
+        ],
+        [
+            Variable('sel0', rvalues=['flag_d0mu'])
+        ]
     )

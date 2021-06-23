@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jun 22, 2021 at 04:14 AM +0200
+# Last Change: Wed Jun 23, 2021 at 04:27 AM +0200
 
 from collections import defaultdict
 
@@ -546,14 +546,13 @@ def test_VariableResolver_partial_common_deps_complex():
     }
     resolver = VariableResolver(namespace)
     result = resolver.resolve_scope('sel', ordering=['calc', 'raw'])
-    print(result)
 
     assert result == (
         [
             ('raw', Variable('mu_PT')),  # This one was missing!
             ('calc', Variable('flag', rvalues=['FLAG(mu_PT)'])),
             ('raw', Variable('mu_isMuon')),
-            ('calc', Variable('flag_mu', rvalues=['FLAG_MU(mu_isMuon)'])),
+            ('calc', Variable('flag_mu', rvalues=['FLAG_MU(flag, mu_isMuon)'])),
             ('sel', Variable('sel1', rvalues=['flag_mu']))
         ],
         [

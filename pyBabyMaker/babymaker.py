@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jun 21, 2021 at 04:21 PM +0200
+# Last Change: Wed Jun 23, 2021 at 04:39 AM +0200
 
 import re
 import logging
@@ -57,6 +57,15 @@ class BabyVariableResolver(VariableResolver):
         """
         var.fname = scope+'_'+var.name
         return var
+
+    @staticmethod
+    def unpack_resolved(var):
+        """
+        Unpack resolved variable to (scope, original variable) tuple for
+        ``babymaker``.
+        """
+        scope = var.fname.split('_')[0]
+        return scope, var.name
 
 
 ########################

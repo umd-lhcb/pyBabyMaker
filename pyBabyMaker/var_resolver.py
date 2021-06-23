@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Jun 23, 2021 at 04:24 AM +0200
+# Last Change: Wed Jun 23, 2021 at 04:37 AM +0200
 """
 This module provides general variable dependency resolution.
 """
@@ -140,9 +140,10 @@ class VariableResolver(object):
                 DEBUG('Not resolvable: {}'.format(var))
                 unresolved.append(var)
                 # Reset resolved variables
-                for tmp_scope, tmp_var in var_load_seq:
-                    DEBUG('Resetting {}.{}...'.format(tmp_scope, tmp_var.name))
-                    self.namespace[tmp_scope][tmp_var.name].reset()
+                for data in var_load_seq:
+                    tmp_scope, tmp_var_name = self.unpack_resolved(data)
+                    DEBUG('Resetting {}.{}...'.format(tmp_scope, tmp_var_name))
+                    self.namespace[tmp_scope][tmp_var_name].reset()
 
         return load_seq, unresolved
 
@@ -238,3 +239,11 @@ class VariableResolver(object):
         Format resolved variable.
         """
         return scope, var
+
+    @staticmethod
+    def unpack_resolved(data):
+        """
+        Unpack resolved variable to (scope, original variable name) tuple.
+        """
+        scope, var = data
+        return scope, var.name

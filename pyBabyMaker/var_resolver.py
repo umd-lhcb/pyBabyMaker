@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jun 21, 2021 at 12:39 AM +0200
+# Last Change: Wed Jun 23, 2021 at 04:24 AM +0200
 """
 This module provides general variable dependency resolution.
 """
@@ -54,6 +54,17 @@ class Variable:
         self.idx += 1
         self.resolved = {}
         return True
+
+    def reset(self):
+        """
+        Reset the variable to its initial condition for possible resolution
+        later.
+
+        We commit a lot of sins in this module by recording states all around
+        the places. This should be fixed by a rewrite but we don't have time
+        now.
+        """
+        self.__post_init__()
 
     @property
     def ok(self):
@@ -119,13 +130,19 @@ class VariableResolver(object):
         unresolved = []
 
         for var in variables:
+            DEBUG('Current scope is: {}'.format(scope))
             status, var_load_seq, var_known_name = self.resolve_var(
                 scope, var, ordering)
             if status:
                 load_seq += var_load_seq
                 self._resolved_names += var_known_name
             else:
+                DEBUG('Not resolvable: {}'.format(var))
                 unresolved.append(var)
+                # Reset resolved variables
+                for tmp_scope, tmp_var in var_load_seq:
+                    DEBUG('Resetting {}.{}...'.format(tmp_scope, tmp_var.name))
+                    self.namespace[tmp_scope][tmp_var.name].reset()
 
         return load_seq, unresolved
 
@@ -144,9 +161,6 @@ class VariableResolver(object):
             return True, load_seq, known_names
 
         for idx, other_scope in enumerate(ordering):
-            if var.ok:
-                break
-
             deps = [i for i in list(var.deps.values())[var.idx]
                     if i not in var.resolved and
                     (other_scope != scope or i != var.name)]
@@ -173,6 +187,8 @@ class VariableResolver(object):
                         var.resolved[dep_var_name] = dep_var.literal
                         continue
 
+                    # The last scope should only contain variables that don't
+                    # need further resolution.
                     if idx+1 == len(ordering):
                         var.resolved[dep_var_name] = dep_var_name_resolved
                         if dep_var_key in self._resolved_names or \
@@ -193,12 +209,15 @@ class VariableResolver(object):
                         dep_load_status, dep_load_seq, dep_known_names = \
                             self.resolve_var(other_scope, dep_var,
                                              ordering[idx:], known_names)
+                        # Always update these to keep track of all variables we
+                        # have accessed
+                        load_seq += dep_load_seq
+                        known_names += dep_known_names
+
                         if dep_load_status:
                             DEBUG('Resolved dep {}.{}.'.format(
                                 other_scope, dep_var_name))
                             var.resolved[dep_var_name] = dep_var_name_resolved
-                            load_seq += dep_load_seq
-                            known_names += dep_known_names
 
         if var.ok:
             DEBUG('Fully resolved: {}.{}.'.format(scope, var.name))

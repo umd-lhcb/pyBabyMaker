@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Jun 24, 2021 at 03:43 AM +0200
+# Last Change: Thu Jun 24, 2021 at 05:16 AM +0200
 
 from collections import defaultdict
 
@@ -570,8 +570,8 @@ def test_VariableResolver_alternative_rvalue_dep_deep():
                 'other_trk', rvalues=['VEC(trk_k, trk_pi, trk_spi)',
                                       'VEC(trk_k, trk_pi)']),
             'trk_k': Variable('trk_k', rvalues=['FAKE(k_PT)']),
-            'trk_pi': Variable('trk_pi', ['FAKE(pi_PT)']),
-            'trk_spi': Variable('trk_spi', ['FAKE(spi_PT)'])
+            'trk_pi': Variable('trk_pi', rvalues=['FAKE(pi_PT)']),
+            'trk_spi': Variable('trk_spi', rvalues=['FAKE(spi_PT)'])
         },
         'raw': {
             'k_PT': Variable('k_PT'),
@@ -592,5 +592,7 @@ def test_VariableResolver_alternative_rvalue_dep_deep():
                               rvalues=['VEC(trk_k, trk_pi, trk_spi)',
                                        'VEC(trk_k, trk_pi)'])),
         ],
-        []
+        [
+            Variable('trk_spi', rvalues=['FAKE(spi_PT)'])
+        ]
     )

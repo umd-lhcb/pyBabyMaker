@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Jun 23, 2021 at 04:37 AM +0200
+# Last Change: Thu Jun 24, 2021 at 02:33 AM +0200
 """
 This module provides general variable dependency resolution.
 """
@@ -162,6 +162,11 @@ class VariableResolver(object):
             return True, load_seq, known_names
 
         for idx, other_scope in enumerate(ordering):
+            if var.ok:
+                DEBUG('All dependencies of variable {} already resolved, break.'.format(
+                    var.name))
+                break
+
             deps = [i for i in list(var.deps.values())[var.idx]
                     if i not in var.resolved and
                     (other_scope != scope or i != var.name)]

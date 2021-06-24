@@ -2,9 +2,12 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Jun 24, 2021 at 02:33 AM +0200
+# Last Change: Thu Jun 24, 2021 at 05:34 AM +0200
 """
 This module provides general variable dependency resolution.
+
+I (Yipeng) commit a lot of sins in this module by recording states all around
+the places. This should be fixed by a rewrite but we don't have time now.
 """
 
 import re
@@ -59,10 +62,6 @@ class Variable:
         """
         Reset the variable to its initial condition for possible resolution
         later.
-
-        We commit a lot of sins in this module by recording states all around
-        the places. This should be fixed by a rewrite but we don't have time
-        now.
         """
         self.__post_init__()
 
@@ -139,13 +138,20 @@ class VariableResolver(object):
             else:
                 DEBUG('Not resolvable: {}'.format(var))
                 unresolved.append(var)
-                # Reset resolved variables
-                for data in var_load_seq:
-                    tmp_scope, tmp_var_name = self.unpack_resolved(data)
-                    DEBUG('Resetting {}.{}...'.format(tmp_scope, tmp_var_name))
-                    self.namespace[tmp_scope][tmp_var_name].reset()
+                # Reset resolved variables in this round
+                self.reset_resolved_vars(var_load_seq)
 
         return load_seq, unresolved
+
+    def reset_resolved_vars(self, load_seq):
+        """
+        Reset resolved variables in ``load_seq`` so they can be resolved again
+        instead of falsely considered to be already resolved.
+        """
+        for data in load_seq:
+            scope, var_name = self.unpack_resolved(data)
+            DEBUG('Resetting {}.{}...'.format(scope, var_name))
+            self.namespace[scope][var_name].reset()
 
     def resolve_var(self, scope, var, ordering=['raw'], known_names=None):
         """
@@ -234,6 +240,8 @@ class VariableResolver(object):
         if var.next():
             DEBUG('Trying alternative rvalues for variable {}.{}'.format(
                 scope, var.name))
+            # Reset variables used in this round only
+            self.reset_resolved_vars(load_seq)
             return self.resolve_var(scope, var, ordering)
 
         return False, load_seq, known_names  # Failed to load

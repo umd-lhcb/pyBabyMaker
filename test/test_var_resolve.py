@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Jun 23, 2021 at 04:27 AM +0200
+# Last Change: Thu Jun 24, 2021 at 03:43 AM +0200
 
 from collections import defaultdict
 
@@ -558,4 +558,39 @@ def test_VariableResolver_partial_common_deps_complex():
         [
             Variable('sel0', rvalues=['flag_d0mu'])
         ]
+    )
+
+
+# NOTE: In a case, when using an alternative rvalue, the dependencies of its
+#       dependencies are not resolved correctly
+def test_VariableResolver_alternative_rvalue_dep_deep():
+    namespace = {
+        'calc': {
+            'other_trk': Variable(
+                'other_trk', rvalues=['VEC(trk_k, trk_pi, trk_spi)',
+                                      'VEC(trk_k, trk_pi)']),
+            'trk_k': Variable('trk_k', rvalues=['FAKE(k_PT)']),
+            'trk_pi': Variable('trk_pi', ['FAKE(pi_PT)']),
+            'trk_spi': Variable('trk_spi', ['FAKE(spi_PT)'])
+        },
+        'raw': {
+            'k_PT': Variable('k_PT'),
+            'pi_PT': Variable('pi_PT'),
+            # 'spi_PT': Variable('spi_PT')
+        }
+    }
+    resolver = VariableResolver(namespace)
+    result = resolver.resolve_scope('calc', ordering=['calc', 'raw'])
+
+    assert result == (
+        [
+            ('raw', Variable('k_PT')),
+            ('calc', Variable('trk_k', rvalues=['FAKE(k_PT)'])),
+            ('raw', Variable('pi_PT')),
+            ('calc', Variable('trk_pi', rvalues=['FAKE(pi_PT)'])),
+            ('calc', Variable('other_trk',
+                              rvalues=['VEC(trk_k, trk_pi, trk_spi)',
+                                       'VEC(trk_k, trk_pi)'])),
+        ],
+        []
     )

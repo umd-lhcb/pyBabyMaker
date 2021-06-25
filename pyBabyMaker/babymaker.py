@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Jun 25, 2021 at 11:32 PM +0200
+# Last Change: Sat Jun 26, 2021 at 12:00 AM +0200
 
 import re
 import logging
@@ -108,7 +108,6 @@ class BabyConfigParser:
 
         for output_tree, config in self.parsed_config['output'].items():
             input_tree = config['input']
-            directive['input_trees'].append(input_tree)
 
             try:
                 dumped_tree = self.dumped_ntuple[input_tree]
@@ -120,6 +119,7 @@ class BabyConfigParser:
 
             print('{}=== Handling output tree {} ==={}'.format(
                 TC.BOLD+TC.BLUE, output_tree, TC.END))
+            directive['input_trees'].append(input_tree)
 
             # Merge raw tree-specific directive with the global one.
             merge = config['inherit'] if 'inherit' in config else True
@@ -317,7 +317,7 @@ class BabyMaker(BaseMaker):
         Generate C++ file based on inputs.
         """
         parsed_config = self.read(self.config_filename)
-        dumped_ntuple, tree_relations = self.dump_ntuples()
+        dumped_ntuple, tree_relations = self.dump_ntuples(blocked_trees)
         directive = self.directive_gen(
             parsed_config, dumped_ntuple, literals, debug)
 

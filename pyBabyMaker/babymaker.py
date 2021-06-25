@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Jun 23, 2021 at 04:39 AM +0200
+# Last Change: Fri Jun 25, 2021 at 11:32 PM +0200
 
 import re
 import logging
@@ -312,7 +312,7 @@ class BabyMaker(BaseMaker):
         self.template_filename = template_filename
         self.use_reformatter = use_reformatter
 
-    def gen(self, filename, literals={}, debug=False):
+    def gen(self, filename, literals={}, blocked_trees=[], debug=False):
         """
         Generate C++ file based on inputs.
         """
@@ -336,11 +336,13 @@ class BabyMaker(BaseMaker):
         if self.use_reformatter:
             self.reformat(filename)
 
-    def dump_ntuples(self):
+    def dump_ntuples(self, blocked_trees=[]):
         """
         Dump main ntuple and all friend ntuples.
         """
         trees = self.dump(self.ntuple_filename)
+        # Remove blocked input trees
+        trees = {k: v for k, v in trees.items() if k not in blocked_trees}
         tree_relations = {k: [] for k in trees}
 
         for friend in self.friend_filenames:

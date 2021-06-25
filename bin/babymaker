@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Jun 21, 2021 at 05:29 AM +0200
+# Last Change: Fri Jun 25, 2021 at 11:33 PM +0200
 
 from argparse import ArgumentParser, Action
 from pyBabyMaker.babymaker import BabyMaker
@@ -70,6 +70,12 @@ specify template path.''')
                         help='''
 specify additional literal variables.''')
 
+    parser.add_argument('-B', '--blocked-trees',
+                        nargs='+',
+                        default=[],
+                        help='''
+specify input trees to block.''')
+
     return parser.parse_args()
 
 
@@ -82,4 +88,4 @@ if __name__ == '__main__':
     template = load_file(args.template_path)
     maker = BabyMaker(args.input, args.ntuple, args.friends, template,
                       args.no_format)
-    maker.gen(args.output, args.additional_vars, args.debug)
+    maker.gen(args.output, args.additional_vars, args.blocked_trees, args.debug)

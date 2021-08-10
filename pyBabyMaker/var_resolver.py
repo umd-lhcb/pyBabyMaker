@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Jun 24, 2021 at 05:34 AM +0200
+# Last Change: Tue Aug 10, 2021 at 03:00 PM +0200
 """
 This module provides general variable dependency resolution.
 
@@ -150,8 +150,12 @@ class VariableResolver(object):
         """
         for data in load_seq:
             scope, var_name = self.unpack_resolved(data)
-            DEBUG('Resetting {}.{}...'.format(scope, var_name))
-            self.namespace[scope][var_name].reset()
+            try:
+                DEBUG('Resetting {}.{}...'.format(scope, var_name))
+                self.namespace[scope][var_name].reset()
+            except:
+                DEBUG('Failed to reset {}.{}, proceed anyway...'.format(
+                    scope, var_name))
 
     def resolve_var(self, scope, var, ordering=['raw'], known_names=None):
         """

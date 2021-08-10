@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 10, 2021 at 03:00 PM +0200
+# Last Change: Tue Aug 10, 2021 at 03:57 PM +0200
 """
 This module provides general variable dependency resolution.
 
@@ -161,7 +161,7 @@ class VariableResolver(object):
         """
         Resolve a single variable in namespaces following an ordering.
         """
-        load_seq = []
+        load_seq = UniqueList()
         known_names = UniqueList() if known_names is None else known_names
         var_key = (scope, var.name)
         DEBUG('Start resolving: {}.{}'.format(scope, var.name))

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Jun 22, 2021 at 02:44 AM +0200
+# Last Change: Tue Aug 10, 2021 at 03:47 PM +0200
 """
 This module defines C++ boolean syntax.
 """
@@ -58,12 +58,14 @@ cpp_boolean_grammar = '''
     arguments: (boolor ",")* (boolor [","])
     fullname: (NAME "::")+ NAME
 
-    %import common.SIGNED_NUMBER -> NUMBER
+    %import common.SIGNED_NUMBER -> RAW_NUM
     %import common.WS_INLINE
     %import common.CNAME -> NAME
 
     %ignore WS_INLINE
 
+    NUMBER: RAW_NUM NUM_SUFFIX*
+    NUM_SUFFIX: "f" | "F" | "u" | "U" | "ll" | "LL" | "l" | "L"
     BOOL.2: "true" | "false"  // These keywords have higher priority
 '''
 

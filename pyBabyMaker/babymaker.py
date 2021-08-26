@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Sat Jun 26, 2021 at 12:00 AM +0200
+# Last Change: Thu Aug 26, 2021 at 11:53 PM +0200
 
 import re
 import logging
@@ -108,6 +108,10 @@ class BabyConfigParser:
 
         for output_tree, config in self.parsed_config['output'].items():
             input_tree = config['input']
+            try:
+                known_warnings = config['mute']
+            except KeyError:
+                known_warnings = []
 
             try:
                 dumped_tree = self.dumped_ntuple[input_tree]
@@ -157,6 +161,13 @@ class BabyConfigParser:
                 unresolved_calculation
 
             # Warn about variables that can't be resolved
+            most_unresolved_vars = [
+                v for v in most_unresolved_vars
+                if not self.match(known_warnings, v.name)]
+            unresolved_selection = [
+                v for v in unresolved_selection
+                if not self.match(known_warnings, v.rval)]
+
             for var in most_unresolved_vars:
                 if var.output:
                     print("{}Output branch {} cannot be resolved...{}".format(

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Aug 26, 2021 at 11:53 PM +0200
+# Last Change: Fri Aug 27, 2021 at 12:35 AM +0200
 
 import re
 import logging
@@ -168,6 +168,16 @@ class BabyConfigParser:
                 v for v in unresolved_selection
                 if not self.match(known_warnings, v.rval)]
 
+            # Print unresolved selections first as they are resolved first and
+            # can't complain about missing variables for now
+            if unresolved_selection or most_unresolved_vars:
+                print("{}There might be undefined/unresolved variables for inputs to these variables!{}".format(
+                TC.RED, TC.END))
+
+            for var in unresolved_selection:
+                print("{}Selection expr {} cannot be resolved...{}".format(
+                    TC.YELLOW, var.rval, TC.END))
+
             for var in most_unresolved_vars:
                 if var.output:
                     print("{}Output branch {} cannot be resolved...{}".format(
@@ -175,10 +185,6 @@ class BabyConfigParser:
                 else:
                     print("{}Temp variable {} cannot be resolved...{}".format(
                         TC.YELLOW, var.name, TC.END))
-
-            for var in unresolved_selection:
-                print("{}Selection expr {} cannot be resolved...{}".format(
-                    TC.YELLOW, var.rval, TC.END))
 
             # Error when one output branch has multiple definitions
             output_br = [v for v in resolved_vars if v.output]

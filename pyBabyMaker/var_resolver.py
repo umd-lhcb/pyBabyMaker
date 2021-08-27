@@ -2,9 +2,12 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 10, 2021 at 03:57 PM +0200
+# Last Change: Fri Aug 27, 2021 at 02:54 PM +0200
 """
 This module provides general variable dependency resolution.
+
+To be more technical, this is a Directed Acyclic Graph (DAG) resolver. I decided
+traverse the DAG tree in a depth-first manner, so there's no laziness involved.
 
 I (Yipeng) commit a lot of sins in this module by recording states all around
 the places. This should be fixed by a rewrite but we don't have time now.

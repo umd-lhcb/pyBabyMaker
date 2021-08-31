@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Aug 27, 2021 at 11:30 PM +0200
+# Last Change: Tue Aug 31, 2021 at 02:09 AM +0200
 """
 This module provides general variable dependency resolution.
 
@@ -24,29 +24,6 @@ from pyBabyMaker.base import TermColor as TC
 from pyBabyMaker.base import UniqueList
 
 DEBUG = logging.debug
-
-
-@dataclass
-class InputVariable:
-    """
-    Store a raw variable to be resolved. Note that by design we allow multiple
-    possible rvalues.
-    """
-    name: str
-    type: str = 'nil'
-    rvalues: List[str] = field(default_factory=list)
-    literal: str = None
-
-    def __iter__(self):
-        self.idx = 0
-        self.len = len(self.rvalues)
-        return self
-
-    def __next__(self):
-        if self.idx < self.len:
-            self.idx += 1
-            return find_all_vars(self.rvalues[self.idx - 1])
-        raise StopIteration
 
 
 @dataclass

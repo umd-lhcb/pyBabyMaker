@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 06:25 PM +0200
+# Last Change: Tue Aug 31, 2021 at 06:35 PM +0200
 """
 This module provides general variable dependency resolution.
 
@@ -138,7 +138,7 @@ class Node:
     def __repr__(self):
         if self.literal:
             return '{} := {}'.format(self.name, self.literal)
-        return '{} {}.{} = {}'.format(
+        return '{} {}_{} = {}'.format(
             self.type, self.scope, self.name, self.rval)
 
     def __eq__(self, other):
@@ -211,7 +211,8 @@ def resolve_var(var, scope, scopes, ordering, parent=None, resolved_vars=None):
             for s in ordering:
                 DEBUG('Try to resolve {} in {}...'.format(n, s))
                 if n in scopes[s] and \
-                        fname_formatter(s, n) not in blocked_fnames:
+                        fname_formatter(s, n) not in blocked_fnames and \
+                        fname_formatter(s, n) != node_root.fname:
                     var_dep = scopes[s][n]
                     is_resolved, node_leaf, resolved_vars_add = resolve_var(
                         var_dep, s, scopes, ordering, node_root,

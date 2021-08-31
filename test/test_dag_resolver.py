@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 06:26 PM +0200
+# Last Change: Tue Aug 31, 2021 at 06:34 PM +0200
 
 from collections import defaultdict
 
@@ -215,30 +215,27 @@ def test_resolve_var_existing_var():
     assert result[1].rval == 'raw_x'
 
 
-# def test_VariableResolver_circular():
-    # var = Variable('x', rvalues=['GEV2(x)'])
-    # namespace = {
-        # 'calc': {
-            # 'x': var,
-        # },
-        # 'raw': {
-            # 'x': Variable('x'),
-        # }
-    # }
-    # resolver = VariableResolver(namespace)
+def test_resolve_var_circular():
+    var = Variable('x', rvals=['GEV2(x)'])
+    scopes = {
+        'calc': {
+            'x': var,
+        },
+        'raw': {
+            'x': Variable('x'),
+        }
+    }
+    result = resolve_var(var, 'calc', scopes, ordering=['calc', 'raw'])
 
-    # assert resolver.resolve_var('calc', var, ordering=['calc', 'raw']) == (
-        # True,
-        # [
-            # ('raw', Variable('x')),
-            # ('calc', var)
-        # ],
-        # [
-            # ('raw', 'x'),
-            # ('calc', 'x')
-        # ]
-    # )
-    # assert var.rval == 'GEV2(raw_x)'
+    assert result == (
+        True,
+        Node('x', 'calc', expr='GEV2(x)'),
+        [
+            Node('x', 'raw'),
+            Node('x', 'calc', expr='GEV2(x)')
+        ]
+    )
+    assert result[1].rval == 'GEV2(raw_x)'
 
 
 # def test_VariableResolver_full_fail():

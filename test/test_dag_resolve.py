@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 02:47 PM +0200
+# Last Change: Tue Aug 31, 2021 at 03:28 PM +0200
 
 from collections import defaultdict
 
@@ -20,7 +20,7 @@ def test_Variable_simple():
     assert var.name == 'test'
     assert var.type is None
     assert var.rvals == []
-    assert var.literal is False
+    assert not var.literal
 
 
 def test_Variable_typical():
@@ -40,22 +40,22 @@ def test_Variable_repr():
     assert str(var2) == 'pi := 3.14'
 
 
-def test_Node_is_properties():
+def test_Node_properties():
     var1 = Node('test')
-    var2 = Node('test', expr='a')
-    var3 = Node('test', expr='a+b', fake=True)
+    var2 = Node('test', literal='a')
+    var3 = Node('test', expr='a+b')
 
-    assert var1.is_literal is False
-    assert var1.is_fake is False
-    assert var1.is_terminal is True
+    assert var1.fname == 'None_test'
+    assert var1.fake is False
+    assert var1.rval == 'test'
 
-    assert var2.is_literal is True
-    assert var2.is_fake is False
-    assert var2.is_terminal is True
+    assert var2.fname == 'None_test'
+    assert var2.fake is False
+    assert var2.rval == 'a'
 
-    assert var3.is_literal is False
-    assert var3.is_fake is True
-    assert var3.is_terminal is False
+    assert var3.fname == 'None_test'
+    assert var3.fake is True
+    assert var3.rval == 'a+b'
 
 
 def test_Node_sub():

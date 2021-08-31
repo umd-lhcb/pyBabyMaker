@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 02:46 PM +0200
+# Last Change: Tue Aug 31, 2021 at 03:29 PM +0200
 """
 This module provides general variable dependency resolution.
 
@@ -48,7 +48,17 @@ class Variable:
     name: str
     type: str = None
     rvals: List[str] = field(default_factory=list)
-    literal: bool = False
+    literal: str = None
+
+    @property
+    def terminal(self):
+        """
+        Return a boolean indicating if the variable is terminal, which means
+        that it is considered to be resolved directly
+        """
+        if not self.literal and not list(self):
+            return True
+        return False
 
     def __iter__(self):
         self._idx = 0
@@ -77,21 +87,12 @@ class Node:
     scope: str = None
     type: str = None
     expr: str = None
-    fake: bool = False
+    literal: str = None
     parent: Node = None
     children: List[Node] = field(default_factory=list)
 
     @property
-    def is_literal(self):
-        """
-        Return a boolean indicating if this Node represents a literal variable.
-        """
-        if not self.type and self.expr and not self.fake:
-            return True
-        return False
-
-    @property
-    def is_fake(self):
+    def fake(self):
         """
         Return a boolean indicating if this Node represents a fake variable.
 
@@ -99,15 +100,7 @@ class Node:
         resolved, e.g. a boolean expression in an if statement, but the
         expression doesn't need to be defined.
         """
-        return self.fake
-
-    @property
-    def is_terminal(self):
-        """
-        Return a boolean indicating if this Node is terminal, i.e. it is
-        considered resolved.
-        """
-        if self.is_literal or not self.expr:
+        if not self.type and self.expr and not self.literal:
             return True
         return False
 
@@ -127,19 +120,24 @@ class Node:
         Suppose ``a -> calc_a``, and ``b -> rename_b``, then a rvalue of
         ``a+b -> calc_a+rename_b``.
         """
-        val = self.expr
+        if self.expr:
+            val = self.expr
+        elif self.literal:
+            val = self.literal
+        else:
+            val = self.name  # For terminal variables
 
         for v in self.children:
-            if v.is_literal:
-                val = re.sub(r'\b'+v.name+r'\b', v.expr, val)
+            if v.literal:
+                val = re.sub(r'\b'+v.name+r'\b', v.literal, val)
             else:
                 val = re.sub(r'\b'+v.name+r'\b', v.fname, val)
 
         return val
 
     def __repr__(self):
-        if self.is_literal:
-            return '{} := {}'.format(self.name, self.expr)
+        if self.literal:
+            return '{} := {}'.format(self.name, self.literal)
         return '{} {}.{} = {}'.format(
             self.type, self.scope, self.name, self.rval)
 
@@ -173,7 +171,7 @@ def resolve_var(var, scope, scopes, ordering, parent=None, resolved_vars=None):
     resolved_vars_now = []
     is_resolved = True
 
-    if not list(var):
+    if var.terminal:
         node_root = Node(var.name, scope, var.type, parent=parent)
         DEBUG('Resolved raw variable: {}'.format(node_root))
         resolved_vars_now.append(node_root)
@@ -181,18 +179,22 @@ def resolve_var(var, scope, scopes, ordering, parent=None, resolved_vars=None):
             parent.children.append(node_root)
         return is_resolved, node_root, resolved_vars_now
 
+    if var.literal:
+        node_root = Node(var.name, expr=var.literal, parent=parent)
+        DEBUG('Resolved literal variable: {}'.format(node_root))
+        # Don't add literal variables to resolved variable list
+        if parent:
+            parent.children.append(node_root)
+        else:
+            print('{}Trying to use literal variable {} as a root DAG node, something must be wrong here{}'.format(
+                TC.RED, node_root, TC.END))
+        return is_resolved, node_root, resolved_vars_now
+
     for rval, deps in var:  # Allow resolve variables with multiple rvalues
         node_root = Node(var.name, scope, var.type, rval, parent=parent)
 
         if resolved_vars and node_root in resolved_vars:
             DEBUG('Already resolved: {}'.format(node_root))
-            return is_resolved, node_root, resolved_vars_now
-
-        if node_root.is_literal:
-            DEBUG('Resolved literal variable: {}'.format(node_root))
-            # Don't add literal variables to resolved variable list
-            if parent:
-                parent.children.append(node_root)
             return is_resolved, node_root, resolved_vars_now
 
         resolved_vars_dep = []

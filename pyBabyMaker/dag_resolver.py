@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 06:11 PM +0200
+# Last Change: Tue Aug 31, 2021 at 06:25 PM +0200
 """
 This module provides general variable dependency resolution.
 
@@ -193,14 +193,15 @@ def resolve_var(var, scope, scopes, ordering, parent=None, resolved_vars=None):
         return True, node_root, resolved_vars_now
 
     for rval, deps in var:  # Allow resolve variables with multiple rvalues
-        is_resolved = True
         node_root = Node(var.name, scope, var.type, rval, parent=parent)
         DEBUG('Try to resolve dependencies of {}...'.format(node_root))
 
         if resolved_vars and node_root in resolved_vars:
             DEBUG('Already resolved: {}'.format(node_root))
-            return is_resolved, node_root, resolved_vars_now
+            node_root = resolved_vars[resolved_vars.index(node_root)]
+            return True, node_root, resolved_vars_now
 
+        is_resolved = True
         resolved_vars_dep = []
         # Don't modify input!
         resolved_vars_copy = deepcopy(resolved_vars) if resolved_vars else []

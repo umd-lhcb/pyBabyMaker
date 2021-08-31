@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 06:13 PM +0200
+# Last Change: Tue Aug 31, 2021 at 06:26 PM +0200
 
 from collections import defaultdict
 
@@ -179,46 +179,40 @@ def test_resolve_var_multi_scope_fail():
     assert result[1].children == [Node('b', 'raw')]
 
 
-# def test_VariableResolver_multi_scope_alt_def():
-    # namespace = {
-        # 'rename': {
-            # 'x': Variable('x', rvalues=['a'])
-        # },
-        # 'raw': {
-            # 'a': Variable('a'),
-            # 'b': Variable('b')
-        # }
-    # }
-    # resolver = VariableResolver(namespace)
-    # var = Variable('a', rvalues=['b+y', 'x+b'])
+def test_resolve_var_multi_scope_alt_def():
+    scopes = {
+        'rename': {
+            'x': Variable('x', rvals=['a'])
+        },
+        'raw': {
+            'a': Variable('a'),
+            'b': Variable('b')
+        }
+    }
+    var = Variable('a', rvals=['b+y', 'x+b'])
+    result = resolve_var(var, 'calc', scopes, ordering=['rename', 'raw'])
 
-    # assert resolver.resolve_var('calc', var, ordering=['rename', 'raw']) == (
-        # True,
-        # [
-            # ('raw', Variable('a')),
-            # ('rename', Variable('x', rvalues=['a'])),
-            # ('raw', Variable('b')),
-            # ('calc', var)
-        # ],
-        # [
-            # ('raw', 'a'),
-            # ('rename', 'x'),
-            # ('raw', 'b'),
-            # ('calc', 'a')
-        # ]
-    # )
-    # assert var.idx == 1
-    # assert var.rval == 'rename_x+raw_b'
+    assert result == (
+        True,
+        Node('a', 'calc', expr='x+b'),
+        [
+            Node('a', 'raw'),
+            Node('x', 'rename', expr='a'),
+            Node('b', 'raw'),
+            Node('a', 'calc', expr='x+b')
+        ]
+    )
+    assert result[1].rval == 'rename_x+raw_b'
 
 
-# def test_VariableResolver_existing_var():
-    # resolver = VariableResolver({})
-    # resolver._resolved_names = [('rename', 'a')]
-    # var = Variable('a', rvalues=['x'])
+def test_resolve_var_existing_var():
+    resolved_vars = [Node('a', 'rename', expr='x', children=[Node('x', 'raw')])]
+    var = Variable('a', rvals=['x'])
+    result = resolve_var(
+        var, 'rename', {'raw': {}}, ['raw'], resolved_vars=resolved_vars)
 
-    # assert resolver.resolve_var('rename', var) == (
-        # True, [], []  # No need to resolve since it's already loaded before
-    # )
+    assert result == (True, Node('a', 'rename', expr='x'), [])
+    assert result[1].rval == 'raw_x'
 
 
 # def test_VariableResolver_circular():

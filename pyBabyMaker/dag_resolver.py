@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 03:29 PM +0200
+# Last Change: Tue Aug 31, 2021 at 03:46 PM +0200
 """
 This module provides general variable dependency resolution.
 
@@ -169,7 +169,6 @@ def find_parent_fnames(var):
 
 def resolve_var(var, scope, scopes, ordering, parent=None, resolved_vars=None):
     resolved_vars_now = []
-    is_resolved = True
 
     if var.terminal:
         node_root = Node(var.name, scope, var.type, parent=parent)
@@ -177,20 +176,21 @@ def resolve_var(var, scope, scopes, ordering, parent=None, resolved_vars=None):
         resolved_vars_now.append(node_root)
         if parent:
             parent.children.append(node_root)
-        return is_resolved, node_root, resolved_vars_now
+        return True, node_root, resolved_vars_now
 
     if var.literal:
-        node_root = Node(var.name, expr=var.literal, parent=parent)
+        node_root = Node(var.name, literal=var.literal, parent=parent)
         DEBUG('Resolved literal variable: {}'.format(node_root))
         # Don't add literal variables to resolved variable list
         if parent:
             parent.children.append(node_root)
         else:
-            print('{}Trying to use literal variable {} as a root DAG node, something must be wrong here{}'.format(
+            print('{}Literal variable {} as a root DAG node, something must be wrong here{}'.format(
                 TC.RED, node_root, TC.END))
-        return is_resolved, node_root, resolved_vars_now
+        return True, node_root, resolved_vars_now
 
     for rval, deps in var:  # Allow resolve variables with multiple rvalues
+        is_resolved = True
         node_root = Node(var.name, scope, var.type, rval, parent=parent)
 
         if resolved_vars and node_root in resolved_vars:
@@ -198,10 +198,12 @@ def resolve_var(var, scope, scopes, ordering, parent=None, resolved_vars=None):
             return is_resolved, node_root, resolved_vars_now
 
         resolved_vars_dep = []
+        # Don't modify input!
         resolved_vars_copy = deepcopy(resolved_vars) if resolved_vars else []
         blocked_fnames = find_parent_fnames(node_root)
 
         for n, s in product(deps, ordering):
+            DEBUG('Try to resolve {} in {}...'.format(n, s))
             if n in scopes[s] and fname_formatter(s, n) not in blocked_fnames:
                 var_dep = scopes[s][n]
                 is_resolved, node_leaf, resolved_vars_add = resolve_var(
@@ -213,6 +215,10 @@ def resolve_var(var, scope, scopes, ordering, parent=None, resolved_vars=None):
                 node_root.children.append(node_leaf)  # append resolved to root
                 resolved_vars_dep += resolved_vars_add
                 resolved_vars_copy += resolved_vars_dep
+
+            else:
+                DEBUG('Variable {} not in {}'.format(n, s))
+                is_resolved = False
 
         if is_resolved:
             resolved_vars_now += resolved_vars_dep

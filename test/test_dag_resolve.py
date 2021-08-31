@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 03:28 PM +0200
+# Last Change: Tue Aug 31, 2021 at 03:39 PM +0200
 
 from collections import defaultdict
 
@@ -97,13 +97,12 @@ def test_resolve_var_simple():
     )
 
 
-# def test_VariableResolver_simple_fail():
-    # namespace = {'raw': {'a': Variable('a')}}
-    # resolver = VariableResolver(namespace)
-    # var = Variable('a', rvalues=['b'])
+def test_VariableResolver_simple_fail():
+    var = Variable('a', type='Double_t', rvals=['b'])
+    scopes = {'raw': {'a': Variable('a', 'Double_t')}}
 
-    # assert resolver.resolve_var('keep', var) == (False, [], [])
-    # assert resolver._resolved_names == []
+    assert resolve_var(var, 'keep', scopes, ['raw']) == (
+        False, Node('a', 'keep', 'Double_t', 'b'), [])
 
 
 # def test_VariableResolver_multi_scope():

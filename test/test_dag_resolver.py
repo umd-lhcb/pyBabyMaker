@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 06:34 PM +0200
+# Last Change: Tue Aug 31, 2021 at 06:46 PM +0200
 
 from collections import defaultdict
 
@@ -238,37 +238,28 @@ def test_resolve_var_circular():
     assert result[1].rval == 'GEV2(raw_x)'
 
 
-# def test_VariableResolver_full_fail():
-    # resolver = VariableResolver({
-        # 'raw': {},
-        # 'rename': {'a': Variable('x', rvalues=['c'])}
-    # })
-    # var = Variable('x', rvalues=['a+b'])
+def test_resolve_var_full_fail():
+    scopes = {
+        'raw': {},
+        'rename': {'a': Variable('x', rvals=['c'])}
+    }
+    var = Variable('x', rvals=['a+b'])
 
-    # assert resolver.resolve_var('calc', var, ordering=['rename', 'raw']) == (
-        # False, [], []
-    # )
-    # assert var.idx == 0
-    # assert not var.ok
+    assert resolve_var(var, 'calc', scopes, ordering=['rename', 'raw']) == (
+        False, Node('x', 'calc', expr='a+b'), []
+    )
 
 
-# def test_VariableResolver_skip_names_simple():
-    # resolver = VariableResolver(
-        # {'raw': {}},
-        # ['GeV']
-    # )
-    # var = Variable('x', rvalues=['300*GeV'])
+def test_resolve_var_skip_names_simple():
+    var = Variable('x', rvals=['300*GeV'])
+    result = resolve_var(var, 'calc', {'raw': {}}, ['raw'], skip_names=['GeV'])
 
-    # assert resolver.resolve_var('calc', var) == (
-        # True,
-        # [
-            # ('calc', var)
-        # ],
-        # [
-            # ('calc', 'x')
-        # ]
-    # )
-    # assert var.rval == '300*GeV'
+    assert result == (
+        True,
+        Node('x', 'calc', expr='300*GeV'),
+        [Node('x', 'calc', expr='300*GeV')]
+    )
+    assert result[1].rval == '300*GeV'
 
 
 # def test_VariableResolver_selection():

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 06:35 PM +0200
+# Last Change: Tue Aug 31, 2021 at 06:48 PM +0200
 """
 This module provides general variable dependency resolution.
 
@@ -167,11 +167,13 @@ def find_parent_fnames(var):
     return names
 
 
-def resolve_var(var, scope, scopes, ordering, parent=None, resolved_vars=None):
+def resolve_var(var, scope, scopes, ordering,
+                parent=None, resolved_vars=None, skip_names=None):
     """
     Resolve a single variable traversing on scopes with a given ordering.
     """
     resolved_vars_now = []
+    skip_names = [] if skip_names is None else skip_names
 
     if var.terminal:
         node_root = Node(var.name, scope, var.type, parent=parent)
@@ -201,22 +203,26 @@ def resolve_var(var, scope, scopes, ordering, parent=None, resolved_vars=None):
             node_root = resolved_vars[resolved_vars.index(node_root)]
             return True, node_root, resolved_vars_now
 
-        is_resolved = True
         resolved_vars_dep = []
         # Don't modify input!
         resolved_vars_copy = deepcopy(resolved_vars) if resolved_vars else []
         blocked_fnames = find_parent_fnames(node_root)
 
+        is_resolved = True
         for n in deps:
             for s in ordering:
                 DEBUG('Try to resolve {} in {}...'.format(n, s))
-                if n in scopes[s] and \
+                if n in skip_names:
+                    DEBUG('Skipping {}...'.format(n))
+                    break
+
+                elif n in scopes[s] and \
                         fname_formatter(s, n) not in blocked_fnames and \
                         fname_formatter(s, n) != node_root.fname:
                     var_dep = scopes[s][n]
                     is_resolved, node_leaf, resolved_vars_add = resolve_var(
                         var_dep, s, scopes, ordering, node_root,
-                        resolved_vars_copy)
+                        resolved_vars_copy, skip_names)
 
                     if is_resolved:
                         DEBUG('Resolved dependency: {}'.format(node_leaf))

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 03:39 PM +0200
+# Last Change: Tue Aug 31, 2021 at 05:59 PM +0200
 
 from collections import defaultdict
 
@@ -84,91 +84,78 @@ def test_resolve_var_trivial():
 
 
 def test_resolve_var_simple():
-    var = Variable('A', type='Double_t', rvals=['a'])
-    scopes = {'raw': {'a': Variable('a', 'Double_t')}}
+    var = Variable('A', rvals=['a'])
+    scopes = {'raw': {'a': Variable('a')}}
 
     assert resolve_var(var, 'keep', scopes, ['raw']) == (
         True,
-        Node('A', 'keep', 'Double_t', 'a'),
+        Node('A', 'keep', expr='a'),
         [
-            Node('a', 'raw', 'Double_t'),
-            Node('A', 'keep', 'Double_t', 'a')
+            Node('a', 'raw'),
+            Node('A', 'keep', expr='a')
         ]
     )
 
 
 def test_VariableResolver_simple_fail():
-    var = Variable('a', type='Double_t', rvals=['b'])
-    scopes = {'raw': {'a': Variable('a', 'Double_t')}}
+    var = Variable('a', rvals=['b'])
+    scopes = {'raw': {'a': Variable('a')}}
 
     assert resolve_var(var, 'keep', scopes, ['raw']) == (
-        False, Node('a', 'keep', 'Double_t', 'b'), [])
+        False, Node('a', 'keep', expr='b'), [])
 
 
-# def test_VariableResolver_multi_scope():
-    # namespace = {
-        # 'rename': {
-            # 'x': Variable('x', rvalues=['a'])
-        # },
-        # 'raw': {
-            # 'a': Variable('a'),
-            # 'b': Variable('b')
-        # }
-    # }
-    # resolver = VariableResolver(namespace)
-    # var = Variable('a', rvalues=['x+b'])
+def test_VariableResolver_multi_scope():
+    scopes = {
+        'rename': {
+            'x': Variable('x', rvals=['a'])
+        },
+        'raw': {
+            'a': Variable('a'),
+            'b': Variable('b')
+        }
+    }
+    var = Variable('a', rvals=['x+b'])
 
-    # assert resolver.resolve_var('calc', var, ordering=['rename', 'raw']) == (
-        # True,
-        # [
-            # ('raw', Variable('a')),
-            # ('rename', Variable('x', rvalues=['a'])),
-            # ('raw', Variable('b')),
-            # ('calc', var)
-        # ],
-        # [
-            # ('raw', 'a'),
-            # ('rename', 'x'),
-            # ('raw', 'b'),
-            # ('calc', 'a')
-        # ]
-    # )
+    assert resolve_var(var, 'calc', scopes, ordering=['rename', 'raw']) == (
+        True,
+        Node('a', 'calc', expr='x+b'),
+        [
+            Node('a', 'raw'),
+            Node('x', 'rename', expr='a'),
+            Node('b', 'raw'),
+            Node('a', 'calc', expr='x+b')
+        ]
+    )
 
 
-# def test_VariableResolver_multi_scope_literal_shadow():
-    # namespace = {
-        # 'rename': {
-            # 'x': Variable('x', rvalues=['a'])
-        # },
-        # 'raw': {
-            # 'a': Variable('a'),
-            # 'b': Variable('b')
-        # },
-        # 'literals': {
-            # 'b': Variable('b', literal='343')
-        # }
-    # }
-    # resolver = VariableResolver(namespace)
-    # var = Variable('a', rvalues=['x+b'])
+def test_VariableResolver_multi_scope_literal_shadow():
+    scopes = {
+        'rename': {
+            'x': Variable('x', rvals=['a'])
+        },
+        'raw': {
+            'a': Variable('a'),
+            'b': Variable('b')
+        },
+        'literals': {
+            'b': Variable('b', literal='343')
+        }
+    }
+    var = Variable('a', rvals=['x+b'])
+    result = resolve_var(
+        var, 'calc', scopes, ordering=['literals', 'rename', 'raw'])
 
-    # assert resolver.resolve_var(
-        # 'calc', var, ordering=['literals', 'rename', 'raw']) == (
-        # True,
-        # [
-            # ('raw', Variable('a')),
-            # ('rename', Variable('x', rvalues=['a'])),
-            # ('calc', var)
-        # ],
-        # [
-            # ('raw', 'a'),
-            # ('rename', 'x'),
-            # ('calc', 'a')
-        # ]
-    # )
-
-    # resolved_var = resolver.resolve_var(
-        # 'calc', var, ordering=['literals', 'rename', 'raw'])[1][-1][1]
-    # assert resolved_var.rval == 'rename_x+343'
+    assert result == (
+        True,
+        Node('a', 'calc', expr='x+b'),
+        [
+            Node('a', 'raw'),
+            Node('x', 'rename', expr='a'),
+            Node('a', 'calc', expr='x+b')
+        ]
+    )
+    assert result[1].rval == 'rename_x+343'
 
 
 # def test_VariableResolver_multi_scope_fail():

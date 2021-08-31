@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 03:46 PM +0200
+# Last Change: Tue Aug 31, 2021 at 05:56 PM +0200
 """
 This module provides general variable dependency resolution.
 
@@ -18,7 +18,6 @@ import logging
 from dataclasses import dataclass, field
 from typing import List, Dict
 from copy import deepcopy
-from itertools import product
 
 from pyBabyMaker.boolean.utils import find_all_vars
 from pyBabyMaker.base import TermColor as TC
@@ -168,6 +167,9 @@ def find_parent_fnames(var):
 
 
 def resolve_var(var, scope, scopes, ordering, parent=None, resolved_vars=None):
+    """
+    Resolve a single variable traversing on scopes with a given ordering.
+    """
     resolved_vars_now = []
 
     if var.terminal:
@@ -202,23 +204,25 @@ def resolve_var(var, scope, scopes, ordering, parent=None, resolved_vars=None):
         resolved_vars_copy = deepcopy(resolved_vars) if resolved_vars else []
         blocked_fnames = find_parent_fnames(node_root)
 
-        for n, s in product(deps, ordering):
-            DEBUG('Try to resolve {} in {}...'.format(n, s))
-            if n in scopes[s] and fname_formatter(s, n) not in blocked_fnames:
-                var_dep = scopes[s][n]
-                is_resolved, node_leaf, resolved_vars_add = resolve_var(
-                    var_dep, s, scopes, ordering, node_root, resolved_vars_copy)
+        for n in deps:
+            for s in ordering:
+                DEBUG('Try to resolve {} in {}...'.format(n, s))
+                if n in scopes[s] and \
+                        fname_formatter(s, n) not in blocked_fnames:
+                    var_dep = scopes[s][n]
+                    is_resolved, node_leaf, resolved_vars_add = resolve_var(
+                        var_dep, s, scopes, ordering, node_root,
+                        resolved_vars_copy)
 
-                if not is_resolved:
-                    break
+                    if is_resolved:
+                        node_root.children.append(node_leaf)  # append resolved to root
+                        resolved_vars_dep += resolved_vars_add
+                        resolved_vars_copy += resolved_vars_dep
+                        break
 
-                node_root.children.append(node_leaf)  # append resolved to root
-                resolved_vars_dep += resolved_vars_add
-                resolved_vars_copy += resolved_vars_dep
-
-            else:
-                DEBUG('Variable {} not in {}'.format(n, s))
-                is_resolved = False
+                else:
+                    DEBUG('Variable {} not in {}'.format(n, s))
+                    is_resolved = False
 
         if is_resolved:
             resolved_vars_now += resolved_vars_dep

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 06:46 PM +0200
+# Last Change: Tue Aug 31, 2021 at 07:06 PM +0200
 
 from collections import defaultdict
 
@@ -262,22 +262,32 @@ def test_resolve_var_skip_names_simple():
     assert result[1].rval == '300*GeV'
 
 
-# def test_VariableResolver_selection():
-    # resolver = VariableResolver({
-        # 'raw': {
-            # 'k_PT': Variable('k_PT'),
-            # 'pi_PT': Variable('pi_PT')
-        # },
-    # }, ['MeV'])
-    # var = Variable('sel0', rvalues=['k_PT + pi_PT > 1400.0*MeV'],)
+def test_resolve_var_selection():
+    scopes = {
+        'raw': {
+            'k_PT': Variable('k_PT'),
+            'pi_PT': Variable('pi_PT')
+        }
+    }
+    var = Variable('sel0', rvals=['k_PT + pi_PT > 1400.0*MeV'])
 
-    # resolver.resolve_var('sel', var, known_names=[('raw', 'k_PT')])
-    # assert var.rval == 'raw_k_PT + raw_pi_PT > 1400.0*MeV'
+    result = resolve_var(var, 'sel', scopes, ['raw'], skip_names=['MeV'])
+    assert result == (
+        True,
+        Node('sel0', 'sel', expr='k_PT + pi_PT > 1400.0*MeV'),
+        [
+            Node('k_PT', 'raw'),
+            Node('pi_PT', 'raw'),
+            Node('sel0', 'sel', expr='k_PT + pi_PT > 1400.0*MeV'),
+        ]
+    )
+    assert result[1].rval == 'raw_k_PT + raw_pi_PT > 1400.0*MeV'
+    assert result[1].fake is True
 
 
-# ################################################
-# # Resolve multiple variables in a single scope #
-# ################################################
+################################################
+# Resolve multiple variables in a single scope #
+################################################
 
 # def test_VariableResolver_vars_simple():
     # namespace = {

@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 08:11 PM +0200
+# Last Change: Tue Aug 31, 2021 at 08:49 PM +0200
 
 from collections import defaultdict
 
@@ -438,114 +438,109 @@ def test_resolve_scope_duplicated_resolution():
     )
 
 
-# # NOTE: In a real use case, two selection variables have common dependencies. If
-# #       the first one can't be fully resolved, the dependencies of the second
-# #       variable were not fully resolved
-# # NOTE: The 'simple' case initially worked; the 'complex' one doesn't
-# def test_VariableResolver_partial_common_deps_simple():
-    # namespace = {
-        # 'sel': {
-            # 'sel0': Variable('sel0', rvals=['flag_d0mu']),
-            # 'sel1': Variable('sel1', rvals=['flag_mu'])
-        # },
-        # 'calc': {
-            # 'flag_d0mu': Variable(
-                # 'flag_d0mu',
-                # rvals=['FLAG_D0MU(mu_isMuon, k_isMuon, pi_isMuon)']
-            # ),
-            # 'flag_mu': Variable('flag_mu', rvals=['FLAG_MU(mu_isMuon)'])
-        # },
-        # 'raw': {
-            # # 'mu_TRUEID': Variable('mu_TRUEID'),
-            # 'mu_isMuon': Variable('mu_isMuon'),
-            # 'k_isMuon': Variable('k_isMuon'),
-        # }
-    # }
-    # resolver = VariableResolver(namespace)
-    # result = resolver.resolve_scope('sel', ordering=['calc', 'raw'])
+# NOTE: In a real use case, two selection variables have common dependencies. If
+#       the first one can't be fully resolved, the dependencies of the second
+#       variable were not fully resolved
+# NOTE: The 'simple' case initially worked; the 'complex' one doesn't
+def test_resolve_scope_partial_common_deps_simple():
+    scopes = {
+        'sel': {
+            'sel0': Variable('sel0', rvals=['flag_d0mu']),
+            'sel1': Variable('sel1', rvals=['flag_mu'])
+        },
+        'calc': {
+            'flag_d0mu': Variable(
+                'flag_d0mu',
+                rvals=['FLAG_D0MU(mu_isMuon, k_isMuon, pi_isMuon)']
+            ),
+            'flag_mu': Variable('flag_mu', rvals=['FLAG_MU(mu_isMuon)'])
+        },
+        'raw': {
+            # 'mu_TRUEID': Variable('mu_TRUEID'),
+            'mu_isMuon': Variable('mu_isMuon'),
+            'k_isMuon': Variable('k_isMuon'),
+        }
+    }
+    result = resolve_scope('sel', scopes, ordering=['calc', 'raw'])
 
-    # assert result == (
-        # [
-            # ('raw', Variable('mu_isMuon')),
-            # ('calc', Variable('flag_mu', rvals=['FLAG_MU(mu_isMuon)'])),
-            # ('sel', Variable('sel1', rvals=['flag_mu']))
-        # ],
-        # [
-            # Variable('sel0', rvals=['flag_d0mu'])
-        # ]
-    # )
-
-
-# def test_VariableResolver_partial_common_deps_complex():
-    # namespace = {
-        # 'sel': {
-            # 'sel0': Variable('sel0', rvals=['flag_d0mu']),
-            # 'sel1': Variable('sel1', rvals=['flag_mu'])
-        # },
-        # 'calc': {
-            # 'flag': Variable('flag', rvals=['FLAG(mu_PT)']),
-            # 'flag_d0mu': Variable(
-                # 'flag_d0mu',
-                # rvals=['FLAG_D0MU(flag, mu_isMuon, k_isMuon, pi_isMuon)']
-            # ),
-            # 'flag_mu': Variable('flag_mu', rvals=['FLAG_MU(flag, mu_isMuon)'])
-        # },
-        # 'raw': {
-            # # 'mu_TRUEID': Variable('mu_TRUEID'),
-            # 'mu_isMuon': Variable('mu_isMuon'),
-            # 'k_isMuon': Variable('k_isMuon'),
-            # 'mu_PT': Variable('mu_PT')
-        # }
-    # }
-    # resolver = VariableResolver(namespace)
-    # result = resolver.resolve_scope('sel', ordering=['calc', 'raw'])
-
-    # assert result == (
-        # [
-            # ('raw', Variable('mu_PT')),  # This one was missing!
-            # ('calc', Variable('flag', rvals=['FLAG(mu_PT)'])),
-            # ('raw', Variable('mu_isMuon')),
-            # ('calc', Variable('flag_mu', rvals=['FLAG_MU(flag, mu_isMuon)'])),
-            # ('sel', Variable('sel1', rvals=['flag_mu']))
-        # ],
-        # [
-            # Variable('sel0', rvals=['flag_d0mu'])
-        # ]
-    # )
+    assert result == (
+        [
+            Node('mu_isMuon', 'raw'),
+            Node('flag_mu', 'calc', expr='FLAG_MU(mu_isMuon)'),
+            Node('sel1', 'sel', expr='flag_mu')
+        ],
+        [
+            Node('sel0', 'sel', expr='flag_d0mu')
+        ]
+    )
 
 
-# # NOTE: In a case, when using an alternative rvalue, the dependencies of its
-# #       dependencies are not resolved correctly
-# def test_VariableResolver_alternative_rvalue_dep_deep():
-    # namespace = {
-        # 'calc': {
-            # 'other_trk': Variable(
-                # 'other_trk', rvals=['VEC(trk_k, trk_pi, trk_spi)',
-                                      # 'VEC(trk_k, trk_pi)']),
-            # 'trk_k': Variable('trk_k', rvals=['FAKE(k_PT)']),
-            # 'trk_pi': Variable('trk_pi', rvals=['FAKE(pi_PT)']),
-            # 'trk_spi': Variable('trk_spi', rvals=['FAKE(spi_PT)'])
-        # },
-        # 'raw': {
-            # 'k_PT': Variable('k_PT'),
-            # 'pi_PT': Variable('pi_PT'),
-            # # 'spi_PT': Variable('spi_PT')
-        # }
-    # }
-    # resolver = VariableResolver(namespace)
-    # result = resolver.resolve_scope('calc', ordering=['calc', 'raw'])
+def test_resove_scope_partial_common_deps_complex():
+    scopes = {
+        'sel': {
+            'sel0': Variable('sel0', rvals=['flag_d0mu']),
+            'sel1': Variable('sel1', rvals=['flag_mu'])
+        },
+        'calc': {
+            'flag': Variable('flag', rvals=['FLAG(mu_PT)']),
+            'flag_d0mu': Variable(
+                'flag_d0mu',
+                rvals=['FLAG_D0MU(flag, mu_isMuon, k_isMuon, pi_isMuon)']
+            ),
+            'flag_mu': Variable('flag_mu', rvals=['FLAG_MU(flag, mu_isMuon)'])
+        },
+        'raw': {
+            # 'mu_TRUEID': Variable('mu_TRUEID'),
+            'mu_isMuon': Variable('mu_isMuon'),
+            'k_isMuon': Variable('k_isMuon'),
+            'mu_PT': Variable('mu_PT')
+        }
+    }
+    result = resolve_scope('sel', scopes, ordering=['calc', 'raw'])
 
-    # assert result == (
-        # [
-            # ('raw', Variable('k_PT')),
-            # ('calc', Variable('trk_k', rvals=['FAKE(k_PT)'])),
-            # ('raw', Variable('pi_PT')),
-            # ('calc', Variable('trk_pi', rvals=['FAKE(pi_PT)'])),
-            # ('calc', Variable('other_trk',
-                              # rvals=['VEC(trk_k, trk_pi, trk_spi)',
-                                       # 'VEC(trk_k, trk_pi)'])),
-        # ],
-        # [
-            # Variable('trk_spi', rvals=['FAKE(spi_PT)'])
-        # ]
-    # )
+    assert result == (
+        [
+            Node('mu_PT', 'raw'),  # This one was missing!
+            Node('flag', 'calc', expr='FLAG(mu_PT)'),
+            Node('mu_isMuon', 'raw'),
+            Node('flag_mu', 'calc', expr='FLAG_MU(flag, mu_isMuon)'),
+            Node('sel1', 'sel', expr='flag_mu')
+        ],
+        [
+            Node('sel0', 'sel', expr='flag_d0mu')
+        ]
+    )
+
+
+# NOTE: In a case, when using an alternative rvalue, the dependencies of its
+#       dependencies are not resolved correctly
+def test_VariableResolver_alternative_rvalue_dep_deep():
+    scopes = {
+        'calc': {
+            'other_trk': Variable(
+                'other_trk', rvals=['VEC(trk_k, trk_pi, trk_spi)',
+                                    'VEC(trk_k, trk_pi)']),
+            'trk_k': Variable('trk_k', rvals=['FAKE(k_PT)']),
+            'trk_pi': Variable('trk_pi', rvals=['FAKE(pi_PT)']),
+            'trk_spi': Variable('trk_spi', rvals=['FAKE(spi_PT)'])
+        },
+        'raw': {
+            'k_PT': Variable('k_PT'),
+            'pi_PT': Variable('pi_PT'),
+            # 'spi_PT': Variable('spi_PT')
+        }
+    }
+    result = resolve_scope('calc', scopes, ordering=['calc', 'raw'])
+
+    assert result == (
+        [
+            Node('k_PT', 'raw', ),
+            Node('trk_k', 'calc', expr='FAKE(k_PT)'),
+            Node('pi_PT', 'raw'),
+            Node('trk_pi', 'calc', expr='FAKE(pi_PT)'),
+            Node('other_trk', 'calc', expr='VEC(trk_k, trk_pi)'),
+        ],
+        [
+            Node('trk_spi', 'calc', expr='FAKE(spi_PT)')
+        ]
+    )

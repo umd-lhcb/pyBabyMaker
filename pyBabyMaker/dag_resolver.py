@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 06:48 PM +0200
+# Last Change: Tue Aug 31, 2021 at 07:48 PM +0200
 """
 This module provides general variable dependency resolution.
 
@@ -204,16 +204,16 @@ def resolve_var(var, scope, scopes, ordering,
             return True, node_root, resolved_vars_now
 
         resolved_vars_dep = []
-        # Don't modify input!
-        resolved_vars_copy = deepcopy(resolved_vars) if resolved_vars else []
+        resolved_vars_copy = deepcopy(resolved_vars) if resolved_vars else []  # Don't modify input!
         blocked_fnames = find_parent_fnames(node_root)
 
-        is_resolved = True
+        dep_resolved = {n: False for n in deps}
         for n in deps:
             for s in ordering:
                 DEBUG('Try to resolve {} in {}...'.format(n, s))
                 if n in skip_names:
                     DEBUG('Skipping {}...'.format(n))
+                    dep_resolved[n] = True
                     break
 
                 elif n in scopes[s] and \
@@ -229,15 +229,35 @@ def resolve_var(var, scope, scopes, ordering,
                         node_root.children.append(node_leaf)  # append resolved to root
                         resolved_vars_dep += resolved_vars_add
                         resolved_vars_copy += resolved_vars_dep
+                        dep_resolved[n] = True
                         break
 
                 else:
                     DEBUG('Variable {} not in {}'.format(n, s))
-                    is_resolved = False
 
-        if is_resolved:
+        var_resolved = not (False in list(dep_resolved.values()))
+        if var_resolved:
             resolved_vars_now += resolved_vars_dep
             resolved_vars_now.append(node_root)
             break
 
-    return is_resolved, node_root, resolved_vars_now
+    return var_resolved, node_root, resolved_vars_now
+
+
+def resolve_vars_in_scope(vars, scope, scopes, ordering, **kwargs):
+    """
+    Resolve specified variables in scopes.
+    """
+    resolved = []
+    failed = []
+
+    for v in vars:
+        is_resolved, node, resolved_append = resolve_var(
+            v, scope, scopes, ordering, resolved_vars=resolved, **kwargs)
+
+        if is_resolved:
+            resolved += resolved_append
+        else:
+            failed.append(node)
+
+    return resolved, failed

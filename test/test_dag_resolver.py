@@ -2,12 +2,12 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 07:06 PM +0200
+# Last Change: Tue Aug 31, 2021 at 07:51 PM +0200
 
 from collections import defaultdict
 
 from pyBabyMaker.dag_resolver import Variable, Node
-from pyBabyMaker.dag_resolver import resolve_var
+from pyBabyMaker.dag_resolver import resolve_var, resolve_vars_in_scope
 
 
 ##############
@@ -289,65 +289,70 @@ def test_resolve_var_selection():
 # Resolve multiple variables in a single scope #
 ################################################
 
-# def test_VariableResolver_vars_simple():
-    # namespace = {
-        # 'calc': {
-            # 'a': Variable('a', rvalues=['b/c']),
-            # 'b': Variable('b', rvalues=['GEV2(b)']),
-        # },
-        # 'rename': {
-            # 'c': Variable('c', rvalues=['x'])
-        # },
-        # 'raw': {
-            # 'b': Variable('b'),
-            # 'x': Variable('x')
-        # }
-    # }
-    # resolver = VariableResolver(namespace)
-    # result = resolver.resolve_vars_in_scope(
-        # 'calc', namespace['calc'].values(), ordering=['calc', 'rename', 'raw'])
+def test_resolve_vars_in_scope_vars_simple():
+    scopes = {
+        'calc': {
+            'a': Variable('a', rvals=['b/c']),
+            'b': Variable('b', rvals=['GEV2(b)']),
+        },
+        'rename': {
+            'c': Variable('c', rvals=['x'])
+        },
+        'raw': {
+            'b': Variable('b'),
+            'x': Variable('x')
+        }
+    }
+    result = resolve_vars_in_scope(
+        scopes['calc'].values(), 'calc', scopes,
+        ordering=['calc', 'rename', 'raw'])
 
-    # assert result == (
-        # [
-            # ('raw', Variable('b')),
-            # ('calc', Variable('b', rvalues=['GEV2(b)'])),
-            # ('raw', Variable('x')),
-            # ('rename', Variable('c', rvalues=['x'])),
-            # ('calc', Variable('a', rvalues=['b/c']))
-        # ],
-        # []
-    # )
-    # assert result[0][4][1].rval == 'calc_b/rename_c'
+    assert result == (
+        [
+            Node('b', 'raw'),
+            Node('b', 'calc', expr='GEV2(b)'),
+            Node('x', 'raw'),
+            Node('c', 'rename', expr='x'),
+            Node('a', 'calc', expr='b/c')
+        ],
+        []
+    )
+    assert result[0][-1].rval == 'calc_b/rename_c'
 
 
-# def test_VariableResolver_vars_partial():
-    # namespace = {
-        # 'calc': {
-            # 'a': Variable('a', rvalues=['d/c']),
-            # 'b': Variable('b', rvalues=['GEV2(b)']),
-        # },
-        # 'rename': {
-            # 'c': Variable('c', rvalues=['x'])
-        # },
-        # 'raw': {
-            # 'b': Variable('b'),
-            # 'x': Variable('x')
-        # }
-    # }
-    # resolver = VariableResolver(namespace)
-    # result = resolver.resolve_vars_in_scope(
-        # 'calc', namespace['calc'].values(), ordering=['calc', 'rename', 'raw'])
+def test_reslove_vars_in_scope_vars_partial():
+    scopes = {
+        'calc': {
+            'a': Variable('a', rvals=['d/c']),
+            'b': Variable('b', rvals=['GEV2(b)']),
+        },
+        'rename': {
+            'c': Variable('c', rvals=['x'])
+        },
+        'raw': {
+            'b': Variable('b'),
+            'x': Variable('x')
+        }
+    }
+    result = resolve_vars_in_scope(
+        scopes['calc'].values(), 'calc', scopes,
+        ordering=['calc', 'rename', 'raw'])
 
-    # assert result == (
-        # [
-            # ('raw', Variable('b')),
-            # ('calc', Variable('b', rvalues=['GEV2(b)'])),
-        # ],
-        # [
-            # Variable('a', rvalues=['d/c']),
-        # ]
-    # )
-    # assert result[0][1][1].rval == 'GEV2(raw_b)'
+    assert result == (
+        [
+            Node('b', 'raw'),
+            Node('b', 'calc', expr='GEV2(b)'),
+        ],
+        [
+            Node('a', 'calc', expr='d/c')
+        ]
+    )
+    assert result[1][0].children == [
+        Node('c', 'rename', expr='x')
+    ]
+    assert result[1][0].children[0].children == [
+        Node('x', 'raw')
+    ]
 
 
 # ###########################################

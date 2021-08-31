@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 05:59 PM +0200
+# Last Change: Tue Aug 31, 2021 at 06:13 PM +0200
 
 from collections import defaultdict
 
@@ -97,7 +97,7 @@ def test_resolve_var_simple():
     )
 
 
-def test_VariableResolver_simple_fail():
+def test_resolve_var_simple_fail():
     var = Variable('a', rvals=['b'])
     scopes = {'raw': {'a': Variable('a')}}
 
@@ -105,7 +105,7 @@ def test_VariableResolver_simple_fail():
         False, Node('a', 'keep', expr='b'), [])
 
 
-def test_VariableResolver_multi_scope():
+def test_resolve_var_multi_scope():
     scopes = {
         'rename': {
             'x': Variable('x', rvals=['a'])
@@ -129,7 +129,7 @@ def test_VariableResolver_multi_scope():
     )
 
 
-def test_VariableResolver_multi_scope_literal_shadow():
+def test_resolve_var_multi_scope_literal_shadow():
     scopes = {
         'rename': {
             'x': Variable('x', rvals=['a'])
@@ -158,24 +158,25 @@ def test_VariableResolver_multi_scope_literal_shadow():
     assert result[1].rval == 'rename_x+343'
 
 
-# def test_VariableResolver_multi_scope_fail():
-    # namespace = {
-        # 'rename': {
-            # 'x': Variable('x', rvalues=['a'])
-        # },
-        # 'raw': {
-            # 'a': Variable('a'),
-            # 'b': Variable('b')
-        # }
-    # }
-    # resolver = VariableResolver(namespace)
-    # var = Variable('a', rvalues=['b+y'])
+def test_resolve_var_multi_scope_fail():
+    scopes = {
+        'rename': {
+            'x': Variable('x', rvals=['a'])
+        },
+        'raw': {
+            'a': Variable('a'),
+            'b': Variable('b')
+        }
+    }
+    var = Variable('a', rvals=['b+y'])
+    result = resolve_var(var, 'calc', scopes, ordering=['rename', 'raw'])
 
-    # assert resolver.resolve_var('calc', var, ordering=['rename', 'raw']) == (
-        # False,
-        # [('raw', Variable('b'))],
-        # [('raw', 'b')]
-    # )
+    assert result == (
+        False,
+        Node('a', 'calc', expr='b+y'),
+        []
+    )
+    assert result[1].children == [Node('b', 'raw')]
 
 
 # def test_VariableResolver_multi_scope_alt_def():

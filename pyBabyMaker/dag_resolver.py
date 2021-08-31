@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 05:56 PM +0200
+# Last Change: Tue Aug 31, 2021 at 06:11 PM +0200
 """
 This module provides general variable dependency resolution.
 
@@ -16,11 +16,12 @@ import re
 import logging
 
 from dataclasses import dataclass, field
-from typing import List, Dict
+from typing import List
 from copy import deepcopy
 
 from pyBabyMaker.boolean.utils import find_all_vars
 from pyBabyMaker.base import TermColor as TC
+from pyBabyMaker.base import UniqueList
 
 DEBUG = logging.debug
 
@@ -88,7 +89,7 @@ class Node:
     expr: str = None
     literal: str = None
     parent: Node = None
-    children: List[Node] = field(default_factory=list)
+    children: List[Node] = field(default_factory=UniqueList)
 
     @property
     def fake(self):
@@ -194,6 +195,7 @@ def resolve_var(var, scope, scopes, ordering, parent=None, resolved_vars=None):
     for rval, deps in var:  # Allow resolve variables with multiple rvalues
         is_resolved = True
         node_root = Node(var.name, scope, var.type, rval, parent=parent)
+        DEBUG('Try to resolve dependencies of {}...'.format(node_root))
 
         if resolved_vars and node_root in resolved_vars:
             DEBUG('Already resolved: {}'.format(node_root))
@@ -215,6 +217,7 @@ def resolve_var(var, scope, scopes, ordering, parent=None, resolved_vars=None):
                         resolved_vars_copy)
 
                     if is_resolved:
+                        DEBUG('Resolved dependency: {}'.format(node_leaf))
                         node_root.children.append(node_leaf)  # append resolved to root
                         resolved_vars_dep += resolved_vars_add
                         resolved_vars_copy += resolved_vars_dep

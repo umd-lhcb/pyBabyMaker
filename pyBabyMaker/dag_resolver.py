@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 01:38 PM +0200
+# Last Change: Tue Aug 31, 2021 at 01:45 PM +0200
 """
 This module provides general variable dependency resolution.
 
@@ -48,7 +48,7 @@ class Variable:
     name: str
     type: str = None
     rvals: List[str] = field(default_factory=list)
-    literal: False
+    literal: bool = False
 
     def __iter__(self):
         self._idx = 0
@@ -64,7 +64,7 @@ class Variable:
 
     def __repr__(self):
         if self.literal:
-            return '{} := {}'.format(self.name, self.literal)
+            return '{} := {}'.format(self.name, '|'.join(self.rvals))
         return '{} {} = {}'.format(self.type, self.name, '|'.join(self.rvals))
 
 

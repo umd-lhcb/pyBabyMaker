@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 04:41 AM +0200
+# Last Change: Tue Aug 31, 2021 at 01:38 PM +0200
 """
 This module provides general variable dependency resolution.
 
@@ -98,7 +98,17 @@ class Node:
         resolved, e.g. a boolean expression in an if statement, but the
         expression doesn't need to be defined.
         """
-        if not self.type:
+        if not self.type and self.expr and self.children:
+            return True
+        return False
+
+    @property
+    def is_terminal(self):
+        """
+        Return a boolean indicating if this Node is terminal, i.e. it is
+        considered resolved.
+        """
+        if self.is_literal or not self.expr:
             return True
         return False
 
@@ -161,34 +171,40 @@ def find_parent_fnames(var):
 
 
 def resolve_var(var, scope, scopes, ordering, parent=None, resolved_vars=None):
-    # Don't mutate inputs!
-    resolved_vars = [] if not resolved_vars else deepcopy(resolved_vars)
-    blocked_fnames = None
-    is_resolved = False
+    resolved_vars_now = []
 
-    for rval, deps in var:
+    for rval, deps in var:  # Allow resolve variables with multiple rvalues
         node_root = Node(var.name, scope, var.type, rval, parent=parent)
-        resolved_vars_dep = []
-        # First store all resolved parent names ONLY ONCE
-        if blocked_fnames is not None:
-            blocked_fnames = find_parent_fnames(node_root)
 
-        dep_ok = True
+        if node_root in resolved_vars:
+            DEBUG('Already resolved: {}'.format(node_root))
+            return True, node_root, resolved_vars
+
+        if node_root.is_terminal:
+            DEBUG('Resolved terminal variable: {}'.format(node_root))
+            resolved_vars.append(node_root)
+            return True, node_root, resolved_vars
+
+        resolved_vars_dep = []
+        resolved_vars_copy = deepcopy(resolved_vars)
+        blocked_fnames = find_parent_fnames(node_root)
+
+        is_resolved = True
         for s, n in product(deps, ordering):
             if n in scopes[s] and fname_formatter(s, n) not in blocked_fnames:
                 var_dep = scopes[s][n]
-                dep_ok, node_leaf, resolved_vars_add = resolve_var(
-                    var_dep, s, scopes, ordering, node_root, resolved_vars)
+                is_resolved, node_leaf, resolved_vars_add = resolve_var(
+                    var_dep, s, scopes, ordering, node_root, resolved_vars_copy)
 
-                if not dep_ok:
+                if not is_resolved:
                     break
 
-                node_root.children.append(node_leaf)
+                node_root.children.append(node_leaf)  # append resolved to root
                 resolved_vars_dep += resolved_vars_add
+                resolved_vars_copy += resolved_vars_dep
 
-        if dep_ok:
-            is_resolved = True
-            resolved_vars += resolved_vars_dep
+        if is_resolved:
+            resolved_vars_now += resolved_vars_dep
             break
 
-    return is_resolved, node_root, resolved_vars
+    return is_resolved, node_root, resolved_vars_now

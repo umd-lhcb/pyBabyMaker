@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 07:53 PM +0200
+# Last Change: Tue Aug 31, 2021 at 08:36 PM +0200
 """
 This module provides general variable dependency resolution.
 
@@ -17,7 +17,6 @@ import logging
 
 from dataclasses import dataclass, field
 from typing import List
-from copy import deepcopy
 
 from pyBabyMaker.boolean.utils import find_all_vars
 from pyBabyMaker.base import TermColor as TC
@@ -168,9 +167,13 @@ def find_parent_fnames(var):
 
 
 def resolve_var(var, scope, scopes, ordering,
-                parent=None, resolved_vars=None, skip_names=None):
+                parent=None, resolved_vars=None, resolved_vars_mutable=None,
+                skip_names=None):
     """
     Resolve a single variable traversing on scopes with a given ordering.
+
+    This is the main function that is responsible for DAG node resolution. Read
+    this with care!
     """
     resolved_vars_now = []
     skip_names = [] if skip_names is None else skip_names
@@ -194,6 +197,8 @@ def resolve_var(var, scope, scopes, ordering,
         return True, node_root, []
 
     for rval, deps in var:  # Allow resolve variables with multiple rvalues
+        resolved_vars_mutable = [] if resolved_vars_mutable is None else \
+            resolved_vars_mutable
         node_root = Node(var.name, scope, var.type, rval, parent=parent)
         DEBUG('Try to resolve dependencies of {}...'.format(node_root))
 
@@ -201,14 +206,18 @@ def resolve_var(var, scope, scopes, ordering,
             DEBUG('Already resolved: {}'.format(node_root))
             return True, resolved_vars[resolved_vars.index(node_root)], []
 
+        if node_root in resolved_vars_mutable:
+            DEBUG('Already resolved: {}'.format(node_root))
+            return True, resolved_vars_mutable[
+                resolved_vars_mutable.index(node_root)], []
+
         resolved_vars_dep = []
-        resolved_vars_copy = deepcopy(resolved_vars) if resolved_vars else []  # Don't modify input!
         blocked_fnames = find_parent_fnames(node_root)
 
         dep_resolved = {n: False for n in deps}
         for n in deps:
             for s in ordering:
-                DEBUG('Try to resolve {} in {}...'.format(n, s))
+                DEBUG('Try to resolve dependency {} in {}...'.format(n, s))
                 if n in skip_names:
                     DEBUG('Skipping {}...'.format(n))
                     dep_resolved[n] = True
@@ -220,23 +229,24 @@ def resolve_var(var, scope, scopes, ordering,
                     var_dep = scopes[s][n]
                     is_resolved, node_leaf, resolved_vars_add = resolve_var(
                         var_dep, s, scopes, ordering, node_root,
-                        resolved_vars_copy, skip_names)
+                        resolved_vars, resolved_vars_mutable, skip_names)
 
                     if is_resolved:
                         DEBUG('Resolved dependency: {}'.format(node_leaf))
                         node_root.children.append(node_leaf)  # append resolved to root
                         resolved_vars_dep += resolved_vars_add
-                        resolved_vars_copy += resolved_vars_dep
+                        resolved_vars_mutable += resolved_vars_add
                         dep_resolved[n] = True
                         break
 
                 else:
-                    DEBUG('Variable {} not in {}'.format(n, s))
+                    DEBUG('Dependency {} not in {}'.format(n, s))
 
         var_resolved = not (False in list(dep_resolved.values()))
         if var_resolved:
             resolved_vars_now += resolved_vars_dep
             resolved_vars_now.append(node_root)
+            DEBUG('Resolved: {}'.format(node_root))
             break
 
     return var_resolved, node_root, resolved_vars_now
@@ -259,3 +269,13 @@ def resolve_vars_in_scope(vars, scope, scopes, ordering, **kwargs):
             failed.append(node)
 
     return resolved, failed
+
+
+def resolve_scope(scope, scopes, ordering, **kwargs):
+    """
+    Resolve all variables in a scope
+    """
+    if scope in scopes:
+        return resolve_vars_in_scope(
+            scopes[scope].values(), scope, scopes, ordering, **kwargs)
+    return [], []

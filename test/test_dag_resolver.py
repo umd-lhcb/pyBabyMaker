@@ -2,12 +2,13 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 07:54 PM +0200
+# Last Change: Tue Aug 31, 2021 at 08:11 PM +0200
 
 from collections import defaultdict
 
 from pyBabyMaker.dag_resolver import Variable, Node
-from pyBabyMaker.dag_resolver import resolve_var, resolve_vars_in_scope
+from pyBabyMaker.dag_resolver import resolve_var, resolve_vars_in_scope, \
+    resolve_scope
 
 
 ##############
@@ -359,86 +360,82 @@ def test_reslove_vars_in_scope_vars_partial():
 # Resolve all variables in a single scope #
 ###########################################
 
-# def test_VariableResolver_scope_unknown():
-    # resolver = VariableResolver({})
-    # assert resolver.resolve_scope('test') == ([], [])
+def test_resolve_scope_unknown():
+    scopes = {'raw': {}}
+    assert resolve_scope('nonexist', scopes, ['raw']) == ([], [])
 
 
-# def test_VariableResolver_scope_resolve():
-    # namespace = {
-        # 'calc': {
-            # 'a': Variable('a', rvalues=['c/b']),
-            # 'b': Variable('b', rvalues=['GEV2(b)']),
-            # 'c': Variable('c', rvalues=['b*b'])
-        # },
-        # 'rename': {
-            # 'c': Variable('c', rvalues=['x'])
-        # },
-        # 'raw': {
-            # 'b': Variable('b'),
-            # 'x': Variable('x')
-        # }
-    # }
-    # resolver = VariableResolver(namespace)
-    # result = resolver.resolve_scope('calc')
+def test_resolve_scope_simple():
+    scopes = {
+        'calc': {
+            'a': Variable('a', rvals=['c/b']),
+            'b': Variable('b', rvals=['GEV2(b)']),
+            'c': Variable('c', rvals=['b*b'])
+        },
+        'rename': {
+            'c': Variable('c', rvals=['x'])
+        },
+        'raw': {
+            'b': Variable('b'),
+            'x': Variable('x')
+        }
+    }
+    result = resolve_scope('calc', scopes, ['calc', 'rename', 'raw'])
 
-    # assert result == (
-        # [
-            # ('raw', Variable('b')),
-            # ('calc', Variable('b', rvalues=['GEV2(b)'])),
-            # ('calc', Variable('c', rvalues=['b*b'])),
-            # ('calc', Variable('a', rvalues=['c/b']))
-        # ],
-        # []
-    # )
-    # assert result[0][1][1].rval == 'GEV2(raw_b)'
-    # assert result[0][2][1].rval == 'calc_b*calc_b'
-    # assert result[0][3][1].rval == 'calc_c/calc_b'
+    assert result == (
+        [
+            Node('b', 'raw'),
+            Node('b', 'calc', expr='GEV2(b)'),
+            Node('c', 'calc', expr='b*b'),
+            Node('a', 'calc', expr='c/b')
+        ],
+        []
+    )
+    assert result[0][1].rval == 'GEV2(raw_b)'
+    assert result[0][2].rval == 'calc_b*calc_b'
+    assert result[0][3].rval == 'calc_c/calc_b'
 
 
-# # NOTE: In a real use case, the dependency variables in 'selection' were
-# #       resolved multiple times, thus an error message was emitted.
-# def test_VariableResolver_scope_duplicated_resolution():
-    # namespace = {
-        # 'sel': {
-            # 'sel0': Variable('sel0', rvalues=['mu_pid > 0']),
-            # 'sel1': Variable('sel1', rvalues=['test > 0'])
-        # },
-        # 'calc': {
-            # 'mu_pid': Variable('mu_pid',
-                               # rvalues=['MU_PID(mu_true_id)',
-                                        # 'MU_PID(mu_is_mu, mu_pid_mu)']),
-            # 'test': Variable('test', rvalues=['TEST(mu_pid_mu, mu_is_mu)'])
-        # },
-        # 'rename': {
-            # 'mu_true_id': Variable('mu_true_id', rvalues=['mu_TRUEID']),
-            # 'mu_is_mu': Variable('mu_is_mu', rvalues=['mu_isMuon']),
-            # 'mu_pid_mu': Variable('mu_pid_mu', rvalues=['mu_PIDmu'])
-        # },
-        # 'raw': {
-            # # 'mu_TRUEID': Variable('mu_TRUEID'),
-            # 'mu_isMuon': Variable('mu_isMuon'),
-            # 'mu_PIDmu': Variable('mu_PIDmu')
-        # }
-    # }
-    # resolver = VariableResolver(namespace)
-    # result = resolver.resolve_scope('sel', ordering=['calc', 'rename', 'raw'])
+# NOTE: In a real use case, the dependency variables in 'selection' were
+#       resolved multiple times, thus an error message was emitted.
+def test_resolve_scope_duplicated_resolution():
+    scopes = {
+        'sel': {
+            'sel0': Variable('sel0', rvals=['mu_pid > 0']),
+            'sel1': Variable('sel1', rvals=['test > 0'])
+        },
+        'calc': {
+            'mu_pid': Variable('mu_pid',
+                               rvals=['MU_PID(mu_true_id)',
+                                      'MU_PID(mu_is_mu, mu_pid_mu)']),
+            'test': Variable('test', rvals=['TEST(mu_pid_mu, mu_is_mu)'])
+        },
+        'rename': {
+            'mu_true_id': Variable('mu_true_id', rvals=['mu_TRUEID']),
+            'mu_is_mu': Variable('mu_is_mu', rvals=['mu_isMuon']),
+            'mu_pid_mu': Variable('mu_pid_mu', rvals=['mu_PIDmu'])
+        },
+        'raw': {
+            # 'mu_TRUEID': Variable('mu_TRUEID'),
+            'mu_isMuon': Variable('mu_isMuon'),
+            'mu_PIDmu': Variable('mu_PIDmu')
+        }
+    }
+    result = resolve_scope('sel', scopes, ordering=['calc', 'rename', 'raw'])
 
-    # assert result == (
-        # [
-            # ('raw', Variable('mu_isMuon')),
-            # ('rename', Variable('mu_is_mu', rvalues=['mu_isMuon'])),
-            # ('raw', Variable('mu_PIDmu')),
-            # ('rename', Variable('mu_pid_mu', rvalues=['mu_PIDmu'])),
-            # ('calc', Variable('mu_pid',
-                              # rvalues=['MU_PID(mu_true_id)',
-                                       # 'MU_PID(mu_is_mu, mu_pid_mu)'])),
-            # ('sel', Variable('sel0', rvalues=['mu_pid > 0'])),
-            # ('calc', Variable('test', rvalues=['TEST(mu_pid_mu, mu_is_mu)'])),
-            # ('sel', Variable('sel1', rvalues=['test > 0']))
-        # ],
-        # []
-    # )
+    assert result == (
+        [
+            Node('mu_isMuon', 'raw'),
+            Node('mu_is_mu', 'rename', expr='mu_isMuon'),
+            Node('mu_PIDmu', 'raw'),
+            Node('mu_pid_mu', 'rename', expr='mu_PIDmu'),
+            Node('mu_pid', 'calc', expr='MU_PID(mu_is_mu, mu_pid_mu)'),
+            Node('sel0', 'sel', expr='mu_pid > 0'),
+            Node('test', 'calc', expr='TEST(mu_pid_mu, mu_is_mu)'),
+            Node('sel1', 'sel', expr='test > 0')
+        ],
+        []
+    )
 
 
 # # NOTE: In a real use case, two selection variables have common dependencies. If
@@ -448,15 +445,15 @@ def test_reslove_vars_in_scope_vars_partial():
 # def test_VariableResolver_partial_common_deps_simple():
     # namespace = {
         # 'sel': {
-            # 'sel0': Variable('sel0', rvalues=['flag_d0mu']),
-            # 'sel1': Variable('sel1', rvalues=['flag_mu'])
+            # 'sel0': Variable('sel0', rvals=['flag_d0mu']),
+            # 'sel1': Variable('sel1', rvals=['flag_mu'])
         # },
         # 'calc': {
             # 'flag_d0mu': Variable(
                 # 'flag_d0mu',
-                # rvalues=['FLAG_D0MU(mu_isMuon, k_isMuon, pi_isMuon)']
+                # rvals=['FLAG_D0MU(mu_isMuon, k_isMuon, pi_isMuon)']
             # ),
-            # 'flag_mu': Variable('flag_mu', rvalues=['FLAG_MU(mu_isMuon)'])
+            # 'flag_mu': Variable('flag_mu', rvals=['FLAG_MU(mu_isMuon)'])
         # },
         # 'raw': {
             # # 'mu_TRUEID': Variable('mu_TRUEID'),
@@ -470,11 +467,11 @@ def test_reslove_vars_in_scope_vars_partial():
     # assert result == (
         # [
             # ('raw', Variable('mu_isMuon')),
-            # ('calc', Variable('flag_mu', rvalues=['FLAG_MU(mu_isMuon)'])),
-            # ('sel', Variable('sel1', rvalues=['flag_mu']))
+            # ('calc', Variable('flag_mu', rvals=['FLAG_MU(mu_isMuon)'])),
+            # ('sel', Variable('sel1', rvals=['flag_mu']))
         # ],
         # [
-            # Variable('sel0', rvalues=['flag_d0mu'])
+            # Variable('sel0', rvals=['flag_d0mu'])
         # ]
     # )
 
@@ -482,16 +479,16 @@ def test_reslove_vars_in_scope_vars_partial():
 # def test_VariableResolver_partial_common_deps_complex():
     # namespace = {
         # 'sel': {
-            # 'sel0': Variable('sel0', rvalues=['flag_d0mu']),
-            # 'sel1': Variable('sel1', rvalues=['flag_mu'])
+            # 'sel0': Variable('sel0', rvals=['flag_d0mu']),
+            # 'sel1': Variable('sel1', rvals=['flag_mu'])
         # },
         # 'calc': {
-            # 'flag': Variable('flag', rvalues=['FLAG(mu_PT)']),
+            # 'flag': Variable('flag', rvals=['FLAG(mu_PT)']),
             # 'flag_d0mu': Variable(
                 # 'flag_d0mu',
-                # rvalues=['FLAG_D0MU(flag, mu_isMuon, k_isMuon, pi_isMuon)']
+                # rvals=['FLAG_D0MU(flag, mu_isMuon, k_isMuon, pi_isMuon)']
             # ),
-            # 'flag_mu': Variable('flag_mu', rvalues=['FLAG_MU(flag, mu_isMuon)'])
+            # 'flag_mu': Variable('flag_mu', rvals=['FLAG_MU(flag, mu_isMuon)'])
         # },
         # 'raw': {
             # # 'mu_TRUEID': Variable('mu_TRUEID'),
@@ -506,13 +503,13 @@ def test_reslove_vars_in_scope_vars_partial():
     # assert result == (
         # [
             # ('raw', Variable('mu_PT')),  # This one was missing!
-            # ('calc', Variable('flag', rvalues=['FLAG(mu_PT)'])),
+            # ('calc', Variable('flag', rvals=['FLAG(mu_PT)'])),
             # ('raw', Variable('mu_isMuon')),
-            # ('calc', Variable('flag_mu', rvalues=['FLAG_MU(flag, mu_isMuon)'])),
-            # ('sel', Variable('sel1', rvalues=['flag_mu']))
+            # ('calc', Variable('flag_mu', rvals=['FLAG_MU(flag, mu_isMuon)'])),
+            # ('sel', Variable('sel1', rvals=['flag_mu']))
         # ],
         # [
-            # Variable('sel0', rvalues=['flag_d0mu'])
+            # Variable('sel0', rvals=['flag_d0mu'])
         # ]
     # )
 
@@ -523,11 +520,11 @@ def test_reslove_vars_in_scope_vars_partial():
     # namespace = {
         # 'calc': {
             # 'other_trk': Variable(
-                # 'other_trk', rvalues=['VEC(trk_k, trk_pi, trk_spi)',
+                # 'other_trk', rvals=['VEC(trk_k, trk_pi, trk_spi)',
                                       # 'VEC(trk_k, trk_pi)']),
-            # 'trk_k': Variable('trk_k', rvalues=['FAKE(k_PT)']),
-            # 'trk_pi': Variable('trk_pi', rvalues=['FAKE(pi_PT)']),
-            # 'trk_spi': Variable('trk_spi', rvalues=['FAKE(spi_PT)'])
+            # 'trk_k': Variable('trk_k', rvals=['FAKE(k_PT)']),
+            # 'trk_pi': Variable('trk_pi', rvals=['FAKE(pi_PT)']),
+            # 'trk_spi': Variable('trk_spi', rvals=['FAKE(spi_PT)'])
         # },
         # 'raw': {
             # 'k_PT': Variable('k_PT'),
@@ -541,14 +538,14 @@ def test_reslove_vars_in_scope_vars_partial():
     # assert result == (
         # [
             # ('raw', Variable('k_PT')),
-            # ('calc', Variable('trk_k', rvalues=['FAKE(k_PT)'])),
+            # ('calc', Variable('trk_k', rvals=['FAKE(k_PT)'])),
             # ('raw', Variable('pi_PT')),
-            # ('calc', Variable('trk_pi', rvalues=['FAKE(pi_PT)'])),
+            # ('calc', Variable('trk_pi', rvals=['FAKE(pi_PT)'])),
             # ('calc', Variable('other_trk',
-                              # rvalues=['VEC(trk_k, trk_pi, trk_spi)',
+                              # rvals=['VEC(trk_k, trk_pi, trk_spi)',
                                        # 'VEC(trk_k, trk_pi)'])),
         # ],
         # [
-            # Variable('trk_spi', rvalues=['FAKE(spi_PT)'])
+            # Variable('trk_spi', rvals=['FAKE(spi_PT)'])
         # ]
     # )

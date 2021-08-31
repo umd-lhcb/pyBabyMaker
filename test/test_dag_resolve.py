@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 01:45 PM +0200
+# Last Change: Tue Aug 31, 2021 at 02:47 PM +0200
 
 from collections import defaultdict
 
@@ -43,7 +43,7 @@ def test_Variable_repr():
 def test_Node_is_properties():
     var1 = Node('test')
     var2 = Node('test', expr='a')
-    var3 = Node('test', expr='a+b', children=['a', 'b'])
+    var3 = Node('test', expr='a+b', fake=True)
 
     assert var1.is_literal is False
     assert var1.is_fake is False
@@ -72,41 +72,29 @@ def test_Node_sub():
 # Resolve a single variable #
 #############################
 
-# def test_VariableResolver_trivial():
-    # namespace = defaultdict(dict)
-    # resolver = VariableResolver(namespace)
-    # var = Variable('id')
+def test_resolve_var_trivial():
+    var = Variable('id')
+    scopes = defaultdict(dict)
 
-    # assert resolver.resolve_var('id', Variable('id')) == (
-        # True,
-        # [('id', var)],
-        # [('id', 'id')]
-    # )
-    # assert resolver._resolved_names == []
+    assert resolve_var(var, 'scope1', scopes, ['a', 'b']) == (
+        True,
+        Node('id', 'scope1'),
+        [Node('id', 'scope1')]
+    )
 
 
-# def test_VariableResolver_simple():
-    # namespace = {'raw': {'a': Variable('a')}}
-    # resolver = VariableResolver(namespace)
-    # var = Variable('a', rvalues=['a'])
+def test_resolve_var_simple():
+    var = Variable('A', type='Double_t', rvals=['a'])
+    scopes = {'raw': {'a': Variable('a', 'Double_t')}}
 
-    # assert resolver.resolve_var('keep', var) == (
-        # True,
-        # [
-            # ('raw', Variable('a')),
-            # ('keep', var)
-        # ],
-        # [
-            # ('raw', 'a'),
-            # ('keep', 'a')
-        # ]
-    # )
-    # assert resolver._resolved_names == []
-
-    # # Do it again (and again) and the result should be the same
-    # assert resolver.resolve_var('keep', var) == \
-        # resolver.resolve_var('keep', var)
-    # assert resolver._resolved_names == []
+    assert resolve_var(var, 'keep', scopes, ['raw']) == (
+        True,
+        Node('A', 'keep', 'Double_t', 'a'),
+        [
+            Node('a', 'raw', 'Double_t'),
+            Node('A', 'keep', 'Double_t', 'a')
+        ]
+    )
 
 
 # def test_VariableResolver_simple_fail():

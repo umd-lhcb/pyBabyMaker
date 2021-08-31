@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 01:45 PM +0200
+# Last Change: Tue Aug 31, 2021 at 02:46 PM +0200
 """
 This module provides general variable dependency resolution.
 
@@ -77,6 +77,7 @@ class Node:
     scope: str = None
     type: str = None
     expr: str = None
+    fake: bool = False
     parent: Node = None
     children: List[Node] = field(default_factory=list)
 
@@ -85,7 +86,7 @@ class Node:
         """
         Return a boolean indicating if this Node represents a literal variable.
         """
-        if not self.children and self.expr:
+        if not self.type and self.expr and not self.fake:
             return True
         return False
 
@@ -98,9 +99,7 @@ class Node:
         resolved, e.g. a boolean expression in an if statement, but the
         expression doesn't need to be defined.
         """
-        if not self.type and self.expr and self.children:
-            return True
-        return False
+        return self.fake
 
     @property
     def is_terminal(self):
@@ -172,25 +171,35 @@ def find_parent_fnames(var):
 
 def resolve_var(var, scope, scopes, ordering, parent=None, resolved_vars=None):
     resolved_vars_now = []
+    is_resolved = True
+
+    if not list(var):
+        node_root = Node(var.name, scope, var.type, parent=parent)
+        DEBUG('Resolved raw variable: {}'.format(node_root))
+        resolved_vars_now.append(node_root)
+        if parent:
+            parent.children.append(node_root)
+        return is_resolved, node_root, resolved_vars_now
 
     for rval, deps in var:  # Allow resolve variables with multiple rvalues
         node_root = Node(var.name, scope, var.type, rval, parent=parent)
 
-        if node_root in resolved_vars:
+        if resolved_vars and node_root in resolved_vars:
             DEBUG('Already resolved: {}'.format(node_root))
-            return True, node_root, resolved_vars
+            return is_resolved, node_root, resolved_vars_now
 
-        if node_root.is_terminal:
-            DEBUG('Resolved terminal variable: {}'.format(node_root))
-            resolved_vars.append(node_root)
-            return True, node_root, resolved_vars
+        if node_root.is_literal:
+            DEBUG('Resolved literal variable: {}'.format(node_root))
+            # Don't add literal variables to resolved variable list
+            if parent:
+                parent.children.append(node_root)
+            return is_resolved, node_root, resolved_vars_now
 
         resolved_vars_dep = []
-        resolved_vars_copy = deepcopy(resolved_vars)
+        resolved_vars_copy = deepcopy(resolved_vars) if resolved_vars else []
         blocked_fnames = find_parent_fnames(node_root)
 
-        is_resolved = True
-        for s, n in product(deps, ordering):
+        for n, s in product(deps, ordering):
             if n in scopes[s] and fname_formatter(s, n) not in blocked_fnames:
                 var_dep = scopes[s][n]
                 is_resolved, node_leaf, resolved_vars_add = resolve_var(
@@ -205,6 +214,7 @@ def resolve_var(var, scope, scopes, ordering, parent=None, resolved_vars=None):
 
         if is_resolved:
             resolved_vars_now += resolved_vars_dep
+            resolved_vars_now.append(node_root)
             break
 
     return is_resolved, node_root, resolved_vars_now

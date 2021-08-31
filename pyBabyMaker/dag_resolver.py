@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 07:48 PM +0200
+# Last Change: Tue Aug 31, 2021 at 07:53 PM +0200
 """
 This module provides general variable dependency resolution.
 
@@ -178,10 +178,9 @@ def resolve_var(var, scope, scopes, ordering,
     if var.terminal:
         node_root = Node(var.name, scope, var.type, parent=parent)
         DEBUG('Resolved raw variable: {}'.format(node_root))
-        resolved_vars_now.append(node_root)
         if parent:
             parent.children.append(node_root)
-        return True, node_root, resolved_vars_now
+        return True, node_root, [node_root]
 
     if var.literal:
         node_root = Node(var.name, literal=var.literal, parent=parent)
@@ -192,7 +191,7 @@ def resolve_var(var, scope, scopes, ordering,
         else:
             print('{}Literal variable {} as a root DAG node, something must be wrong here{}'.format(
                 TC.RED, node_root, TC.END))
-        return True, node_root, resolved_vars_now
+        return True, node_root, []
 
     for rval, deps in var:  # Allow resolve variables with multiple rvalues
         node_root = Node(var.name, scope, var.type, rval, parent=parent)
@@ -200,8 +199,7 @@ def resolve_var(var, scope, scopes, ordering,
 
         if resolved_vars and node_root in resolved_vars:
             DEBUG('Already resolved: {}'.format(node_root))
-            node_root = resolved_vars[resolved_vars.index(node_root)]
-            return True, node_root, resolved_vars_now
+            return True, resolved_vars[resolved_vars.index(node_root)], []
 
         resolved_vars_dep = []
         resolved_vars_copy = deepcopy(resolved_vars) if resolved_vars else []  # Don't modify input!

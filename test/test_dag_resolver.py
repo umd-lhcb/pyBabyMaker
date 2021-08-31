@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 07:51 PM +0200
+# Last Change: Tue Aug 31, 2021 at 07:54 PM +0200
 
 from collections import defaultdict
 
@@ -355,9 +355,9 @@ def test_reslove_vars_in_scope_vars_partial():
     ]
 
 
-# ###########################################
-# # Resolve all variables in a single scope #
-# ###########################################
+###########################################
+# Resolve all variables in a single scope #
+###########################################
 
 # def test_VariableResolver_scope_unknown():
     # resolver = VariableResolver({})

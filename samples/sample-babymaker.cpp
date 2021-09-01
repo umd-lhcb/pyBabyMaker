@@ -145,6 +145,7 @@ void generator_AnotherTuple(TTree *input_tree, TString output_prefix) {
 
     if ((true) && ((*raw_Y_ISOLATION_BDT) > 0) && (rename_b0_pt > 10000) && ((*raw_Y_PE) > (100 * pow(10, 3)))) {
       // Assign values for each output branch in this loop
+      rename_b0_pt = (*raw_Y_PT);
       keep_Y_PE = (*raw_Y_PE);
       keep_Y_PX = (*raw_Y_PX);
       keep_Y_PY = (*raw_Y_PY);

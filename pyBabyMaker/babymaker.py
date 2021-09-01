@@ -364,29 +364,29 @@ class BabyMaker(BaseMaker):
 
         Currently we only generate the 'trees' part
         """
-        output = []
+        output = ''
 
-        for val, tree in directive['trees'].items():
-            output += ['# {}, from {}'.format(tree, val['input_tree'])]
+        for tree, val in directive['trees'].items():
+            output += '# {}, from {}\n'.format(tree, val['input_tree'])
 
-            output += ['## Selection-related']
+            output += '## Selection-related\n'
             for key, repl in [('sel', 'Cuts'),
                               ('pre_sel_vars', 'Pre-cut variables'),
                               ('post_sel_vars', 'Post-cut variables')]:
-                output += '### {}'.format(repl)
+                output += '### {}\n'.format(repl)
                 for i in val[key]:
-                    output += ' - {}'.format(i)
+                    output += ' - {}\n'.format(i)
 
-            output += '## Input, output and temp variables'
+            output += '## Input, output and temp variables\n'
             for key, repl in [('input', 'Input variables'),
                               ('output', 'Output variables'),
                               ('tmp', 'Temp variables')]:
-                output += '### {}'.format(repl)
+                output += '### {}\n'.format(repl)
                 for i in val[key]:
                     output += ' - {}'.format(i)
 
-            output += '## Input variable full names'
+            output += '## Input variable full names\n'
             for i in val['input_br']:
-                output += ' - {}'.format(i)
+                output += ' - {}\n'.format(i)
 
-        return '\n'.join(output)
+        return output

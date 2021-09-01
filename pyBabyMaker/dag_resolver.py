@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 01, 2021 at 04:20 PM +0200
+# Last Change: Wed Sep 01, 2021 at 04:46 PM +0200
 """
 This module provides general variable dependency resolution.
 
@@ -259,11 +259,12 @@ def resolve_var(var, scope, scopes, ordering,
     return var_resolved, node_root, resolved_vars_now
 
 
-def resolve_vars_in_scope(vars, scope, scopes, ordering, **kwargs):
+def resolve_vars_in_scope(vars, scope, scopes, ordering,
+                          resolved_vars=None, **kwargs):
     """
     Resolve specified variables in scopes.
     """
-    resolved = []
+    resolved = [] if resolved_vars is None else resolved_vars
     failed = []
 
     for v in vars:

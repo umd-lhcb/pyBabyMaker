@@ -9,3 +9,4 @@ processing:
 
    ntpdump
    babymaker
+   debugmaker

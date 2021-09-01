@@ -367,26 +367,30 @@ class BabyMaker(BaseMaker):
         output = ''
 
         for tree, val in directive['trees'].items():
-            output += '# {}, from {}\n'.format(tree, val['input_tree'])
+            output += '# {}, from {}\n\n'.format(tree, val['input_tree'])
 
-            output += '## Selection-related\n'
+            output += '## Selection-related\n\n'
             for key, repl in [('sel', 'Cuts'),
                               ('pre_sel_vars', 'Pre-cut variables'),
                               ('post_sel_vars', 'Post-cut variables')]:
                 output += '### {}\n'.format(repl)
                 for i in val[key]:
                     output += ' - {}\n'.format(i)
+                output += '\n'
 
-            output += '## Input, output and temp variables\n'
+            output += '## Input, output and temp variables\n\n'
             for key, repl in [('input', 'Input variables'),
                               ('output', 'Output variables'),
                               ('tmp', 'Temp variables')]:
                 output += '### {}\n'.format(repl)
                 for i in val[key]:
-                    output += ' - {}'.format(i)
+                    output += ' - {}\n'.format(i)
+                output += '\n'
 
             output += '## Input variable full names\n'
             for i in val['input_br']:
                 output += ' - {}\n'.format(i)
+
+            output += '\n'
 
         return output

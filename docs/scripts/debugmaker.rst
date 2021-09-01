@@ -1,5 +1,5 @@
-``babymaker``
--------------
+``debugmaker``
+--------------
 
 This script generates a markdown file that represents operations defined in the
 input YAML with given ntuples.
@@ -11,7 +11,7 @@ This is very similar to that of the ``babymaker``
 
 .. code-block:: console
 
-   babymaker -i <yaml_file> -n <main_ntuple> -f [<friend_ntuple1> ...] -o <output_markdown> -t <template_file> -V "<var:name>"
+   debugmaker -i <yaml_file> -n <main_ntuple> -f [<friend_ntuple1> ...] -o <output_markdown> -t <template_file> -V "<var:name>"
 
 Note that:
 
@@ -35,7 +35,7 @@ In the root of this project, type in:
 
 You'll get the following input:
 
-.. code-block::
+.. code-block:: markdown
 
     # ATuple, from TupleB0/DecayTree
 

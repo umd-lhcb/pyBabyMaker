@@ -1,5 +1,5 @@
-``pyBabyMaker.var_resolve``
----------------------------
+``pyBabyMaker.dag_resolver``
+----------------------------
 
 .. automodule:: pyBabyMaker.dag_resolver
    :members:

@@ -9,6 +9,10 @@
 #include <vector>
 #include <iostream>
 
+#include <Math/Vector3D.h>
+#include <Math/Vector4D.h>
+#include <TMath.h>
+
 // System headers
 // {% join: (format_list: "#include <{}>", directive.system_headers), "\n" %}
 
@@ -16,6 +20,7 @@
 // {% join: (format_list: "#include \"{}\"", directive.user_headers), "\n" %}
 
 using namespace std;
+using namespace ROOT::Math;
 
 // Generator for each output tree: one tree per file
 // {% for tree_out, config in directive.trees->items: %}

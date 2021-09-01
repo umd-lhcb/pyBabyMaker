@@ -200,7 +200,6 @@ class BabyConfigParser:
                 renamed_var = rename_dict[var.name]
                 namespace['rename'][renamed_var] = Variable(
                     renamed_var, var.type, [var.name])
-                continue
 
             if 'keep' in config and cls.match(config['keep'], var.name):
                 namespace['keep'][var.name] = Variable(

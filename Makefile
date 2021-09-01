@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Jun 25, 2021 at 11:34 PM +0200
+# Last Change: Wed Sep 01, 2021 at 04:42 PM +0200
 
 include ./samples/sample.mk
 
@@ -50,6 +50,19 @@ gen/sample-babymaker.root: gen/postprocess
 gen/postprocess.cpp: samples/sample-babymaker.yml samples/sample.root samples/sample_friend.root
 	@mkdir -p gen
 	babymaker --no-format -i $< -o $@ \
+		-n ./samples/sample.root -f ./samples/sample_friend.root \
+		--debug \
+		-V "pi:3.14" -B "TupleB0WSPi/DecayTree"
+
+#########
+# Debug #
+#########
+
+debug: gen/directive.md
+
+gen/directive.md: samples/sample-babymaker.yml samples/sample.root samples/sample_friend.root
+	@mkdir -p gen
+	debugmaker -i $< -o $@ \
 		-n ./samples/sample.root -f ./samples/sample_friend.root \
 		--debug \
 		-V "pi:3.14" -B "TupleB0WSPi/DecayTree"

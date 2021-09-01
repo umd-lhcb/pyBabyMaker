@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 01, 2021 at 03:06 PM +0200
+# Last Change: Wed Sep 01, 2021 at 04:20 PM +0200
 """
 This module provides general variable dependency resolution.
 
@@ -90,7 +90,7 @@ class Node:
     parent: Node = None
     children: List[Node] = field(default_factory=UniqueList)
     input: bool = False
-    output: bool = False
+    output: bool = True
 
     @property
     def fake(self):

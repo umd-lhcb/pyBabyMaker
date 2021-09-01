@@ -28,18 +28,26 @@ void generator_ATuple(TTree *input_tree, TString output_prefix) {
   TTreeReaderValue<double> raw_Y_ISOLATION_BDT(reader, "Y_ISOLATION_BDT");
   TTreeReaderValue<double> raw_Y_PT(reader, "Y_PT");
   TTreeReaderValue<double> raw_Y_PE(reader, "Y_PE");
+  TTreeReaderValue<double> raw_Y_PX(reader, "Y_PX");
+  TTreeReaderValue<double> raw_Y_PY(reader, "Y_PY");
+  TTreeReaderValue<double> raw_Y_PZ(reader, "Y_PZ");
   TTreeReaderValue<UInt_t> raw_runNumber(reader, "runNumber");
   TTreeReaderValue<ULong64_t> raw_eventNumber(reader, "eventNumber");
   TTreeReaderValue<ULong64_t> raw_GpsTime(reader, "GpsTime");
   TTreeReaderValue<double> raw_random_pt(reader, "random_pt");
-  TTreeReaderValue<double> raw_Y_PX(reader, "Y_PX");
-  TTreeReaderValue<double> raw_Y_PY(reader, "Y_PY");
-  TTreeReaderValue<double> raw_Y_PZ(reader, "Y_PZ");
   TTreeReaderValue<double> raw_D0_P(reader, "D0_P");
 
   // Define output branches
+  double keep_Y_PT;
+  output.Branch("Y_PT", &keep_Y_PT);
   double keep_Y_PE;
   output.Branch("Y_PE", &keep_Y_PE);
+  double keep_Y_PX;
+  output.Branch("Y_PX", &keep_Y_PX);
+  double keep_Y_PY;
+  output.Branch("Y_PY", &keep_Y_PY);
+  double keep_Y_PZ;
+  output.Branch("Y_PZ", &keep_Y_PZ);
   UInt_t keep_runNumber;
   output.Branch("runNumber", &keep_runNumber);
   ULong64_t keep_eventNumber;
@@ -72,7 +80,11 @@ void generator_ATuple(TTree *input_tree, TString output_prefix) {
 
     if ((true) && ((*raw_Y_ISOLATION_BDT) > 0) && ((*raw_Y_PT) > 10000)) {
       // Assign values for each output branch in this loop
+      keep_Y_PT = (*raw_Y_PT);
       keep_Y_PE = (*raw_Y_PE);
+      keep_Y_PX = (*raw_Y_PX);
+      keep_Y_PY = (*raw_Y_PY);
+      keep_Y_PZ = (*raw_Y_PZ);
       keep_runNumber = (*raw_runNumber);
       keep_eventNumber = (*raw_eventNumber);
       keep_GpsTime = (*raw_GpsTime);
@@ -117,6 +129,8 @@ void generator_AnotherTuple(TTree *input_tree, TString output_prefix) {
   // Define output branches
   double rename_b0_pt;
   output.Branch("b0_pt", &rename_b0_pt);
+  double keep_Y_PT;
+  output.Branch("Y_PT", &keep_Y_PT);
   double keep_Y_PE;
   output.Branch("Y_PE", &keep_Y_PE);
   double keep_Y_PX;
@@ -146,6 +160,7 @@ void generator_AnotherTuple(TTree *input_tree, TString output_prefix) {
     if ((true) && ((*raw_Y_ISOLATION_BDT) > 0) && (rename_b0_pt > 10000) && ((*raw_Y_PE) > (100 * pow(10, 3)))) {
       // Assign values for each output branch in this loop
       rename_b0_pt = (*raw_Y_PT);
+      keep_Y_PT = (*raw_Y_PT);
       keep_Y_PE = (*raw_Y_PE);
       keep_Y_PX = (*raw_Y_PX);
       keep_Y_PY = (*raw_Y_PY);
@@ -182,7 +197,11 @@ void generator_YetAnotherTuple(TTree *input_tree, TString output_prefix) {
   TTreeReaderValue<double> raw_Y_OWNPV_ZERR(reader, "Y_OWNPV_ZERR");
   TTreeReaderValue<double> raw_Y_OWNPV_CHI2(reader, "Y_OWNPV_CHI2");
   TTreeReaderValue<int32_t> raw_Y_OWNPV_NDOF(reader, "Y_OWNPV_NDOF");
+  TTreeReaderValue<double> raw_Y_PT(reader, "Y_PT");
   TTreeReaderValue<double> raw_Y_PE(reader, "Y_PE");
+  TTreeReaderValue<double> raw_Y_PX(reader, "Y_PX");
+  TTreeReaderValue<double> raw_Y_PY(reader, "Y_PY");
+  TTreeReaderValue<double> raw_Y_PZ(reader, "Y_PZ");
   TTreeReaderValue<double> raw_Y_ISOLATION_CHI2(reader, "Y_ISOLATION_CHI2");
   TTreeReaderValue<double> raw_Y_ISOLATION_ANGLE(reader, "Y_ISOLATION_ANGLE");
   TTreeReaderValue<int32_t> raw_Y_ISOLATION_SC(reader, "Y_ISOLATION_SC");
@@ -257,10 +276,6 @@ void generator_YetAnotherTuple(TTree *input_tree, TString output_prefix) {
   TTreeReaderValue<UInt_t> raw_runNumber(reader, "runNumber");
   TTreeReaderValue<ULong64_t> raw_eventNumber(reader, "eventNumber");
   TTreeReaderValue<ULong64_t> raw_GpsTime(reader, "GpsTime");
-  TTreeReaderValue<double> raw_Y_PT(reader, "Y_PT");
-  TTreeReaderValue<double> raw_Y_PX(reader, "Y_PX");
-  TTreeReaderValue<double> raw_Y_PY(reader, "Y_PY");
-  TTreeReaderValue<double> raw_Y_PZ(reader, "Y_PZ");
   TTreeReaderValue<double> raw_D0_P(reader, "D0_P");
 
   // Define output branches
@@ -280,8 +295,16 @@ void generator_YetAnotherTuple(TTree *input_tree, TString output_prefix) {
   output.Branch("Y_OWNPV_CHI2", &keep_Y_OWNPV_CHI2);
   int32_t keep_Y_OWNPV_NDOF;
   output.Branch("Y_OWNPV_NDOF", &keep_Y_OWNPV_NDOF);
+  double keep_Y_PT;
+  output.Branch("Y_PT", &keep_Y_PT);
   double keep_Y_PE;
   output.Branch("Y_PE", &keep_Y_PE);
+  double keep_Y_PX;
+  output.Branch("Y_PX", &keep_Y_PX);
+  double keep_Y_PY;
+  output.Branch("Y_PY", &keep_Y_PY);
+  double keep_Y_PZ;
+  output.Branch("Y_PZ", &keep_Y_PZ);
   double keep_Y_ISOLATION_CHI2;
   output.Branch("Y_ISOLATION_CHI2", &keep_Y_ISOLATION_CHI2);
   double keep_Y_ISOLATION_ANGLE;
@@ -462,7 +485,11 @@ void generator_YetAnotherTuple(TTree *input_tree, TString output_prefix) {
       keep_Y_OWNPV_ZERR = (*raw_Y_OWNPV_ZERR);
       keep_Y_OWNPV_CHI2 = (*raw_Y_OWNPV_CHI2);
       keep_Y_OWNPV_NDOF = (*raw_Y_OWNPV_NDOF);
+      keep_Y_PT = (*raw_Y_PT);
       keep_Y_PE = (*raw_Y_PE);
+      keep_Y_PX = (*raw_Y_PX);
+      keep_Y_PY = (*raw_Y_PY);
+      keep_Y_PZ = (*raw_Y_PZ);
       keep_Y_ISOLATION_CHI2 = (*raw_Y_ISOLATION_CHI2);
       keep_Y_ISOLATION_ANGLE = (*raw_Y_ISOLATION_ANGLE);
       keep_Y_ISOLATION_SC = (*raw_Y_ISOLATION_SC);

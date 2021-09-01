@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 01, 2021 at 10:40 PM +0200
+# Last Change: Wed Sep 01, 2021 at 11:22 PM +0200
 
 import yaml
 import pytest
@@ -68,28 +68,32 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
         'raw_Y_ISOLATION_BDT',
         'raw_Y_PT',
         'raw_Y_PE',
-        'raw_runNumber',
-        'raw_eventNumber',
-        'raw_GpsTime',
         'raw_Y_PX',
         'raw_Y_PY',
         'raw_Y_PZ',
+        'raw_runNumber',
+        'raw_eventNumber',
+        'raw_GpsTime',
         'raw_D0_P',
     ]
     assert directive['trees']['ATuple']['input'] == [
         Node('Y_ISOLATION_BDT', 'raw', 'double', input=True, output=False),
         Node('Y_PT', 'raw', 'double', input=True, output=False),
         Node('Y_PE', 'raw', 'double', input=True, output=False),
-        Node('runNumber', 'raw', 'UInt_t', input=True, output=False),
-        Node('eventNumber', 'raw', 'ULong64_t', input=True, output=False),
-        Node('GpsTime', 'raw', 'ULong64_t', input=True, output=False),
         Node('Y_PX', 'raw', 'double', input=True, output=False),
         Node('Y_PY', 'raw', 'double', input=True, output=False),
         Node('Y_PZ', 'raw', 'double', input=True, output=False),
+        Node('runNumber', 'raw', 'UInt_t', input=True, output=False),
+        Node('eventNumber', 'raw', 'ULong64_t', input=True, output=False),
+        Node('GpsTime', 'raw', 'ULong64_t', input=True, output=False),
         Node('D0_P', 'raw', 'double', input=True, output=False),
     ]
     assert directive['trees']['ATuple']['output'] == [
+        Node('Y_PT', 'keep', 'double', 'Y_PT'),
         Node('Y_PE', 'keep', 'double', 'Y_PE'),
+        Node('Y_PX', 'keep', 'double', 'Y_PX'),
+        Node('Y_PY', 'keep', 'double', 'Y_PY'),
+        Node('Y_PZ', 'keep', 'double', 'Y_PZ'),
         Node('runNumber', 'keep', 'UInt_t', 'runNumber'),
         Node('eventNumber', 'keep', 'ULong64_t', 'eventNumber'),
         Node('GpsTime', 'keep', 'ULong64_t', 'GpsTime'),
@@ -107,7 +111,11 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
     ]
     assert directive['trees']['ATuple']['pre_sel_vars'] == []
     assert directive['trees']['ATuple']['post_sel_vars'] == [
+        Node('Y_PT', 'keep', 'double', 'Y_PT'),
         Node('Y_PE', 'keep', 'double', 'Y_PE'),
+        Node('Y_PX', 'keep', 'double', 'Y_PX'),
+        Node('Y_PY', 'keep', 'double', 'Y_PY'),
+        Node('Y_PZ', 'keep', 'double', 'Y_PZ'),
         Node('runNumber', 'keep', 'UInt_t', 'runNumber'),
         Node('eventNumber', 'keep', 'ULong64_t', 'eventNumber'),
         Node('GpsTime', 'keep', 'ULong64_t', 'GpsTime'),
@@ -145,6 +153,7 @@ def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
         #       Because the change in 'rename' selection, 'y_pt' and 'y_pz' are
         #       not defined!
         Node('b0_pt', 'rename', 'double', 'Y_PT'),
+        Node('Y_PT', 'keep', 'double', 'Y_PT'),
         Node('Y_PE', 'keep', 'double', 'Y_PE'),
         Node('Y_PX', 'keep', 'double', 'Y_PX'),
         Node('Y_PY', 'keep', 'double', 'Y_PY'),

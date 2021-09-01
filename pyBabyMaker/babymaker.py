@@ -9,6 +9,7 @@ import logging
 
 from collections import defaultdict
 from dataclasses import dataclass
+from copy import deepcopy
 
 from pyBabyMaker.base import TermColor as TC
 from pyBabyMaker.base import UniqueList, BaseMaker

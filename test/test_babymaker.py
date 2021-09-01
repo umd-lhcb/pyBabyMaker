@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 01, 2021 at 03:29 PM +0200
+# Last Change: Wed Sep 01, 2021 at 09:49 PM +0200
 
 import yaml
 import pytest
@@ -40,7 +40,6 @@ def test_BabyMaker_cpp_gen(tmp_path):
                        for line in gen_cpp.read_text().split('\n')[1:]]
 
     with open(SAMPLE_CPP, 'r') as f:
-        print(f)
         assert gen_cpp_content == [line.strip() for line in f.readlines()]
 
 
@@ -93,7 +92,7 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
         Node('Y_PE', 'keep', 'double', 'Y_PE'),
         Node('runNumber', 'keep', 'UInt_t', 'runNumber'),
         Node('eventNumber', 'keep', 'ULong64_t', 'eventNumber'),
-        Node('GpsTime', 'kepp', 'ULong64_t', 'GpsTime'),
+        Node('GpsTime', 'keep', 'ULong64_t', 'GpsTime'),
         Node('y_pt', 'rename', 'double', 'Y_PT'),
         Node('y_px', 'rename', 'double', 'Y_PX'),
         Node('y_py', 'rename', 'double', 'Y_PY'),
@@ -124,47 +123,47 @@ def test_BabyConfigParser_parse_ATuple(realistic_BabyConfigParser):
     ]
 
 
-# def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
-    # directive = realistic_BabyConfigParser.parse()
+def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
+    directive = realistic_BabyConfigParser.parse()
 
-    # assert directive['trees']['AnotherTuple']['input_tree'] == \
-        # 'TupleB0/DecayTree'
-    # assert directive['trees']['AnotherTuple']['input'] == [
-        # BabyVariable('Y_ISOLATION_BDT', 'double', input=True, output=False),
-        # BabyVariable('Y_PT', 'double', input=True, output=False),
-        # BabyVariable('Y_PE', 'double', input=True, output=False),
-        # BabyVariable('Y_PX', 'double', input=True, output=False),
-        # BabyVariable('Y_PY', 'double', input=True, output=False),
-        # BabyVariable('Y_PZ', 'double', input=True, output=False),
-        # BabyVariable('runNumber', 'UInt_t', input=True, output=False),
-        # BabyVariable('eventNumber', 'ULong64_t', input=True, output=False),
-        # BabyVariable('GpsTime', 'ULong64_t', input=True, output=False),
-        # BabyVariable('D0_P', 'double', input=True, output=False),
-    # ]
-    # assert directive['trees']['AnotherTuple']['output'] == [
-        # # NOTE: 'some_other_var' is not resolvable for this tree!
-        # #       Because the change in 'rename' selection, 'y_pt' and 'y_pz' are
-        # #       not defined!
-        # BabyVariable('b0_pt', 'double', ['Y_PT']),
-        # BabyVariable('Y_PE', 'double', ['Y_PE']),
-        # BabyVariable('Y_PX', 'double', ['Y_PX']),
-        # BabyVariable('Y_PY', 'double', ['Y_PY']),
-        # BabyVariable('Y_PZ', 'double', ['Y_PZ']),
-        # BabyVariable('runNumber', 'UInt_t', ['runNumber']),
-        # BabyVariable('eventNumber', 'ULong64_t', ['eventNumber']),
-        # BabyVariable('GpsTime', 'ULong64_t', ['GpsTime']),
-        # BabyVariable('RandStuff', 'double', ['TempStuff*pi']),
-    # ]
-    # assert directive['trees']['AnotherTuple']['tmp'] == [
-        # BabyVariable('TempStuff', 'double', ['D0_P+Y_PT'], output=False),
-    # ]
-    # assert directive['system_headers'] == ['cmath', 'iostream']
-    # assert directive['trees']['AnotherTuple']['sel'] == [
-        # 'true',
-        # 'raw_Y_ISOLATION_BDT > 0',
-        # 'rename_b0_pt > 10000',
-        # 'raw_Y_PE > (100 * pow(10, 3))'
-    # ]
+    assert directive['trees']['AnotherTuple']['input_tree'] == \
+        'TupleB0/DecayTree'
+    assert directive['trees']['AnotherTuple']['input'] == [
+        Node('Y_ISOLATION_BDT', 'raw', 'double', input=True, output=False),
+        Node('Y_PT', 'raw', 'double', input=True, output=False),
+        Node('Y_PE', 'raw', 'double', input=True, output=False),
+        Node('Y_PX', 'raw', 'double', input=True, output=False),
+        Node('Y_PY', 'raw', 'double', input=True, output=False),
+        Node('Y_PZ', 'raw', 'double', input=True, output=False),
+        Node('runNumber', 'raw', 'UInt_t', input=True, output=False),
+        Node('eventNumber', 'raw', 'ULong64_t', input=True, output=False),
+        Node('GpsTime', 'raw', 'ULong64_t', input=True, output=False),
+        Node('D0_P', 'raw', 'double', input=True, output=False),
+    ]
+    assert directive['trees']['AnotherTuple']['output'] == [
+        # NOTE: 'some_other_var' is not resolvable for this tree!
+        #       Because the change in 'rename' selection, 'y_pt' and 'y_pz' are
+        #       not defined!
+        Node('b0_pt', 'rename', 'double', 'Y_PT'),
+        Node('Y_PE', 'keep', 'double', 'Y_PE'),
+        Node('Y_PX', 'keep', 'double', 'Y_PX'),
+        Node('Y_PY', 'keep', 'double', 'Y_PY'),
+        Node('Y_PZ', 'keep', 'double', 'Y_PZ'),
+        Node('runNumber', 'keep', 'UInt_t', 'runNumber'),
+        Node('eventNumber', 'keep', 'ULong64_t', 'eventNumber'),
+        Node('GpsTime', 'keep', 'ULong64_t', 'GpsTime'),
+        Node('RandStuff', 'calculation', 'double', 'TempStuff*pi'),
+    ]
+    assert directive['trees']['AnotherTuple']['tmp'] == [
+        Node('TempStuff', 'calculation', 'double', 'D0_P+Y_PT', output=False),
+    ]
+    assert directive['system_headers'] == ['cmath', 'iostream']
+    assert directive['trees']['AnotherTuple']['sel'] == [
+        'true',
+        'raw_Y_ISOLATION_BDT > 0',
+        'rename_b0_pt > 10000',
+        'raw_Y_PE > (100 * pow(10, 3))'
+    ]
 
 
 # def test_BabyConfigParser_parse_YetAnotherTuple(realistic_BabyConfigParser):

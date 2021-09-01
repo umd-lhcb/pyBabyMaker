@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 01, 2021 at 09:49 PM +0200
+# Last Change: Wed Sep 01, 2021 at 09:57 PM +0200
 
 import yaml
 import pytest
@@ -13,7 +13,7 @@ from os.path import join as J
 from os.path import dirname, realpath
 
 from pyBabyMaker.babymaker import BabyMaker, BabyConfigParser, BabyResolver
-from pyBabyMaker.dag_resolver import Node
+from pyBabyMaker.dag_resolver import Node, Variable
 from pyBabyMaker.base import UniqueList
 from pyBabyMaker.io.NestedYAMLLoader import NestedYAMLLoader
 from pyBabyMaker.io.TupleDump import PyTupleDump
@@ -166,176 +166,153 @@ def test_BabyConfigParser_parse_AnotherTuple(realistic_BabyConfigParser):
     ]
 
 
-# def test_BabyConfigParser_parse_YetAnotherTuple(realistic_BabyConfigParser):
-    # directive = realistic_BabyConfigParser.parse()
-    # input_br = directive['trees']['YetAnotherTuple']['input_br']
+def test_BabyConfigParser_parse_YetAnotherTuple(realistic_BabyConfigParser):
+    directive = realistic_BabyConfigParser.parse()
+    input_br = directive['trees']['YetAnotherTuple']['input_br']
 
-    # assert directive['trees']['YetAnotherTuple']['input_tree'] == \
-        # 'TupleB0WSPi/DecayTree'
-    # assert 'raw_Y_ISOLATION_CHI22' in input_br
-    # assert 'raw_Y_ISOLATION_NNp3' in input_br
-    # assert directive['trees']['YetAnotherTuple']['sel'] == [
-        # 'true',
-        # 'raw_Y_ISOLATION_BDT > 0',
-        # 'raw_piminus_isMuon'
-    # ]
-
-
-# ###################################
-# # Test individual parse functions #
-# ###################################
-
-# @pytest.fixture
-# def directive():
-    # return {
-        # 'system_headers': UniqueList(),
-        # 'user_headers': UniqueList(),
-        # 'tree': {},
-        # 'input_trees': [],
-    # }
+    assert directive['trees']['YetAnotherTuple']['input_tree'] == \
+        'TupleB0WSPi/DecayTree'
+    assert 'raw_Y_ISOLATION_CHI22' in input_br
+    assert 'raw_Y_ISOLATION_NNp3' in input_br
+    assert directive['trees']['YetAnotherTuple']['sel'] == [
+        'true',
+        'raw_Y_ISOLATION_BDT > 0',
+        'raw_piminus_isMuon'
+    ]
 
 
-# @pytest.fixture
-# def make_namespace():
-    # def namespace(dumped_tree):
-        # ns = defaultdict(dict)
-        # ns['raw'] = {n: BabyVariable(n, t, input=True)
-                     # for n, t in dumped_tree.items()}
+###################################
+# Test individual parse functions #
+###################################
 
-        # return ns
-    # return namespace
-
-
-# def test_BabyConfigParser_parse_non_existing_tree(directive):
-    # parsed_yml = {'output': {'nothing': {'input': 'nil'}}}
-    # dumped_ntuple = {'fake': {'br1': 'double'}}
-    # parser = BabyConfigParser(parsed_yml, dumped_ntuple)
-    # directive = parser.parse()
-
-    # assert directive['trees'] == {}
+@pytest.fixture
+def directive():
+    return {
+        'system_headers': UniqueList(),
+        'user_headers': UniqueList(),
+        'tree': {},
+        'input_trees': [],
+    }
 
 
-# def test_BabyConfigParser_parse_duplicated_output_br():
-    # parsed_yml = {'output': {
-        # 'test_tree': {
-            # 'input': 'tree',
-            # 'rename': {'Y_PX': 'dupl'},
-            # 'calculation': {'dupl': 'float;Y_PZ'}
-        # }}}
-    # dumped_ntuple = {'tree': {
-        # 'Y_PX': 'float',
-        # 'Y_PY': 'float',
-        # 'Y_PZ': 'float'
-    # }}
-    # parser = BabyConfigParser(parsed_yml, dumped_ntuple)
+@pytest.fixture
+def make_namespace():
+    def namespace(dumped_tree):
+        ns = defaultdict(dict)
+        ns['raw'] = {n: Variable(n, t, input=True)
+                     for n, t in dumped_tree.items()}
 
-    # with pytest.raises(ValueError) as e:
-        # parser.parse()
-    # assert e.value.args[0] == \
-        # 'These output branches are defined multiple times:\n' \
-        # '  dupl:\n' \
-        # '    float dupl = Y_PX\n' \
-        # '    float dupl = Y_PZ'
+        return ns
+    return namespace
 
 
-# def test_BabyConfigParser_parse_headers_none(directive):
-    # BabyConfigParser.parse_headers({}, directive)
+def test_BabyConfigParser_parse_non_existing_tree(directive):
+    parsed_yml = {'output': {'nothing': {'input': 'nil'}}}
+    dumped_ntuple = {'fake': {'br1': 'double'}}
+    parser = BabyConfigParser(parsed_yml, dumped_ntuple)
+    directive = parser.parse()
 
-    # assert directive['system_headers'] == []
-    # assert directive['user_headers'] == []
-
-
-# def test_BabyConfigParser_parse_headers_system_only(directive):
-    # BabyConfigParser.parse_headers({
-        # 'headers': {
-            # 'system': ['iostream', 'iostream']
-        # }
-    # }, directive)
-
-    # assert directive['system_headers'] == ['iostream']
-    # assert directive['user_headers'] == []
+    assert directive['trees'] == {}
 
 
-# def test_BabyConfigParser_parse_headers_user_only(directive):
-    # BabyConfigParser.parse_headers({
-        # 'headers': {
-            # 'user': ['include/dummy.h']
-        # }
-    # }, directive)
+def test_BabyConfigParser_parse_headers_none(directive):
+    BabyConfigParser.parse_headers({}, directive)
 
-    # assert directive['system_headers'] == []
-    # assert directive['user_headers'] == ['include/dummy.h']
+    assert directive['system_headers'] == []
+    assert directive['user_headers'] == []
 
 
-# def test_BabyConfigParser_parse_drop_keep_rename(make_namespace):
-    # config = {
-        # 'drop': ['Y_P.*'],
-        # 'keep': ['Y_P.*', 'Z_PX', 'X_P.*'],
-        # 'rename': {'Z_PY': 'z_py'}
-    # }
-    # dumped_tree = {
-        # 'X_PX': 'float',
-        # 'X_PY': 'float',
-        # 'X_PZ': 'float',
-        # 'Y_PX': 'float',
-        # 'Y_PY': 'float',
-        # 'Y_PZ': 'float',
-        # 'Z_PX': 'float',
-        # 'Z_PY': 'float',
-        # 'Z_PZ': 'float',
-    # }
-    # namespace = make_namespace(dumped_tree)
-    # BabyConfigParser.parse_drop_keep_rename(config, namespace)
+def test_BabyConfigParser_parse_headers_system_only(directive):
+    BabyConfigParser.parse_headers({
+        'headers': {
+            'system': ['iostream', 'iostream']
+        }
+    }, directive)
 
-    # assert namespace['keep'] == {
-        # n: BabyVariable(n, 'float', [n]) for n in dumped_tree.keys()
-        # if not n.startswith('Y') and n != 'Z_PZ' and n != 'Z_PY'}
-    # assert namespace['rename'] == {
-        # 'z_py': BabyVariable('z_py', 'float', ['Z_PY'])}
+    assert directive['system_headers'] == ['iostream']
+    assert directive['user_headers'] == []
 
 
-# def test_BabyConfigParser_parse_calculation(make_namespace):
-    # config = {'calculation': {
-        # 'Y_P_TEMP': '^double;Y_PX+1',
-        # 'Y_P_shift': 'double;Y_P_TEMP',
-    # }}
-    # namespace = make_namespace({})
-    # BabyConfigParser.parse_calculation(config, namespace)
+def test_BabyConfigParser_parse_headers_user_only(directive):
+    BabyConfigParser.parse_headers({
+        'headers': {
+            'user': ['include/dummy.h']
+        }
+    }, directive)
 
-    # assert namespace['calculation'] == {
-        # 'Y_P_TEMP': BabyVariable(
-            # 'Y_P_TEMP', 'double', ['Y_PX+1'], output=False),
-        # 'Y_P_shift': BabyVariable('Y_P_shift', 'double', ['Y_P_TEMP'])
-    # }
+    assert directive['system_headers'] == []
+    assert directive['user_headers'] == ['include/dummy.h']
 
 
-# def test_BabyConfigParser_parse_calculation_alt(make_namespace):
-    # config = {'calculation': {
-        # 'Y_P_TEMP': '^double;Y_PX+1;FUNC(Y_PX, 1)',
-    # }}
-    # namespace = make_namespace({})
-    # BabyConfigParser.parse_calculation(config, namespace)
+def test_BabyConfigParser_parse_drop_keep_rename(make_namespace):
+    config = {
+        'drop': ['Y_P.*'],
+        'keep': ['Y_P.*', 'Z_PX', 'X_P.*'],
+        'rename': {'Z_PY': 'z_py'}
+    }
+    dumped_tree = {
+        'X_PX': 'float',
+        'X_PY': 'float',
+        'X_PZ': 'float',
+        'Y_PX': 'float',
+        'Y_PY': 'float',
+        'Y_PZ': 'float',
+        'Z_PX': 'float',
+        'Z_PY': 'float',
+        'Z_PZ': 'float',
+    }
+    namespace = make_namespace(dumped_tree)
+    BabyConfigParser.parse_drop_keep_rename(config, namespace)
 
-    # assert namespace['calculation'] == {
-        # 'Y_P_TEMP': BabyVariable(
-            # 'Y_P_TEMP', 'double', ['Y_PX+1', 'FUNC(Y_PX, 1)'], output=False)}
+    assert namespace['keep'] == {
+        n: Variable(n, 'float', [n]) for n in dumped_tree.keys()
+        if not n.startswith('Y') and n != 'Z_PZ' and n != 'Z_PY'}
+    assert namespace['rename'] == {
+        'z_py': Variable('z_py', 'float', ['Z_PY'])}
 
 
-# def test_BabyConfigParser_parse_calculation_invalid_spec(make_namespace):
-    # config = {'calculation': {
-        # 'TEMP': '^double Y_PX+1 FUNC(Y_PX, 1)',
-    # }}
-    # namespace = make_namespace({})
+def test_BabyConfigParser_parse_calculation(make_namespace):
+    config = {'calculation': {
+        'Y_P_TEMP': '^double;Y_PX+1',
+        'Y_P_shift': 'double;Y_P_TEMP',
+    }}
+    namespace = make_namespace({})
+    BabyConfigParser.parse_calculation(config, namespace)
 
-    # with pytest.raises(ValueError) as e:
-        # BabyConfigParser.parse_calculation(config, namespace)
-    # assert e.value.args[0] == \
-        # 'Illegal specification for TEMP: ^double Y_PX+1 FUNC(Y_PX, 1).'
+    assert namespace['calculation'] == {
+        'Y_P_TEMP': Variable(
+            'Y_P_TEMP', 'double', ['Y_PX+1'], output=False),
+        'Y_P_shift': Variable('Y_P_shift', 'double', ['Y_P_TEMP'])
+    }
 
 
-# ############################
-# # Test variable resolution #
-# ############################
+def test_BabyConfigParser_parse_calculation_alt(make_namespace):
+    config = {'calculation': {
+        'Y_P_TEMP': '^double;Y_PX+1;FUNC(Y_PX, 1)',
+    }}
+    namespace = make_namespace({})
+    BabyConfigParser.parse_calculation(config, namespace)
+
+    assert namespace['calculation'] == {
+        'Y_P_TEMP': Variable(
+            'Y_P_TEMP', 'double', ['Y_PX+1', 'FUNC(Y_PX, 1)'], output=False)}
+
+
+def test_BabyConfigParser_parse_calculation_invalid_spec(make_namespace):
+    config = {'calculation': {
+        'TEMP': '^double Y_PX+1 FUNC(Y_PX, 1)',
+    }}
+    namespace = make_namespace({})
+
+    with pytest.raises(ValueError) as e:
+        BabyConfigParser.parse_calculation(config, namespace)
+    assert e.value.args[0] == \
+        'Illegal specification for TEMP: ^double Y_PX+1 FUNC(Y_PX, 1).'
+
+
+############################
+# Test variable resolution #
+############################
 
 # def test_BabyVariableResolver_simple(make_namespace):
     # dumped_tree = {

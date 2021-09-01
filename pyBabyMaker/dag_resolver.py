@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Tue Aug 31, 2021 at 08:55 PM +0200
+# Last Change: Wed Sep 01, 2021 at 02:54 PM +0200
 """
 This module provides general variable dependency resolution.
 
@@ -159,7 +159,7 @@ def find_parent_fnames(var):
     These names will be forbidden in the subsequent resolution to make sure
     there's no back branch in the constructed DAG.
     """
-    names = []
+    names = [var.fname]  # No self-referential
     if var.parent:
         names.append(var.parent.fname)
         names += find_parent_fnames(var.parent)
@@ -168,7 +168,7 @@ def find_parent_fnames(var):
 
 def resolve_var(var, scope, scopes, ordering,
                 parent=None, resolved_vars=None, resolved_vars_mutable=None,
-                skip_names=None):
+                skip_names=None, postprocess=lambda x, y: (x, y)):
     """
     Resolve a single variable traversing on scopes with a given ordering.
 
@@ -180,6 +180,7 @@ def resolve_var(var, scope, scopes, ordering,
 
     if var.terminal:
         node_root = Node(var.name, scope, var.type, parent=parent)
+        postprocess(var, node_root)
         DEBUG('Resolved raw variable: {}'.format(node_root))
         if parent:
             parent.children.append(node_root)
@@ -187,6 +188,7 @@ def resolve_var(var, scope, scopes, ordering,
 
     if var.literal:
         node_root = Node(var.name, literal=var.literal, parent=parent)
+        postprocess(var, node_root)
         DEBUG('Resolved literal variable: {}'.format(node_root))
         # Don't add literal variables to resolved variable list
         if parent:
@@ -200,6 +202,7 @@ def resolve_var(var, scope, scopes, ordering,
         resolved_vars_mutable = [] if resolved_vars_mutable is None else \
             resolved_vars_mutable  # This is flushed for each rvalue
         node_root = Node(var.name, scope, var.type, rval, parent=parent)
+        postprocess(var, node_root)
         DEBUG('Try to resolve dependencies of {}...'.format(node_root))
 
         if resolved_vars and node_root in resolved_vars:
@@ -224,8 +227,7 @@ def resolve_var(var, scope, scopes, ordering,
                     break
 
                 elif n in scopes[s] and \
-                        fname_formatter(s, n) not in blocked_fnames and \
-                        fname_formatter(s, n) != node_root.fname:
+                        fname_formatter(s, n) not in blocked_fnames:
                     var_dep = scopes[s][n]
                     is_resolved, node_leaf, resolved_vars_add = resolve_var(
                         var_dep, s, scopes, ordering, node_root,

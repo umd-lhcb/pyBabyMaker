@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 01, 2021 at 04:46 PM +0200
+# Last Change: Wed Sep 01, 2021 at 05:47 PM +0200
 """
 This module provides general variable dependency resolution.
 
@@ -36,6 +36,13 @@ def fname_formatter(scope, name):
     return '{}_{}'.format(scope, name)
 
 
+def propagate_io_attr(var, node):
+    """
+    Make sure the 'input' and 'output' attrs are the same between `var` and
+    `node`.
+    """
+
+
 @dataclass
 class Variable:
     """
@@ -48,6 +55,8 @@ class Variable:
     type: str = None
     rvals: List[str] = field(default_factory=list)
     literal: str = None
+    input: bool = False
+    output: bool = True
 
     @property
     def terminal(self):
@@ -170,7 +179,7 @@ def find_parent_fnames(var):
 
 def resolve_var(var, scope, scopes, ordering,
                 parent=None, resolved_vars=None, resolved_vars_mutable=None,
-                skip_names=None, postprocess=lambda x, y: (x, y)):
+                skip_names=None, postprocess=propagate_io_attr):
     """
     Resolve a single variable traversing on scopes with a given ordering.
 
@@ -233,7 +242,8 @@ def resolve_var(var, scope, scopes, ordering,
                     var_dep = scopes[s][n]
                     is_resolved, node_leaf, resolved_vars_add = resolve_var(
                         var_dep, s, scopes, ordering, node_root,
-                        resolved_vars, resolved_vars_mutable, skip_names)
+                        resolved_vars, resolved_vars_mutable, skip_names,
+                        postprocess)
 
                     if is_resolved:
                         DEBUG('Resolved dependency: {}'.format(node_leaf))

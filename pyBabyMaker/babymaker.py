@@ -8,7 +8,6 @@ import re
 import logging
 
 from collections import defaultdict
-from dataclasses import dataclass
 from copy import deepcopy
 
 from pyBabyMaker.base import TermColor as TC
@@ -22,17 +21,6 @@ from pyBabyMaker.dag_resolver import Variable
 ###########
 # Helpers #
 ###########
-
-@dataclass(repr=False)
-class BabyVariable(Variable):
-    """
-    Store both raw variables and resolved variables.
-
-    The added attributes make sorting variables easier.
-    """
-    input: bool = False
-    output: bool = True
-
 
 class BabyResolver:
     def __init__(self, scopes, skip_names):
@@ -90,7 +78,7 @@ class BabyConfigParser:
             'input_trees': UniqueList(),
         }
         self.parse_headers(self.parsed_config, directive)
-        parsed_literals = {k: BabyVariable(k, literal=v)
+        parsed_literals = {k: Variable(k, literal=v)
                            for k, v in self.literals.items()}
 
         for output_tree, config in self.parsed_config['output'].items():
@@ -117,7 +105,7 @@ class BabyConfigParser:
             config = update_config(self.parsed_config, config, merge=merge)
             namespace = defaultdict(dict)
             namespace['literals'] = parsed_literals
-            namespace['raw'] = {n: BabyVariable(n, t, input=True, output=False)
+            namespace['raw'] = {n: Variable(n, t, input=True, output=False)
                                 for n, t in dumped_tree.items()}
 
             # Load all variables in separate namespaces
@@ -210,12 +198,12 @@ class BabyConfigParser:
 
             if 'rename' in config and var.name in config['rename']:
                 renamed_var = rename_dict[var.name]
-                namespace['rename'][renamed_var] = BabyVariable(
+                namespace['rename'][renamed_var] = Variable(
                     renamed_var, var.type, [var.name])
                 continue
 
             if 'keep' in config and cls.match(config['keep'], var.name):
-                namespace['keep'][var.name] = BabyVariable(
+                namespace['keep'][var.name] = Variable(
                     var.name, var.type, [var.name])
 
     @staticmethod
@@ -236,7 +224,7 @@ class BabyConfigParser:
                     datatype = datatype.strip('^')
                     output = False
 
-                namespace['calculation'][name] = BabyVariable(
+                namespace['calculation'][name] = Variable(
                     name, datatype, rvals, output=output)
 
     @classmethod
@@ -251,7 +239,7 @@ class BabyConfigParser:
             selections += config['selection']
 
         for idx, expr in enumerate(selections):
-            namespace['selection']['sel'+str(idx)] = BabyVariable(
+            namespace['selection']['sel'+str(idx)] = Variable(
                 'sel'+str(idx), rvals=[expr], input=False, output=False)
 
     @staticmethod

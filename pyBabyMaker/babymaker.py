@@ -23,7 +23,7 @@ from pyBabyMaker.dag_resolver import Variable
 ###########
 
 class BabyResolver:
-    def __init__(self, scopes, skip_names):
+    def __init__(self, scopes, skip_names=[]):
         self.scopes = scopes
         self.skip_names = skip_names
         self.resolved = UniqueList()

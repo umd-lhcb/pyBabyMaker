@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+#
+# Author: Yipeng Sun <syp at umd dot edu>
+# License: BSD 2-clause
+# Last Change: Wed Sep 01, 2021 at 04:37 PM +0200
+
+from argparse import ArgumentParser, Action
+from pyBabyMaker.babymaker import BabyMaker
+from pyBabyMaker.base import load_file
+
+
+#################################
+# Command line arguments parser #
+#################################
+
+class AddVarAction(Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        result = dict([v.split(':') for v in values])
+        setattr(namespace, self.dest, result)
+
+
+def parse_input():
+    parser = ArgumentParser(description='''
+generate compilable C++ source file for ntuple processing.''')
+
+    parser.add_argument('-i', '--input',
+                        nargs='?',
+                        required=True,
+                        help='''
+path to input YAML file.''')
+
+    parser.add_argument('-o', '--output',
+                        nargs='?',
+                        required=True,
+                        help='''
+path to output debug file.''')
+
+    parser.add_argument('-n', '--ntuple',
+                        nargs='?',
+                        required=True,
+                        help='''
+path to the main ntuple file.''')
+
+    parser.add_argument('-f', '--friends',
+                        nargs='+',
+                        default=[],
+                        help='''
+path to the auxillary ntuples containing friend trees.''')
+
+    parser.add_argument('--debug',
+                        action='store_true',
+                        help='''
+enable additional debug messages.''')
+
+    parser.add_argument('-V', '--additional-vars',
+                        nargs='+',
+                        action=AddVarAction,
+                        default={},
+                        help='''
+specify additional literal variables.''')
+
+    return parser.parse_args()
+
+
+########
+# Main #
+########
+
+if __name__ == '__main__':
+    args = parse_input()
+    template = load_file(args.template_path)
+    maker = BabyMaker(args.input, args.ntuple, args.friends, template,
+                      args.no_format)
+    maker.debug(
+        args.output, args.additional_vars, args.blocked_trees, args.debug)

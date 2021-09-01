@@ -7,9 +7,8 @@
 import re
 import logging
 
-from collections import defaultdict, Counter
+from collections import defaultdict
 from dataclasses import dataclass
-from copy import deepcopy
 
 from pyBabyMaker.base import TermColor as TC
 from pyBabyMaker.base import UniqueList, BaseMaker
@@ -38,12 +37,16 @@ class BabyResolver:
     def __init__(self, scopes, skip_names):
         self.scopes = scopes
         self.skip_names = skip_names
+        self.resolved = UniqueList()
 
     def resolve(self, scope,
                 ordering=['literals', 'calculation', 'rename', 'raw'],
                 **kwargs):
-        return resolve_scope(scope, self.scopes, ordering,
-                             postprocess=self.postprocess, **kwargs)
+        resolved, unresolved = resolve_scope(
+            scope, self.scopes, ordering, postprocess=self.postprocess,
+            resolved_vars=self.resolved, **kwargs)
+        self.resolved += resolved
+        return resolved, unresolved
 
     @staticmethod
     def postprocess(var, node):
@@ -156,20 +159,6 @@ class BabyConfigParser:
                     print("{}Temp variable {} cannot be resolved...{}".format(
                         TC.YELLOW, var.name, TC.END))
 
-            # Error when one output branch has multiple definitions
-            output_br = [v for v in resolved_vars if v.output]
-            dupl_br_name = [k for k, v in Counter(
-                [n.name for n in output_br]).items() if v > 1]
-            dupl_br_def = {n: [x for x in output_br if x.name == n]
-                           for n in dupl_br_name}
-            if dupl_br_def:
-                raise ValueError(
-                    'These output branches are defined multiple times:\n' +
-                    '\n'.join(
-                        ['\n'.join(['  '+n+':']+['    '+str(v) for v in vals])
-                         for n, vals in dupl_br_def.items()])
-                )
-
             directive['trees'][output_tree] = {
                 'input_tree': input_tree,
                 'sel': ['true']+[v.rval for v in selection if v.fake],
@@ -235,8 +224,8 @@ class BabyConfigParser:
         """
         if 'calculation' in config:
             for name, code in config['calculation'].items():
-                datatype, *rvalues = [i.strip() for i in code.split(';')]
-                if not rvalues:
+                datatype, *rvals = [i.strip() for i in code.split(';')]
+                if not rvals:
                     raise ValueError('Illegal specification for {}: {}.'.format(
                         name, code
                     ))
@@ -247,7 +236,7 @@ class BabyConfigParser:
                     output = False
 
                 namespace['calculation'][name] = BabyVariable(
-                    name, datatype, rvalues, output=output)
+                    name, datatype, rvals, output=output)
 
     @classmethod
     def parse_selection(cls, config, namespace):
@@ -262,8 +251,7 @@ class BabyConfigParser:
 
         for idx, expr in enumerate(selections):
             namespace['selection']['sel'+str(idx)] = BabyVariable(
-                'sel'+str(idx), rvalues=[expr],
-                input=False, output=False, fake=True)
+                'sel'+str(idx), rvals=[expr], input=False, output=False)
 
     @staticmethod
     def match(patterns, string, return_value=True):
@@ -323,6 +311,19 @@ class BabyMaker(BaseMaker):
         if self.use_reformatter:
             self.reformat(filename)
 
+    def debug(self, filename, literals={}, blocked_trees=[], debug=False):
+        """
+        Generate a debug file for the directives that will be used for C++
+        generation.
+        """
+        parsed_config = self.read(self.config_filename)
+        dumped_ntuple, _ = self.dump_ntuples(blocked_trees)
+        directive = self.directive_gen(
+            parsed_config, dumped_ntuple, literals, debug)
+
+        with open(filename, 'w') as f:
+            f.write(self.directive_debug(directive))
+
     def dump_ntuples(self, blocked_trees=[]):
         """
         Dump main ntuple and all friend ntuples.
@@ -354,3 +355,37 @@ class BabyMaker(BaseMaker):
         """
         parser = BabyConfigParser(parsed_config, dumped_ntuple, literals, debug)
         return parser.parse()
+
+    @staticmethod
+    def directive_debug(directive):
+        """
+        Generate a plain-text representation of the directive.
+
+        Currently we only generate the 'trees' part
+        """
+        output = []
+
+        for val, tree in directive['trees'].items():
+            output += ['# {}, from {}'.format(tree, val['input_tree'])]
+
+            output += ['## Selection-related']
+            for key, repl in [('sel', 'Cuts'),
+                              ('pre_sel_vars', 'Pre-cut variables'),
+                              ('post_sel_vars', 'Post-cut variables')]:
+                output += '### {}'.format(repl)
+                for i in val[key]:
+                    output += ' - {}'.format(i)
+
+            output += '## Input, output and temp variables'
+            for key, repl in [('input', 'Input variables'),
+                              ('output', 'Output variables'),
+                              ('tmp', 'Temp variables')]:
+                output += '### {}'.format(repl)
+                for i in val[key]:
+                    output += ' - {}'.format(i)
+
+            output += '## Input variable full names'
+            for i in val['input_br']:
+                output += ' - {}'.format(i)
+
+        return '\n'.join(output)

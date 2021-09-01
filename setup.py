@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Mar 31, 2021 at 10:53 PM +0200
+# Last Change: Wed Sep 01, 2021 at 04:37 PM +0200
 
 import setuptools
 import subprocess
@@ -75,7 +75,7 @@ setup(
     long_description_content_type='text/markdown',
     url='https://github.com/umd-lhcb/pyBabyMaker',
     packages=setuptools.find_packages(),
-    scripts=['bin/ntpdump', 'bin/babymaker'],
+    scripts=['bin/ntpdump', 'bin/babymaker', 'bin/debugmaker'],
     include_package_data=True,
     install_requires=[
         'pyyaml',

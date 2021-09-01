@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Fri Aug 27, 2021 at 12:35 AM +0200
+# Las Change: Tue Aug 31, 2021 at 11:38 PM +0200
 
 import re
 import logging
@@ -15,7 +15,8 @@ from pyBabyMaker.base import TermColor as TC
 from pyBabyMaker.base import UniqueList, BaseMaker
 from pyBabyMaker.base import update_config
 from pyBabyMaker.engine.core import template_transformer, template_evaluator
-from pyBabyMaker.var_resolver import Variable, VariableResolver
+from pyBabyMaker.dag_resolver import resolve_scope
+from pyBabyMaker.dag_resolver import Variable
 
 
 ###########
@@ -31,41 +32,23 @@ class BabyVariable(Variable):
     """
     input: bool = False
     output: bool = True
-    fake: bool = False
-
-    def __post_init__(self):
-        super().__post_init__()
-        self._fname = self.name  # 'fname' -> full name
-        self.fname_set = False
-
-    @property
-    def fname(self):
-        return self._fname
-
-    @fname.setter
-    def fname(self, fname):
-        if not self.fname_set:
-            self.fname_set = True
-            self._fname = fname
 
 
-class BabyVariableResolver(VariableResolver):
-    @staticmethod
-    def format_resolved(scope, var):
-        """
-        Prepare resolved variables for ``babymaker``.
-        """
-        var.fname = scope+'_'+var.name
-        return var
+class BabyResolver:
+    def __init__(self, scopes, skip_names):
+        self.scopes = scopes
+        self.skip_names = skip_names
+
+    def resolve(self, scope,
+                ordering=['literals', 'calculation', 'rename', 'raw'],
+                **kwargs):
+        return resolve_scope(scope, self.scopes, ordering,
+                             postprocess=self.postprocess, **kwargs)
 
     @staticmethod
-    def unpack_resolved(var):
-        """
-        Unpack resolved variable to (scope, original variable) tuple for
-        ``babymaker``.
-        """
-        scope = var.fname.split('_')[0]
-        return scope, var.name
+    def postprocess(var, node):
+        node.input = var.input
+        node.output = var.output
 
 
 ########################
@@ -138,24 +121,17 @@ class BabyConfigParser:
             self.parse_calculation(config, namespace)
             self.parse_selection(config, namespace)
 
-            # Initialize a variable resolver
-            if 'skip_names' in config:
-                resolver = BabyVariableResolver(namespace, config['skip_names'])
-            else:
-                resolver = BabyVariableResolver(namespace)
-            if self.debug:
-                self._resolvers.append(resolver)
+            skip_names = config['skip_names'] if 'skip_names' in config else []
+            resolver = BabyResolver(namespace, skip_names)
 
             # Resolve variables needed for selection
-            selection, unresolved_selection = resolver.resolve_scope(
-                'selection', ['literals', 'calculation', 'rename', 'raw'])
+            selection, unresolved_selection = resolver.resolve('selection')
 
             # Resolve all other variables
-            keep, unresolved_keep = resolver.resolve_scope('keep', ['raw'])
-            rename, unresolved_rename = resolver.resolve_scope(
-                'rename', ['raw'])
-            calculation, unresolved_calculation = resolver.resolve_scope(
-                'calculation', ['literals', 'calculation', 'rename', 'raw'])
+            keep, unresolved_keep = resolver.resolve('keep', ['raw'])
+            rename, unresolved_rename = resolver.resolve('rename', ['raw'])
+            calculation, unresolved_calculation = resolver.resolve(
+                'calculation')
             resolved_vars = selection + keep + rename + calculation
             most_unresolved_vars = unresolved_keep + unresolved_rename + \
                 unresolved_calculation
@@ -167,12 +143,6 @@ class BabyConfigParser:
             unresolved_selection = [
                 v for v in unresolved_selection
                 if not self.match(known_warnings, v.rval)]
-
-            # Print unresolved selections first as they are resolved first and
-            # can't complain about missing variables for now
-            if unresolved_selection or most_unresolved_vars:
-                print("{}There might be undefined/unresolved variables for inputs to these variables!{}".format(
-                TC.RED, TC.END))
 
             for var in unresolved_selection:
                 print("{}Selection expr {} cannot be resolved...{}".format(

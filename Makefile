@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 01, 2021 at 04:42 PM +0200
+# Last Change: Thu Sep 02, 2021 at 03:44 PM +0200
 
 include ./samples/sample.mk
 
@@ -53,6 +53,15 @@ gen/postprocess.cpp: samples/sample-babymaker.yml samples/sample.root samples/sa
 		-n ./samples/sample.root -f ./samples/sample_friend.root \
 		--debug \
 		-V "pi:3.14" -B "TupleB0WSPi/DecayTree"
+
+##############
+# Validation #
+##############
+
+.PHONY: validation
+
+validation: integrationtest
+	@tools/validate_with_rdf.py ./samples/sample.root ./gen/ATuple.root
 
 #########
 # Debug #

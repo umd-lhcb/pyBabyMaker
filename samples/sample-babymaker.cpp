@@ -8,6 +8,10 @@
 #include <vector>
 #include <iostream>
 
+#include <Math/Vector3D.h>
+#include <Math/Vector4D.h>
+#include <TMath.h>
+
 // System headers
 #include <cmath>
 #include <iostream>
@@ -16,6 +20,7 @@
 
 
 using namespace std;
+using namespace ROOT::Math;
 
 // Generator for each output tree: one tree per file
 void generator_ATuple(TTree *input_tree, TString output_prefix) {

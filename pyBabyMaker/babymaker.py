@@ -250,8 +250,11 @@ class BabyConfigParser:
         If there's a match, return ``return_value``.
         """
         for p in patterns:
-            if bool(re.search(r'{}'.format(p), string)):
-                return return_value
+            try:
+                if bool(re.search(r'{}'.format(p), string)):
+                    return return_value
+            except:
+                print('WARN: Invalid regex: {}'.format(p))
         return not return_value
 
 

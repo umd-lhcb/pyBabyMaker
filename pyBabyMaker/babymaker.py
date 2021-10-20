@@ -253,7 +253,7 @@ class BabyConfigParser:
             try:
                 if bool(re.search(r'{}'.format(p), string)):
                     return return_value
-            except:
+            except Exception:
                 print('WARN: Invalid regex: {}'.format(p))
         return not return_value
 
@@ -278,12 +278,17 @@ class BabyMaker(BaseMaker):
         self.template_filename = template_filename
         self.use_reformatter = use_reformatter
 
-    def gen(self, filename, literals={}, blocked_trees=[], debug=False):
+    def gen(self, filename, literals={},
+            blocked_input_trees=[], blocked_output_trees=[], debug=False):
         """
         Generate C++ file based on inputs.
         """
         parsed_config = self.read(self.config_filename)
-        dumped_ntuple, tree_relations = self.dump_ntuples(blocked_trees)
+        parsed_config['output'] = {
+            k: v for k, v in parsed_config['output'].items()
+            if k not in blocked_output_trees}
+
+        dumped_ntuple, tree_relations = self.dump_ntuples(blocked_input_trees)
         directive = self.directive_gen(
             parsed_config, dumped_ntuple, literals, debug)
 
@@ -302,26 +307,31 @@ class BabyMaker(BaseMaker):
         if self.use_reformatter:
             self.reformat(filename)
 
-    def debug(self, filename, literals={}, blocked_trees=[], debug=False):
+    def debug(self, filename, literals={},
+              blocked_input_trees=[], blocked_output_trees=[], debug=False):
         """
         Generate a debug file for the directives that will be used for C++
         generation.
         """
         parsed_config = self.read(self.config_filename)
-        dumped_ntuple, _ = self.dump_ntuples(blocked_trees)
+        parsed_config['output'] = {
+            k: v for k, v in parsed_config['output'].items()
+            if k not in blocked_output_trees}
+
+        dumped_ntuple, _ = self.dump_ntuples(blocked_input_trees)
         directive = self.directive_gen(
             parsed_config, dumped_ntuple, literals, debug)
 
         with open(filename, 'w') as f:
             f.write(self.directive_debug(directive))
 
-    def dump_ntuples(self, blocked_trees=[]):
+    def dump_ntuples(self, blocked_input_trees=[]):
         """
         Dump main ntuple and all friend ntuples.
         """
         trees = self.dump(self.ntuple_filename)
         # Remove blocked input trees
-        trees = {k: v for k, v in trees.items() if k not in blocked_trees}
+        trees = {k: v for k, v in trees.items() if k not in blocked_input_trees}
         tree_relations = {k: [] for k in trees}
 
         for friend in self.friend_filenames:

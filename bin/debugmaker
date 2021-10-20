@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 01, 2021 at 04:44 PM +0200
+# Last Change: Thu Oct 21, 2021 at 01:22 AM +0200
 
 from argparse import ArgumentParser, Action
 from pyBabyMaker.babymaker import BabyMaker
@@ -58,11 +58,17 @@ enable additional debug messages.''')
                         help='''
 specify additional literal variables.''')
 
-    parser.add_argument('-B', '--blocked-trees',
+    parser.add_argument('-B', '--blocked-input-trees',
                         nargs='+',
                         default=[],
                         help='''
 specify input trees to block.''')
+
+    parser.add_argument('-X', '--blocked-output-trees',
+                        nargs='+',
+                        default=[],
+                        help='''
+specify output trees defined in YAML to block.''')
 
     return parser.parse_args()
 
@@ -74,5 +80,5 @@ specify input trees to block.''')
 if __name__ == '__main__':
     args = parse_input()
     maker = BabyMaker(args.input, args.ntuple, args.friends, None)
-    maker.debug(
-        args.output, args.additional_vars, args.blocked_trees, args.debug)
+    maker.debug(args.output, args.additional_vars,
+                args.blocked_input_trees, args.blocked_output_trees, args.debug)

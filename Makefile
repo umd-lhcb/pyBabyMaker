@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Sep 02, 2021 at 03:44 PM +0200
+# Last Change: Thu Oct 21, 2021 at 01:27 AM +0200
 
 include ./samples/sample.mk
 
@@ -74,4 +74,4 @@ gen/directive.md: samples/sample-babymaker.yml samples/sample.root samples/sampl
 	debugmaker -i $< -o $@ \
 		-n ./samples/sample.root -f ./samples/sample_friend.root \
 		--debug \
-		-V "pi:3.14" -B "TupleB0WSPi/DecayTree"
+		-V "pi:3.14" -B "TupleB0WSPi/DecayTree" -X ATuple

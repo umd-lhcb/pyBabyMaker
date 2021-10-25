@@ -1,6 +1,6 @@
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Oct 25, 2021 at 06:40 PM +0200
+# Last Change: Tue Oct 26, 2021 at 01:53 AM +0200
 
 include ./samples/sample.mk
 
@@ -21,7 +21,7 @@ doc:
 	@sphinx-build -b html docs build
 
 install:
-	@pip install . --force-reinstall
+	@pip install .
 
 install-egg:
 	@python ./setup.py install

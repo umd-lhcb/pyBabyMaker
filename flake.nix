@@ -33,6 +33,9 @@
             flake8
             pylint
             virtualenvwrapper
+
+            # Pinned Python dependencies
+            numpy
           ];
 
           shellHook = ''

@@ -399,8 +399,8 @@ class BabyMaker(BaseMaker):
 
         return output
 
-    @staticmethod
-    def parse_ext_directive(directives):
+    @classmethod
+    def parse_ext_directive(cls, directives):
         result = dict()
 
         for key, val in directives.items():
@@ -415,10 +415,22 @@ class BabyMaker(BaseMaker):
                     prev = prev[n]
                 else:
                     try:
-                        prev[n] = val
+                        prev[n] = cls.type_infer(val)
                     except TypeError:
                         print('Incoherent directive!')
                         print('Current directive: {}'.format(result))
                         print('Trying to assign {} to {}'.format(val, prev))
 
         return result
+
+    @staticmethod
+    def type_infer(val):
+        if bool(re.search(r'^\d*$', val)):
+            return int(val)
+        elif bool(re.search(r'^\d*\.\d*$', val)):
+            return float(val)
+        elif val.lower() == 'true':
+            return True
+        elif val.lower() == 'false':
+            return False
+        return val

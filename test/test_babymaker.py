@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Mon Oct 25, 2021 at 06:31 PM +0200
+# Last Change: Mon Oct 25, 2021 at 09:37 PM +0200
 
 import yaml
 import pytest
@@ -11,6 +11,7 @@ from collections import defaultdict
 from os import pardir
 from os.path import join as J
 from os.path import dirname, realpath
+from math import isclose
 
 from pyBabyMaker.babymaker import BabyMaker, BabyConfigParser, BabyResolver
 from pyBabyMaker.dag_resolver import Node, Variable
@@ -482,7 +483,7 @@ def test_BabyConfigParser_match_partial_match():
 
 def test_BabyMaker_parse_ext_directive():
     output = BabyMaker.parse_ext_directive({
-        'a/b/c': 1, 'a/b/d': 2, 'a/c': 3
+        'a/b/c': '1', 'a/b/d': '2', 'a/c': 'false', 'a/d': 'stuff'
     })
     expected = {
         'a': {
@@ -490,8 +491,17 @@ def test_BabyMaker_parse_ext_directive():
                 'c': 1,
                 'd': 2,
             },
-            'c': 3,
+            'c': False,
+            'd': 'stuff'
         }
     }
 
     assert output == expected
+
+
+def test_BabyMaker_type_infer():
+    assert BabyMaker.type_infer('1') == 1
+    assert isclose(BabyMaker.type_infer('1.1'), 1.1)
+    assert BabyMaker.type_infer('true')
+    assert not BabyMaker.type_infer('false')
+    assert BabyMaker.type_infer('stuff') == 'stuff'

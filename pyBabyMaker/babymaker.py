@@ -394,3 +394,27 @@ class BabyMaker(BaseMaker):
             output += '\n'
 
         return output
+
+    @staticmethod
+    def parse_ext_directive(directives):
+        result = dict()
+
+        for key, val in directives.items():
+            nested_keys = key.split('/')
+            prev = result
+            size = len(nested_keys)
+
+            for idx, n in enumerate(nested_keys):
+                if idx < size - 1:
+                    if not (isinstance(prev, dict) and n in prev):
+                        prev[n] = dict()
+                    prev = prev[n]
+                else:
+                    try:
+                        prev[n] = val
+                    except TypeError:
+                        print('Incoherent directive!')
+                        print('Current directive: {}'.format(result))
+                        print('Trying to assign {} to {}'.format(val, prev))
+
+        return result

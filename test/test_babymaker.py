@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Wed Sep 01, 2021 at 11:22 PM +0200
+# Last Change: Mon Oct 25, 2021 at 06:31 PM +0200
 
 import yaml
 import pytest
@@ -478,3 +478,20 @@ def test_BabyConfigParser_match_False_partial_match():
 
 def test_BabyConfigParser_match_partial_match():
     assert BabyConfigParser.match(['quick', 'brown', 'fox'], 'fox2')
+
+
+def test_BabyMaker_parse_ext_directive():
+    output = BabyMaker.parse_ext_directive({
+        'a/b/c': 1, 'a/b/d': 2, 'a/c': 3
+    })
+    expected = {
+        'a': {
+            'b': {
+                'c': 1,
+                'd': 2,
+            },
+            'c': 3,
+        }
+    }
+
+    assert output == expected

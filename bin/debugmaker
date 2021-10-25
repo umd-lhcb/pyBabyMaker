@@ -2,7 +2,7 @@
 #
 # Author: Yipeng Sun <syp at umd dot edu>
 # License: BSD 2-clause
-# Last Change: Thu Oct 21, 2021 at 01:22 AM +0200
+# Last Change: Mon Oct 25, 2021 at 06:36 PM +0200
 
 from argparse import ArgumentParser, Action
 from pyBabyMaker.babymaker import BabyMaker
@@ -58,6 +58,13 @@ enable additional debug messages.''')
                         help='''
 specify additional literal variables.''')
 
+    parser.add_argument('-D', '--directive-override',
+                        nargs='+',
+                        action=AddVarAction,
+                        default={},
+                        help='''
+specify directive to override.''')
+
     parser.add_argument('-B', '--blocked-input-trees',
                         nargs='+',
                         default=[],
@@ -81,4 +88,5 @@ if __name__ == '__main__':
     args = parse_input()
     maker = BabyMaker(args.input, args.ntuple, args.friends, None)
     maker.debug(args.output, args.additional_vars,
-                args.blocked_input_trees, args.blocked_output_trees, args.debug)
+                args.blocked_input_trees, args.blocked_output_trees,
+                args.directive_override, args.debug)

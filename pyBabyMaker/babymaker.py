@@ -278,19 +278,31 @@ class BabyMaker(BaseMaker):
         self.template_filename = template_filename
         self.use_reformatter = use_reformatter
 
-    def gen(self, filename, literals={},
-            blocked_input_trees=[], blocked_output_trees=[], debug=False):
+    def process(self, literals={},
+                blocked_input_trees=[], blocked_output_trees=[],
+                directive_override={}, debug=False):
         """
-        Generate C++ file based on inputs.
+        Generate raw directive and tree relations. This is the basis for
+        processing.
         """
         parsed_config = self.read(self.config_filename)
         parsed_config['output'] = {
             k: v for k, v in parsed_config['output'].items()
             if k not in blocked_output_trees}
+        config_override = self.parse_ext_directive(directive_override)
+        parsed_config = update_config(parsed_config, config_override, True)
 
         dumped_ntuple, tree_relations = self.dump_ntuples(blocked_input_trees)
         directive = self.directive_gen(
             parsed_config, dumped_ntuple, literals, debug)
+
+        return directive, tree_relations
+
+    def gen(self, filename, *args, **kwargs):
+        """
+        Generate C++ file based on inputs.
+        """
+        directive, tree_relations = self.process(*args, **kwargs)
 
         # Adding ntuple info to the directive
         directive['ntuple'] = self.ntuple_filename
@@ -307,20 +319,12 @@ class BabyMaker(BaseMaker):
         if self.use_reformatter:
             self.reformat(filename)
 
-    def debug(self, filename, literals={},
-              blocked_input_trees=[], blocked_output_trees=[], debug=False):
+    def debug(self, filename, *args, **kwargs):
         """
         Generate a debug file for the directives that will be used for C++
         generation.
         """
-        parsed_config = self.read(self.config_filename)
-        parsed_config['output'] = {
-            k: v for k, v in parsed_config['output'].items()
-            if k not in blocked_output_trees}
-
-        dumped_ntuple, _ = self.dump_ntuples(blocked_input_trees)
-        directive = self.directive_gen(
-            parsed_config, dumped_ntuple, literals, debug)
+        directive, _ = self.process(*args, **kwargs)
 
         with open(filename, 'w') as f:
             f.write(self.directive_debug(directive))

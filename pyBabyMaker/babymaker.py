@@ -81,12 +81,16 @@ class BabyConfigParser:
         parsed_literals = {k: Variable(k, literal=v)
                            for k, v in self.literals.items()}
 
+        global_known_warnings = self.parsed_config['global_mute'] \
+            if 'global_mute' in self.parsed_config else []
         for output_tree, config in self.parsed_config['output'].items():
             input_tree = config['input']
+
+
             try:
-                known_warnings = config['mute']
+                known_warnings = global_known_warnings + config['mute']
             except KeyError:
-                known_warnings = []
+                known_warnings = global_known_warnings
 
             try:
                 dumped_tree = self.dumped_ntuple[input_tree]

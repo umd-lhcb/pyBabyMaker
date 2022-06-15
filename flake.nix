@@ -16,15 +16,15 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ root-curated.overlay ];
+          overlays = [ root-curated.overlay self.overlay ];
         };
         python = pkgs.python3;
         pythonPackages = python.pkgs;
       in
       {
-        # packages = flake-utils.lib.flattenTree {
-        #   pyBabyMaker = python.withPackages (p: with p; [ pyBabyMaker ]);
-        # };
+        packages = flake-utils.lib.flattenTree {
+          pyBabyMaker = python.withPackages (p: with p; [ pyBabyMaker ]);
+        };
         devShell = pkgs.mkShell rec {
           name = "pyBabyMaker-dev";
           buildInputs = with pythonPackages; [

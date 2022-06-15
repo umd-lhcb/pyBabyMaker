@@ -16,12 +16,15 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ self.overlay root-curated.overlay ];
+          overlays = [ root-curated.overlay ];
         };
         python = pkgs.python3;
         pythonPackages = python.pkgs;
       in
       {
+        # packages = flake-utils.lib.flattenTree {
+        #   pyBabyMaker = python.withPackages (p: with p; [ pyBabyMaker ]);
+        # };
         devShell = pkgs.mkShell rec {
           name = "pyBabyMaker-dev";
           buildInputs = with pythonPackages; [
@@ -36,6 +39,10 @@
 
             # Pinned Python dependencies
             numpy
+            uproot
+            lz4
+            pyyaml
+            lark-parser
           ];
 
           shellHook = ''

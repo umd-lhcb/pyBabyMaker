@@ -1,15 +1,9 @@
-let
-  pythonPackageOverlay = overlay: attr: self: super: {
-    ${attr} = self.lib.fix (py:
-      super.${attr}.override (old: {
-        self = py;
-        packageOverrides = self.lib.composeExtensions
-          (old.packageOverrides or (_: _: { }))
-          overlay;
-      }));
+final: prev:
+
+{
+  python3 = prev.python3.override {
+    packageOverrides = python-final: python-prev: {
+      pyBabyMaker = python-final.callPackage ./default.nix { };
+    };
   };
-in
-pythonPackageOverlay
-  (self: super: {
-    pyBabyMaker = super.callPackage ./default.nix { };
-  }) "python3"
+}
